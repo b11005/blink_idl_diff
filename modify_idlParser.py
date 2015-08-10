@@ -25,23 +25,29 @@ def GetInterfaceNodes(dir_path):
             if definition.GetClass() == 'Interface':
                 yield definition
 
-def NotPartial(interfaceNode):
+def IsPartial(interfaceNode):
     interfaceNodeName = interfaceNode.GetName()
     isPartial = interfaceNode.GetProperty('Partial', default = False)
     if isPartial:
         yield interfaceNodeName
-        
+
+def GetProperties(interfaceNode):
+    interfaceName = interfaceNode.GetProperty('NAME')
+    filePath = interfaceNode.GetProperty('FILENAME')
+    lineNo = interfaceNode.GetProperty('LINENO')
+    #print interfaceNode.GetProperties()
+
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
     count = 0
     partial = []
     for interfaceNode in GetInterfaceNodes(path):
-        print interfaceNode.GetProperties()
-        #print interfaceNode.GetName()
-        for interfaceNodeName in NotPartial(interfaceNode):
+        print interfaceNode.GetName()
+        #GetProperties(interfaceNode)
+        for interfaceNodeName in IsPartial(interfaceNode):
             partial.append(interfaceNodeName)
-    #print partial
+    print partial
     #print 'count: ', count
     
 
