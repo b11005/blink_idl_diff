@@ -11,50 +11,55 @@ sys.path.insert(0, blink_bindings_path)
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
-def GetIDLFiles(dir):
+def getIDLFiles(dir):
     for dpath, dnames, fnames in os.walk(dir):
         for fname in fnames:
             if fname.endswith('.idl') and fname!='InspectorInstrumentation.idl':
                 yield os.path.join(dpath, fname)
 
 
-def GetInterfaceNodes(dir_path):
+def getInterfaceNodes(dir_path):
     parser = BlinkIDLParser(debug=False)
-    for file in GetIDLFiles(dir_path):
+    for file in getIDLFiles(dir_path):
         definitions = parse_file(parser, file)
         for definition in definitions.GetChildren():
             if definition.GetClass() == 'Interface':
                 yield definition
 
 
-def IsPartial(interfaceNode):
+def partial(interfaceNode):
     isPartial = interfaceNode.GetProperty('Partial', default = False)
     if isPartial:
         yield interfaceNode
 
 
-def NotPartial(interfaceNode):
+def nonePartial(interfaceNode):
     isPartial = interfaceNode.GetProperty('Partial', default = False)
     if not isPartial:
         yield interfaceNode
 
 
-def GetAttributes(interfaceNode):
+def getAttributes(interfaceNode):
     for attribute in interfaceNode.GetListOf('Attribute'):
         yield attribute.GetName()
-    #for element in interfaceNode.Tree():
-        #print element
+
+
+def getOperations(interfaceNode):
+    for operation in interfaceNode.GetListOf('Operation'):
+        yield operation.GetName()
 
 
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
     count = 0
-    partialFilter = NotPartial
-    for interfaceNode in GetInterfaceNodes(path):
+    partialFilter = nonePartial
+    for interfaceNode in getInterfaceNodes(path):
         for filteredNode in partialFilter(interfaceNode):
-            print filteredNode.GetName()
-            print [attributeNames for attributeNames in GetAttributes(filteredNode) if attributeNames]
+            getAttributes(filteredNode)
+            print 'interfaceName ', filteredNode.GetName()
+            #print 'Attributes',[attributeNames for attributeNames in getAttributes(filteredNode) if getAttributes(filteredNode) != None]
+            print 'Operations',[operationNames for operationNames in getOperations(filteredNode) if getOperations(filteredNode) != None]
     #print 'count: ', count
 
 
