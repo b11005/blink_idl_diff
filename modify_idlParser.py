@@ -17,6 +17,7 @@ def GetIDLFiles(dir):
             if fname.endswith('.idl') and fname!='InspectorInstrumentation.idl':
                 yield os.path.join(dpath, fname)
 
+
 def GetInterfaceNodes(dir_path):
     parser = BlinkIDLParser(debug=False)
     for file in GetIDLFiles(dir_path):
@@ -25,31 +26,37 @@ def GetInterfaceNodes(dir_path):
             if definition.GetClass() == 'Interface':
                 yield definition
 
+
 def IsPartial(interfaceNode):
-    interfaceNodeName = interfaceNode.GetName()
     isPartial = interfaceNode.GetProperty('Partial', default = False)
     if isPartial:
-        yield interfaceNodeName
+        yield interfaceNode
 
-def GetProperties(interfaceNode):
-    interfaceName = interfaceNode.GetProperty('NAME')
-    filePath = interfaceNode.GetProperty('FILENAME')
-    lineNo = interfaceNode.GetProperty('LINENO')
-    #print interfaceNode.GetProperties()
+
+def NotPartial(interfaceNode):
+    isPartial = interfaceNode.GetProperty('Partial', default = False)
+    if not isPartial:
+        yield interfaceNode
+
+
+def GetAttributes(interfaceNode):
+    for attribute in interfaceNode.GetListOf('Attribute'):
+        yield attribute.GetName()
+    #for element in interfaceNode.Tree():
+        #print element
+
 
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
     count = 0
-    partial = []
+    partialFilter = NotPartial
     for interfaceNode in GetInterfaceNodes(path):
-        print interfaceNode.GetName()
-        #GetProperties(interfaceNode)
-        for interfaceNodeName in IsPartial(interfaceNode):
-            partial.append(interfaceNodeName)
-    print partial
+        for filteredNode in partialFilter(interfaceNode):
+            print filteredNode.GetName()
+            print [attributeNames for attributeNames in GetAttributes(filteredNode) if attributeNames]
     #print 'count: ', count
-    
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
