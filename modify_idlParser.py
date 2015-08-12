@@ -1,7 +1,6 @@
 #!/usr/bin/env python                                                           
 
-import os
-import sys,pdb
+import os, sys, pdb
 
 chromium_path = os.path.abspath(
     os.path.join(os.environ['HOME'], 'chromium', 'src'))
@@ -12,54 +11,64 @@ sys.path.insert(0, blink_bindings_path)
 from blink_idl_parser import parse_file, BlinkIDLParser
 
 def getIDLFiles(dir):
-    for dpath, dnames, fnames in os.walk(dir):
-        for fname in fnames:
-            if fname.endswith('.idl') and fname!='InspectorInstrumentation.idl':
-                yield os.path.join(dpath, fname)
+    file_type='.idl'
+    ignore_set = (
+        'InspectorInstrumentation.idl',
+    )
+    for dir_path, dir_names, file_names in os.walk(dir):
+        for file_name in file_names:
+            if file_name.endswith(file_type) and file_name not in ignore_set:
+                yield os.path.join(dir_path, file_name)
 
 
 def getInterfaceNodes(dir_path):
     parser = BlinkIDLParser(debug=False)
+    class_name = 'Interface' 
     for file in getIDLFiles(dir_path):
         definitions = parse_file(parser, file)
         for definition in definitions.GetChildren():
-            if definition.GetClass() == 'Interface':
+            if definition.GetClass() == class_name:
                 yield definition
 
 
 def partial(interfaceNode):
-    isPartial = interfaceNode.GetProperty('Partial', default = False)
-    if isPartial:
+    is_partial = interfaceNode.GetProperty('Partial', default = False)
+    if is_partial:
         yield interfaceNode
 
 
-def nonePartial(interfaceNode):
-    isPartial = interfaceNode.GetProperty('Partial', default = False)
-    if not isPartial:
+def none_partial(interfaceNode):
+    is_partial = interfaceNode.GetProperty('Partial', default = False)
+    if not is_partial:
         yield interfaceNode
 
 
 def getAttributes(interfaceNode):
-    for attribute in interfaceNode.GetListOf('Attribute'):
-        yield attribute.GetName()
+    for node in interfaceNode:
+        for attribute in node.GetListOf('Attribute'):
+            yield attribute.GetName()
 
 
 def getOperations(interfaceNode):
-    for operation in interfaceNode.GetListOf('Operation'):
-        yield operation.GetName()
+    for node in interfaceNode:
+        for operation in node.GetListOf('Operation'):
+            yield operation.GetName()
 
 
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
     count = 0
-    partialFilter = nonePartial
+    partialFilter = none_partial
     for interfaceNode in getInterfaceNodes(path):
-        for filteredNode in partialFilter(interfaceNode):
-            getAttributes(filteredNode)
-            print 'interfaceName ', filteredNode.GetName()
-            #print 'Attributes',[attributeNames for attributeNames in getAttributes(filteredNode) if getAttributes(filteredNode) != None]
-            print 'Operations',[operationNames for operationNames in getOperations(filteredNode) if getOperations(filteredNode) != None]
+        print interfaceNode.GetName()
+        filtered_nodes = partialFilter(interfaceNode)
+        #print [name.GetName() for name in filtered_nodes]
+        #for filteredNode in partialFilter(interfaceNode):
+        #getAttributes(filtered_nodes)
+        #print 'interfaceName: ', [node_name.GetName() for node_name in filtered_nodes] 
+        print 'Attributes',[attributeNames for attributeNames in getAttributes(filtered_nodes)]
+        print 'Operations',[operationNames for operationNames in getOperations(filtered_nodes)]
     #print 'count: ', count
 
 
