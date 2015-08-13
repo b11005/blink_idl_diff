@@ -55,9 +55,9 @@ def getOperations(interfaceNode):
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
-    partial_or_nonpartial = partial
+    partial_or_nonpartial = non_partial
     print 'interface node', [node.GetName() for node in partial_or_nonpartial(getInterfaceNodes(path))]
-    #print [attr.GetName() for nodes_list in partial_filter(getInterfaceNodes(path)) for nodes in nodes_list for attr in getAttributes(nodes)]
+    print [attr.GetName() for node_list in partial_or_nonpartial(getInterfaceNodes(path)) for attr in getAttributes(node_list)]
 
 if __name__ == '__main__':
     main(sys.argv[1:])
