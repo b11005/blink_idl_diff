@@ -32,13 +32,11 @@ def getInterfaceNodes(dir_path):
 
 
 def partial(interface_node_list):
-    #return [interface_node for interface_node in interface_node_list if interface_node.GetProperty('Partial', default=False)]
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
           yield interface_node  
 
 def non_partial(interface_node_list):
-    #return [interface_node for interface_node in interface_node_list if not interface_node.GetProperty('Partial', default=False)]
     for interface_node in interface_node_list:
         if not interface_node.GetProperty('Partial', default=False):
             yield interface_node
