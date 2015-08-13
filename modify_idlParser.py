@@ -34,7 +34,7 @@ def getInterfaceNodes(dir_path):
 def partial(interface_node_list):
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
-          yield interface_node  
+            yield interface_node  
 
 def non_partial(interface_node_list):
     for interface_node in interface_node_list:
@@ -55,8 +55,7 @@ def getOperations(interfaceNode):
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
-    partial_or_nonpartial = non_partial
-    #print [node for node in getInterfaceNodes(path)]
+    partial_or_nonpartial = partial
     print 'interface node', [node.GetName() for node in partial_or_nonpartial(getInterfaceNodes(path))]
     #print [attr.GetName() for nodes_list in partial_filter(getInterfaceNodes(path)) for nodes in nodes_list for attr in getAttributes(nodes)]
 
