@@ -12,12 +12,12 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 
 def getIDLFiles(dir):
     file_type='.idl'
-    ignore_set = (
+    non_idl_set = (
         'InspectorInstrumentation.idl',
     )
     for dir_path, dir_names, file_names in os.walk(dir):
         for file_name in file_names:
-            if file_name.endswith(file_type) and file_name not in ignore_set:
+            if file_name.endswith(file_type) and file_name not in non_idl_set:
                 yield os.path.join(dir_path, file_name)
 
 
@@ -31,46 +31,31 @@ def getInterfaceNodes(dir_path):
                 yield definition
 
 
-def partial(interfaceNode):
-    is_partial = interfaceNode.GetProperty('Partial', default = False)
-    if is_partial:
-        yield interfaceNode
+def partial(interface_node_list):
+    yield [node_list for node_list in interface_node_list if node_list.GetProperty('Partial', default=False)]
 
 
-def none_partial(interfaceNode):
-    is_partial = interfaceNode.GetProperty('Partial', default = False)
-    if not is_partial:
-        yield interfaceNode
+def none_partial(interface_node_list):
+    yield [node_list for node_list in interface_node_list if not node_list.GetProperty('Partial', default=False)]
 
 
-def getAttributes(interfaceNode):
-    for node in interfaceNode:
-        for attribute in node.GetListOf('Attribute'):
-            yield attribute.GetName()
+def getAttributes(interface_node):
+    for attribute in interface_node.GetListOf('Attribute'):
+        yield attribute
 
 
 def getOperations(interfaceNode):
     for node in interfaceNode:
         for operation in node.GetListOf('Operation'):
-            yield operation.GetName()
+            yield operation
 
 
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
-    count = 0
-    partialFilter = none_partial
-    for interfaceNode in getInterfaceNodes(path):
-        print interfaceNode.GetName()
-        filtered_nodes = partialFilter(interfaceNode)
-        #print [name.GetName() for name in filtered_nodes]
-        #for filteredNode in partialFilter(interfaceNode):
-        #getAttributes(filtered_nodes)
-        #print 'interfaceName: ', [node_name.GetName() for node_name in filtered_nodes] 
-        print 'Attributes',[attributeNames for attributeNames in getAttributes(filtered_nodes)]
-        print 'Operations',[operationNames for operationNames in getOperations(filtered_nodes)]
-    #print 'count: ', count
-
+    partial_filter = none_partial
+    print 'interface node list ', [node.GetName() for nodes in partial_filter(getInterfaceNodes(path)) for node in nodes]
+    print [attr.GetName() for nodes_list in partial_filter(getInterfaceNodes(path)) for nodes in nodes_list for attr in getAttributes(nodes)]
 
 if __name__ == '__main__':
     main(sys.argv[1:])
