@@ -1,4 +1,4 @@
-#!/usr/bin/env python                                                           
+#!/usr/bin/env python
 
 import os, sys, pdb
 
@@ -32,12 +32,16 @@ def getInterfaceNodes(dir_path):
 
 
 def partial(interface_node_list):
-    yield [node_list for node_list in interface_node_list if node_list.GetProperty('Partial', default=False)]
+    #return [interface_node for interface_node in interface_node_list if interface_node.GetProperty('Partial', default=False)]
+    for interface_node in interface_node_list:
+        if interface_node.GetProperty('Partial', default=False):
+          yield interface_node  
 
-
-def none_partial(interface_node_list):
-    yield [node_list for node_list in interface_node_list if not node_list.GetProperty('Partial', default=False)]
-
+def non_partial(interface_node_list):
+    #return [interface_node for interface_node in interface_node_list if not interface_node.GetProperty('Partial', default=False)]
+    for interface_node in interface_node_list:
+        if not interface_node.GetProperty('Partial', default=False):
+            yield interface_node
 
 def getAttributes(interface_node):
     for attribute in interface_node.GetListOf('Attribute'):
@@ -53,9 +57,10 @@ def getOperations(interfaceNode):
 def main(args):
     parser = BlinkIDLParser(debug=False)
     path = args[0]
-    partial_filter = none_partial
-    print 'interface node list ', [node.GetName() for nodes in partial_filter(getInterfaceNodes(path)) for node in nodes]
-    print [attr.GetName() for nodes_list in partial_filter(getInterfaceNodes(path)) for nodes in nodes_list for attr in getAttributes(nodes)]
+    partial_or_nonpartial = non_partial
+    #print [node for node in getInterfaceNodes(path)]
+    print 'interface node', [node.GetName() for node in partial_or_nonpartial(getInterfaceNodes(path))]
+    #print [attr.GetName() for nodes_list in partial_filter(getInterfaceNodes(path)) for nodes in nodes_list for attr in getAttributes(nodes)]
 
 if __name__ == '__main__':
     main(sys.argv[1:])
