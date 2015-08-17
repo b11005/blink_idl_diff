@@ -65,7 +65,6 @@ def main(args):
     for interface_node in partial_or_nonpartial(getInterfaceNodes(path)):
         interface_dict = {
             'interface': interface_node.GetName(),
-            'attribute':[attr.GetName() for attr in getAttributes(interface_node)],
             'Attribute':{attribute.GetName(): attr_type.GetName() for attribute, attr_type in getAttributeType(interface_node)},
             'operation':[operator.GetName() for operator in getOperations(interface_node)],
             }
