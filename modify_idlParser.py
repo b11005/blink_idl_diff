@@ -53,7 +53,7 @@ def getAttributeType(interface_node):
 
 def getOperations(interfaceNode):
     for operation in interfaceNode.GetListOf('Operation'):
-        yield operation
+        yield operation, operation.GetListOf('Arguments')[0].GetChildren()
 
 
 def main(args):
@@ -66,7 +66,7 @@ def main(args):
         interface_dict = {
             'interface': interface_node.GetName(),
             'Attribute':{attribute.GetName(): attr_type.GetName() for attribute, attr_type in getAttributeType(interface_node)},
-            'operation':[operator.GetName() for operator in getOperations(interface_node)],
+            'Operation':{operator.GetName(): [operate.GetName() for operate in oprate_type] for operator, oprate_type in getOperations(interface_node)},
             }
         json.dump(interface_dict, f, sort_keys = True, indent = indent_size)
     f.close()
