@@ -42,10 +42,6 @@ def non_partial(interface_node_list):
             yield interface_node
 
 
-def getAttributes(interface_node):
-    for attribute in interface_node.GetListOf('Attribute'):
-        yield attribute
-
 def getAttributeType(interface_node):
     for attribute in interface_node.GetListOf('Attribute'):
         yield attribute, attribute.GetListOf('Type')[0].GetChildren()[0]
