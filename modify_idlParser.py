@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, pdb
+import os, sys, pdb, json
 
 chromium_path = os.path.abspath(
     os.path.join(os.environ['HOME'], 'chromium', 'src'))
@@ -47,17 +47,24 @@ def getAttributes(interface_node):
 
 
 def getOperations(interfaceNode):
-    for node in interfaceNode:
-        for operation in node.GetListOf('Operation'):
-            yield operation
+    for operation in interfaceNode.GetListOf('Operation'):
+        yield operation
 
 
 def main(args):
-    parser = BlinkIDLParser(debug=False)
     path = args[0]
     partial_or_nonpartial = non_partial
-    print 'interface node', [node.GetName() for node in partial_or_nonpartial(getInterfaceNodes(path))]
-    print [attr.GetName() for node_list in partial_or_nonpartial(getInterfaceNodes(path)) for attr in getAttributes(node_list)]
+    filename = 'sample.json'
+    f = open(filename, 'w')
+    for interface_node in partial_or_nonpartial(getInterfaceNodes(path)):
+        interface_dict = {
+            'interface': interface_node.GetName(),
+            'attr':[attr.GetName() for attr in getAttributes(interface_node)],
+            'operation':[operator.GetName() for operator in getOperations(interface_node)]
+            }
+        json.dump(interface_dict, f, sort_keys = True, indent = 4)
+    f.close()
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
