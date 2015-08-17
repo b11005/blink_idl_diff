@@ -41,10 +41,15 @@ def non_partial(interface_node_list):
         if not interface_node.GetProperty('Partial', default=False):
             yield interface_node
 
+
 def getAttributes(interface_node):
     for attribute in interface_node.GetListOf('Attribute'):
         yield attribute
 
+def getAttributeType(interface_node):
+    for attribute in interface_node.GetListOf('Attribute'):
+        yield attribute, attribute.GetListOf('Type')[0].GetChildren()[0]
+    
 
 def getOperations(interfaceNode):
     for operation in interfaceNode.GetListOf('Operation'):
@@ -55,14 +60,16 @@ def main(args):
     path = args[0]
     partial_or_nonpartial = non_partial
     filename = 'sample.json'
+    indent_size = 4
     f = open(filename, 'w')
     for interface_node in partial_or_nonpartial(getInterfaceNodes(path)):
         interface_dict = {
             'interface': interface_node.GetName(),
-            'attr':[attr.GetName() for attr in getAttributes(interface_node)],
-            'operation':[operator.GetName() for operator in getOperations(interface_node)]
+            'attribute':[attr.GetName() for attr in getAttributes(interface_node)],
+            'Attribute':{attribute.GetName(): attr_type.GetName() for attribute, attr_type in getAttributeType(interface_node)},
+            'operation':[operator.GetName() for operator in getOperations(interface_node)],
             }
-        json.dump(interface_dict, f, sort_keys = True, indent = 4)
+        json.dump(interface_dict, f, sort_keys = True, indent = indent_size)
     f.close()
 
 
