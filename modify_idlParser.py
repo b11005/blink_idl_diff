@@ -31,6 +31,12 @@ def getInterfaceNodes(dir_path):
                 yield definition
 
 
+def get_filepath(interface_node):
+    filename = interface_node.GetProperty('FILENAME')
+    filepath = os.path.realpath(filename)
+    return filepath
+
+
 def partial(interface_node_list):
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
@@ -43,38 +49,47 @@ def non_partial(interface_node_list):
 
 def getAttribute(interface_node):
     for attribute in interface_node.GetListOf('Attribute'):
-        yield attribute.GetName()
+        yield attribute
 
 
-def getAttributeType(interface_node):
-    for attribute in interface_node.GetListOf('Attribute'):
-        yield attribute.GetListOf('Type')[0].GetChildren()[0].GetName()
-    
+def getType(node):
+    yield node.GetListOf('Type')[0].GetChildren()[0].GetName()
+
+
+def attribute_dict(interface_node):
+    for attribute in getAttribute(interface_node):
+        attr_dict = {}
+        attr_dict['Name'] = attribute.GetName()
+        attr_dict['Type'] = [attr_type for attr_type in getType(attribute)]
+        yield attr_dict
 
 def getOperation(interface_node):
     for operation in interface_node.GetListOf('Operation'):
         yield operation
 
 
-def getArgument(interface_node):
+def getArgument(operation):
+    #for operation in getOperation(interface_node):
+    argument_node = operation.GetListOf('Arguments')[0]
+    yield argument_node.GetListOf('Argument')
+
+def operation_dict(interface_node):
     for operation in getOperation(interface_node):
-        argument_node = operation.GetListOf('Arguments')[0]
-        yield argument_node.GetListOf('Argument')
+        operate_dict = {}
+        operate_dict['Name'] = operation.GetName()
+        operate_dict['Argument'] = [argument.GetName() for argument_list in getArgument(operation) for argument in argument_list]
+        operate_dict['Type'] = [operate_type for operate_type in getType(operation)]
+        yield operate_dict
 
 
 def make_interface_dict(interface_node):
-
-        #argument_list = [argument.GetName() for arguments in getArgument(interface_node) for argument in arguments]
-        #print argument_list
         interface_dict = {}
         interface_dict['Interface Name'] = interface_node.GetName()
-        #'FilePath':,
-        interface_dict['Attribute'] = {'Name':attr_name for attr_name in getAttribute(interface_node)}
-        interface_dict['Attribute'].update({'Type':attr_type for attr_type in getAttributeType(interface_node)})
-        interface_dict['Operation'] = {'Name': operation.GetName() for operation in getOperation(interface_node)}
-        interface_dict['Operation'].update({'Argument':[argument.GetName() for arguments in getArgument(interface_node) for argument in arguments]})
+        interface_dict['FilePath'] = get_filepath(interface_node)
+        interface_dict['Attribute'] = [attr_name for attr_name in attribute_dict(interface_node)]
+        interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
         return interface_dict
-        #print interface_dict
+
 
 def make_jsonfile(dictionary):
     filename = 'sample.json'
@@ -91,8 +106,12 @@ def main(args):
     partial_or_nonpartial = non_partial
     for interface_node in partial_or_nonpartial(getInterfaceNodes(path)):
         dictionary = make_interface_dict(interface_node)
-        make_jsonfile(dictionary)
+        #make_jsonfile(dictionary)
         #make_interface_dict(interface_node)
+        print make_interface_dict(interface_node)
+        #print [attr for attr in attribute_dict(interface_node)]
+        #print [ope for ope in operation_dict(interface_node)]
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
