@@ -58,10 +58,10 @@ def get_type(node):
     return node.GetListOf('Type')[0].GetChildren()[0].GetName()
 
 
-def get_primitivetype(node):
-    under_type = node.GetListOf('Type')[0].GetChildren()[0]
-    if under_type.GetClass() == 'PrimitiveType':
-        return under_type.GetName()
+def get_extattirbute(node):
+    for extattributes in node.GetListOf('ExtAttributes'):
+        for extattribute_list in extattributes.GetChildren():
+            yield extattribute_list
 
 
 def extattr_dict(extattribute_list):
@@ -149,7 +149,7 @@ def main(args):
     for interface_node in partial_or_nonpartial(get_interface_nodes(path)):
         #dictionary = format_interface_dict(interface_node)
         #export_jsonfile(dictionary)
-        #print format_interface_dict(interface_node)
+        print format_interface_dict(interface_node)
         #print [con.GetName() for con in get_const(interface_node)]
         print getter_Setter_deleter(get_operation(interface_node))
 
