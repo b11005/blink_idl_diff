@@ -58,8 +58,16 @@ def get_type(node):
     return node.GetListOf('Type')[0].GetName()
 
 
-def get_undertype(node):
-    return node.GetListOf('Type')[0].GetChildren()[0].GetName()
+def get_primitivetype(node):
+    under_type = node.GetListOf('Type')[0].GetChildren()[0]
+    if under_type.GetClass() == 'PrimitiveType':
+        return under_type.GetName()
+
+
+def get_typeref(node):
+    under_type = node.GetListOf('Type')[0].GetChildren()[0]
+    if under_type.GetClass() == 'Typeref':
+        return under_type.GetName()
 
 
 def get_extattirbute(interface_node):
@@ -71,7 +79,7 @@ def get_extattirbute(interface_node):
 def extattr_dict(extattribute_list):
     for extattribute in extattribute_list:
         extattribute_dict = {}
-        extattribute_dict['Name'] = extattribute.GetName()
+        extattribute_dict['Extattribute Name'] = extattribute.GetName()
         return extattribute_dict
 
 
@@ -79,17 +87,16 @@ def attribute_dict(interface_node):
     for attribute in getAttribute(interface_node):
         attr_dict = {}
         attr_dict['Name'] = attribute.GetName()
-        attr_dict['Typeref'] = get_undertype(attribute)
-        #attr_dict['ExtAttribute'] = [attr.GetName() for attr_list in get_extattirbute(attribute) for attr in attr_list]
+        attr_dict['Typeref'] = get_typeref(attribute)
+        attr_dict['ExtAttributes'] = extattr_dict(get_extattirbute(attribute))
         yield attr_dict
 
-def getOperation(interface_node):
+def get_operation(interface_node):
     for operation in interface_node.GetListOf('Operation'):
         yield operation
 
 
 def get_argument(operation):
-    #for argument in getOperation(operation):
     argument_node = operation.GetListOf('Arguments')[0]
     yield argument_node.GetListOf('Argument')
 
@@ -98,18 +105,19 @@ def argument_dict(argument):
     for arg_list in get_argument(argument):
         for arg_name in arg_list:
             arg_dict = {}
-            arg_dict['Name'] = arg_name.GetName()
+            arg_dict['Argument Name'] = arg_name.GetName()
             arg_dict['Type'] = get_type(arg_name)
-            arg_dict['PrimitiveType'] = get_undertype(arg_name)
+            arg_dict['PrimitiveType'] = get_primitivetype(arg_name)
             yield arg_dict
 
 
 def operation_dict(interface_node):
-    for operation in getOperation(interface_node):
+    for operation in get_operation(interface_node):
         operate_dict = {}
         operate_dict['Name'] = operation.GetName()
         operate_dict['Arguments'] =[argument for argument in argument_dict(operation)]
         operate_dict['Type'] = get_type(operation)
+        operate_dict['ExtAttributes'] = extattr_dict(get_extattirbute(operation))
         yield operate_dict
 
 
@@ -117,7 +125,7 @@ def get_const(interface_node):
     for const in interface_node.GetListOf('Const'):
         yield const
 
-def make_interface_dict(interface_node):
+def format_interface_dict(interface_node):
         interface_dict = {}
         interface_dict['Interface Name'] = interface_node.GetName()
         interface_dict['FilePath'] = get_filepath(interface_node)
@@ -127,7 +135,7 @@ def make_interface_dict(interface_node):
         return interface_dict
 
 
-def make_jsonfile(dictionary):
+def export_jsonfile(dictionary):
     filename = 'sample.json'
     indent_size = 4
     f = open(filename, 'a')
@@ -138,15 +146,12 @@ def make_jsonfile(dictionary):
 
 def main(args):
     path = args[0]
-    #make_jsonfile([dictronary for dictronary in make_interface_dict(path)])
     partial_or_nonpartial = non_partial
     for interface_node in partial_or_nonpartial(getInterfaceNodes(path)):
-        dictionary = make_interface_dict(interface_node)
-        make_jsonfile(dictionary)
-        make_interface_dict(interface_node)
-        print make_interface_dict(interface_node)
+        dictionary = format_interface_dict(interface_node)
+        export_jsonfile(dictionary)
+        #print format_interface_dict(interface_node)
         #print [con.GetName() for con in get_const(interface_node)]
-        #print operation_dict(interface_node)
 
 
 if __name__ == '__main__':
