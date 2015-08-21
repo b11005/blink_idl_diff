@@ -98,22 +98,20 @@ def argument_dict(argument):
             yield arg_dict
 
 
-def getter_Setter_deleter(operation):
-    for operate in operation:
-        if operate.GetProperty('GETTER',default=None):
-            print '__getter__'
-            #print operate.GetProperties()
-        elif operate.GetProperty('SETTER',default=None):
-            print '__setter__'
-        elif operate.GetProperty('DELETER',default=None):
-            print '__deleter__'
-        else:
-            print operate.GetName()
+def getter_setter_deleter(operation):
+    if operation.GetProperty('GETTER',default=None):
+        return '__getter__'
+    elif operation.GetProperty('SETTER',default=None):
+        return '__setter__'
+    elif operation.GetProperty('DELETER',default=None):
+        return '__deleter__'
+    else:
+        return operation.GetName()
 
 def operation_dict(interface_node):
     for operation in get_operation(interface_node):
         operate_dict = {}
-        operate_dict['Name'] = operation.GetName()
+        operate_dict['Name'] = getter_setter_deleter(operation)
         operate_dict['Argument'] =[argument for argument in argument_dict(operation)]
         operate_dict['Type'] = get_type(operation)
         operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(get_extattirbute(operation))]
@@ -124,15 +122,38 @@ def get_const(interface_node):
     for const in interface_node.GetListOf('Const'):
         yield const
 
+def get_const_type(node):
+    return node.GetChildren()[0].GetName()
+
+
+def get_const_value(node):
+    return node.GetChildren()[1].GetName()
+
+
+def const_dict(const):
+    #for const_node in const:
+    con_dict = {}
+    con_dict['Name'] = const.GetName()
+    #print const.GetProperties()
+    con_dict['Type'] = get_const_type(const)
+    con_dict['Value'] = get_const_value(const)
+    return con_dict
+
+
+def format_const(interface_node):
+    for const in get_const(interface_node):
+        print const
+        print const_dict(const)
+
 
 def format_interface_dict(interface_node):
-        interface_dict = {}
-        interface_dict['Interface Name'] = interface_node.GetName()
-        interface_dict['FilePath'] = get_filepath(interface_node)
-        interface_dict['Attribute'] = [attr_name for attr_name in attribute_dict(interface_node)]
-        interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
-        interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(get_extattirbute(interface_node))]
-        return interface_dict
+    interface_dict = {}
+    interface_dict['Interface Name'] = interface_node.GetName()
+    interface_dict['FilePath'] = get_filepath(interface_node)
+    interface_dict['Attribute'] = [attr_name for attr_name in attribute_dict(interface_node)]
+    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
+    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(get_extattirbute(interface_node))]
+    return interface_dict
 
 
 def export_jsonfile(dictionary):
@@ -150,8 +171,8 @@ def main(args):
         #dictionary = format_interface_dict(interface_node)
         #export_jsonfile(dictionary)
         print format_interface_dict(interface_node)
-        #print [con.GetName() for con in get_const(interface_node)]
-        print getter_Setter_deleter(get_operation(interface_node))
+        #print [const.GetName() for const in get_const(interface_node)]
+        print format_const(interface_node)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
