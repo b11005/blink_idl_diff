@@ -157,14 +157,6 @@ def format_interface_dict(interface_node):
     return interface_dict
 
 
-def export_jsonfile(dictionary):
-    filename = 'sample.json'
-    indent_size = 4
-    f = open(filename, 'w')
-    json.dump(dictionary, f, sort_keys = True, indent = indent_size)
-    f.close()
-
-
 def merge_partial_interface(interface_dict_list, partial_dict_list):
     for partial in partial_dict_list:
         for interface in interface_dict_list:
@@ -175,6 +167,14 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['ExtAttributes'].append(partial['ExtAttributes'])
                 interface['Const'].append(partial['Const'])
     return interface_dict_list
+
+
+def export_jsonfile(dictionary):
+    filename = 'sample.json'
+    indent_size = 4
+    f = open(filename, 'w')
+    json.dump(dictionary, f, sort_keys = True, indent = indent_size)
+    f.close()
 
 
 def main(args):
