@@ -33,7 +33,7 @@ def get_interface_nodes(dir_path):
 
 def get_filepath(interface_node):
     filename = interface_node.GetProperty('FILENAME')
-    filepath = os.path.realpath(filename)
+    filepath = os.path.basename(filename)
     return filepath
 
 
@@ -131,10 +131,8 @@ def get_const_value(node):
 
 
 def const_dict(const):
-    #for const_node in const:
     con_dict = {}
     con_dict['Name'] = const.GetName()
-    #print const.GetProperties()
     con_dict['Type'] = get_const_type(const)
     con_dict['Value'] = get_const_value(const)
     return con_dict
@@ -142,17 +140,17 @@ def const_dict(const):
 
 def format_const(interface_node):
     for const in get_const(interface_node):
-        print const
-        print const_dict(const)
+        yield const_dict(const)
 
 
 def format_interface_dict(interface_node):
     interface_dict = {}
     interface_dict['Interface Name'] = interface_node.GetName()
-    interface_dict['FilePath'] = get_filepath(interface_node)
+    interface_dict['File name'] = get_filepath(interface_node)
     interface_dict['Attribute'] = [attr_name for attr_name in attribute_dict(interface_node)]
     interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
     interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(get_extattirbute(interface_node))]
+    interface_dict['Const'] = [const for const in format_const(interface_node)]
     return interface_dict
 
 
@@ -168,11 +166,10 @@ def main(args):
     path = args[0]
     partial_or_nonpartial = non_partial
     for interface_node in partial_or_nonpartial(get_interface_nodes(path)):
-        #dictionary = format_interface_dict(interface_node)
-        #export_jsonfile(dictionary)
-        print format_interface_dict(interface_node)
-        #print [const.GetName() for const in get_const(interface_node)]
-        print format_const(interface_node)
+        dictionary = format_interface_dict(interface_node)
+        export_jsonfile(dictionary)
+        #print format_interface_dict(interface_node)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
