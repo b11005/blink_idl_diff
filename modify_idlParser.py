@@ -40,7 +40,8 @@ def get_filepath(interface_node):
 def partial(interface_node_list):
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
-            yield interface_node  
+            yield interface_node
+
 
 
 def non_partial(interface_node_list):
@@ -157,7 +158,7 @@ def format_interface_dict(interface_node):
 def export_jsonfile(dictionary):
     filename = 'sample.json'
     indent_size = 4
-    f = open(filename, 'a')
+    f = open(filename, 'w')
     json.dump(dictionary, f, sort_keys = True, indent = indent_size)
     f.close()
 
@@ -165,10 +166,14 @@ def export_jsonfile(dictionary):
 def main(args):
     path = args[0]
     partial_or_nonpartial = non_partial
+    result = []
     for interface_node in partial_or_nonpartial(get_interface_nodes(path)):
         dictionary = format_interface_dict(interface_node)
-        export_jsonfile(dictionary)
-        #print format_interface_dict(interface_node)
+        result.append(dictionary)
+        print format_interface_dict(interface_node)
+    
+    export_jsonfile(result)
+
 
 
 if __name__ == '__main__':
