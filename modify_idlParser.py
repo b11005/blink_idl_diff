@@ -166,13 +166,8 @@ def export_jsonfile(dictionary):
 def main(args):
     path = args[0]
     partial_or_nonpartial = non_partial
-    result = []
-    for interface_node in partial_or_nonpartial(get_interface_nodes(path)):
-        dictionary = format_interface_dict(interface_node)
-        result.append(dictionary)
-        print format_interface_dict(interface_node)
-    
-    export_jsonfile(result)
+    interface_dict_list = [format_interface_dict(interface_node) for interface_node in partial_or_nonpartial(get_interface_nodes(path))]
+    export_jsonfile(interface_dict_list)
 
 
 
