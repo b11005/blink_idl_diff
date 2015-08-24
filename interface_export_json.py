@@ -62,31 +62,32 @@ def get_extattirbutes(node):
         return extattributes.GetChildren()
 
 def extattr_dict(extattribute_list):
+    extattributes_dict = {}
     for extattribute in get_extattirbutes(extattribute_list):
-        extattributes_dict = {}
         extattributes_dict['Name'] = extattribute.GetName()
-        yield extattributes_dict
+    return extattributes_dict
 
 
 def attributes_dict(interface_node):
+    attr_dict = {}
     for attribute in get_attributes(interface_node):
-        attr_dict = {}
         attr_dict['Name'] = attribute.GetName()
         attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttribute'] = [extattr for extattr in extattr_dict(attribute)]
-        yield attr_dict
+        attr_dict['ExtAttribute'] = extattr_dict(attribute)
+    return attr_dict
 
 
 def get_operations(interface_node):
     return interface_node.GetListOf('Operation')
 
-def get_argument(operation):
+
+def get_arguments(operation):
     argument_node = operation.GetListOf('Arguments')[0]
     yield argument_node.GetListOf('Argument')
 
 
 def argument_dict(argument):
-    for arg_list in get_argument(argument):
+    for arg_list in get_arguments(argument):
         for arg_name in arg_list:
             arg_dict = {}
             arg_dict['Name'] = arg_name.GetName()
@@ -106,18 +107,17 @@ def get_operation_name(operation):
 
 
 def operation_dict(interface_node):
-    for operation in get_operation(interface_node):
-        operate_dict = {}
+    operate_dict = {}
+    for operation in get_operations(interface_node):
         operate_dict['Name'] = get_operation_name(operation)
-        operate_dict['Argument'] = [argument for argument in argument_dict(operation)]
+        operate_dict['Argument'] = [argument_dict(operation)]
         operate_dict['Type'] = get_type(operation)
-        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(get_extattirbutes(operation))]
-        yield operate_dict
+        operate_dict['ExtAttributes'] = [extattr_dict(get_extattirbutes(operation))]
+    return operate_dict
 
 
 def get_const(interface_node):
-    for const in interface_node.GetListOf('Const'):
-        yield const
+    return interface_node.GetListOf('Const')
 
 
 def get_const_type(node):
@@ -128,27 +128,23 @@ def get_const_value(node):
     return node.GetChildren()[1].GetName()
 
 
-def const_dict(const):
+def const_dict(interface_node):
+    for const in get_const(interface_node):
     return {
     'Name': const.GetName(),
     'Type': get_const_type(const),
     'Value': get_const_value(const)
-    }
-
-
-def format_const(interface_node):
-    for const in get_const(interface_node):
-        yield const_dict(const)
+    }        
 
 
 def format_interface_dict(interface_node):
     interface_dict = {}
     interface_dict['Name'] = interface_node.GetName()
     interface_dict['FilePath'] = get_filepath(interface_node)
-    interface_dict['Attribute'] = [attr_name for attr_name in attributes_dict(interface_node)]
-    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
-    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(get_extattirbutes(interface_node))]
-    interface_dict['Const'] = [const for const in format_const(interface_node)]
+    interface_dict['Attribute'] = [attributes_dict(interface_node)]
+    interface_dict['Operation'] = [operation_dict(interface_node)]
+    interface_dict['ExtAttributes'] = [extattr_dict(get_extattirbutes(interface_node))]
+    interface_dict['Const'] = const_dict(interface_node)
     return interface_dict
 
 
@@ -162,6 +158,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['Const'].append(partial['Const'])
                 interface.setdefault('Partial_FilePath',[]).append(partial['FilePath'])
     return interface_dict_list
+
 
 def format_dictionary(dictionary_list):
     dictionary = {}
@@ -190,4 +187,3 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-   
