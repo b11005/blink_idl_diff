@@ -99,8 +99,8 @@ def argument_dict(argument):
 
 
 def get_operation_name(operation):
-    if operation.GetProperty('',default=None):
-        return '____'
+    if operation.GetProperty('GETTER',default=None):
+        return '__getter__'
     elif operation.GetProperty('SETTER',default=None):
         return '__setter__'
     elif operation.GetProperty('DELETER',default=None):

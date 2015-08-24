@@ -50,8 +50,7 @@ def get_non_partial(interface_node_list):
 
 
 def get_attributes(interface_node):
-    for attribute in interface_node.GetListOf('Attribute'):
-        yield attribute
+    return interface_node.GetListOf('Attribute')
 
 
 def get_type(node):
@@ -62,6 +61,7 @@ def get_extattirbutes(node):
     for extattributes in node.GetListOf('ExtAttributes'):
         for extattribute_list in extattributes.GetChildren():
             yield extattribute_list
+        #return extattributes.GetChildren()
 
 def extattr_dict(extattribute_list):
     for extattribute in extattribute_list:
@@ -99,8 +99,8 @@ def argument_dict(argument):
 
 
 def get_operation_name(operation):
-    if operation.GetProperty('',default=None):
-        return '____'
+    if operation.GetProperty('GETTER',default=None):
+        return '__getter__'
     elif operation.GetProperty('SETTER',default=None):
         return '__setter__'
     elif operation.GetProperty('DELETER',default=None):
@@ -169,8 +169,8 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
 
 def format_dictionary(dictionary_list):
     dictionary = {}
-    for i in dictionary_list:
-        dictionary.setdefault(i['Name'],i)
+    for interface_dict in dictionary_list:
+        dictionary.setdefault(interface_dict['Name'],interface_dict)
     return dictionary
 
 
@@ -190,7 +190,7 @@ def main(args):
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_dictionary(dictionary_list)
     export_jsonfile(dictionary, json_file)
-    #print dictionary(dictionary_list)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
