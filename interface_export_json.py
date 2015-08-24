@@ -161,10 +161,10 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
         for interface in interface_dict_list:
             if interface['Name'] == partial['Name']:
                 interface['Attribute'].append(partial['Attribute'])
-                #interface['File name'].append(partial['FilePath'])
                 interface['Operation'].append(partial['Operation'])
                 interface['ExtAttributes'].append(partial['ExtAttributes'])
                 interface['Const'].append(partial['Const'])
+                interface.setdefault('Partial_FilePath',[]).append(partial['FilePath'])
     return interface_dict_list
 
 def format_dictionary(dictionary_list):
