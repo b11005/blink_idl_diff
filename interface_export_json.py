@@ -59,12 +59,10 @@ def get_type(node):
 
 def get_extattirbutes(node):
     for extattributes in node.GetListOf('ExtAttributes'):
-        for extattribute_list in extattributes.GetChildren():
-            yield extattribute_list
-        #return extattributes.GetChildren()
+        return extattributes.GetChildren()
 
 def extattr_dict(extattribute_list):
-    for extattribute in extattribute_list:
+    for extattribute in get_extattirbutes(extattribute_list):
         extattributes_dict = {}
         extattributes_dict['Name'] = extattribute.GetName()
         yield extattributes_dict
@@ -75,7 +73,7 @@ def attributes_dict(interface_node):
         attr_dict = {}
         attr_dict['Name'] = attribute.GetName()
         attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttribute'] = [extattr for extattr in extattr_dict(get_extattirbutes(attribute))]
+        attr_dict['ExtAttribute'] = [extattr for extattr in extattr_dict(attribute)]
         yield attr_dict
 
 
