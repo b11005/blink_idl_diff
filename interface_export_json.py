@@ -77,10 +77,8 @@ def attributes_dict(interface_node):
         yield attr_dict
 
 
-def get_operation(interface_node):
-    for operation in interface_node.GetListOf('Operation'):
-        yield operation
-
+def get_operations(interface_node):
+    return interface_node.GetListOf('Operation')
 
 def get_argument(operation):
     argument_node = operation.GetListOf('Arguments')[0]
