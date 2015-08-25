@@ -7,15 +7,14 @@ path = os.path.abspath(
     os.path.join(os.environ['HOME'], 'blink_idl_diff'))
 
 class TestFunctions(unittest.TestCase):
-
     def setup(self):
-        print 'Setup'
+        print 'setup'
 
-    def test_idlfile(self):
-        for i in interface_export_json.get_idl_files(path):
-            actual = i
-            self.assertEqual(actual, os.path.join(path, "test_interface.idl"))
 
+    def test_interface_node(self):
+        for actual in interface_export_json.get_interface_nodes(path):
+            self.assertEqual(actual, "GCObservation")
 
 if __name__ == '__main__':
     unittest.main()
+        
