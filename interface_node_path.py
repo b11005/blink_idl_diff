@@ -36,8 +36,6 @@ def main(args):
     path = args[0]
     filename = args[1]
     interface_path_list = [node_path for node_path in get_interface_nodes(path)]
-    #print interface_path
-    #with open(filename) as f:
     f = open(filename, 'w')
     for interface_path in interface_path_list:
         f.write(interface_path + '\t')
