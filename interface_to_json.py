@@ -105,7 +105,7 @@ def operation_dict(interface_node):
     for operation in get_operations(interface_node):
         operate_dict = {}
         operate_dict['Name'] = get_operation_name(operation)
-        operate_dict['Argument'] = [args for args in argument_dict(operation) if args]
+        operate_dict['Argument'] = [args for args in argument_dict(operation) if is args]
         operate_dict['Type'] = get_type(operation)
         operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation) if extattr]
         yield operate_dict
