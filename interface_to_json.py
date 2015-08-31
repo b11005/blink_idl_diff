@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""Usage: interface_to_json.py [text file which has idl file pathes] [json file name]
+"""
+
 import os
 import sys
 import json
@@ -9,16 +12,15 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 
 def load_filepath(path_file):
     for line in open(path_file, 'r'):
-        itemList = line[:-1].split('\t')
-        yield ','.join(map(str, itemList))
+        path = line[:-1].split('\t')
+        yield ','.join(map(str, path))
 
 
-def get_interface_nodes(dir_path):
+def get_interface_nodes(path):
     parser = BlinkIDLParser(debug=False)
     class_name = 'Interface'
-    for node_path in load_filepath(dir_path):
-        node = node_path
-        definitions = parse_file(parser, node)
+    for node_path in load_filepath(path):
+        definitions = parse_file(parser, node_path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == class_name:
                 yield definition
@@ -26,8 +28,7 @@ def get_interface_nodes(dir_path):
 
 def get_filepath(interface_node):
     filename = interface_node.GetProperty('FILENAME')
-    filepath = os.path.relpath(filename)
-    return filepath
+    return os.path.relpath(filename)
 
 
 def get_partial(interface_node_list):
@@ -86,7 +87,7 @@ def argument_dict(argument):
         arg_dict = {}
         arg_dict['Name'] = arg_name.GetName()
         arg_dict['Type'] = get_type(arg_name)
-        return arg_dict
+        yield arg_dict
 
 
 def get_operation_name(operation):
@@ -101,13 +102,13 @@ def get_operation_name(operation):
 
 
 def operation_dict(interface_node):
-    operate_dict = {}
     for operation in get_operations(interface_node):
+        operate_dict = {}
         operate_dict['Name'] = get_operation_name(operation)
-        operate_dict['Argument'] = [argument_dict(operation)]
+        operate_dict['Argument'] = [args for args in argument_dict(operation)]
         operate_dict['Type'] = get_type(operation)
         operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation)]
-    return operate_dict
+        yield operate_dict
 
 
 def get_consts(interface_node):
@@ -136,7 +137,7 @@ def format_interface_dict(interface_node):
     interface_dict['Name'] = interface_node.GetName()
     interface_dict['FilePath'] = get_filepath(interface_node)
     interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node)]
-    interface_dict['Operation'] = [operation_dict(interface_node)]
+    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
     interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node)]
     interface_dict['Constant'] = [const for const in const_dict(interface_node)]
     return interface_dict
