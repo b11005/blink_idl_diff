@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import os, sys, json
+import os
+import sys
+import json
 
 chromium_path = os.path.abspath(
     os.path.join(os.environ['HOME'], 'chromium', 'src'))
@@ -10,6 +12,7 @@ sys.path.insert(0, blink_bindings_path)
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
+
 def load_filepath(path_file):
     with open(path_file, 'r') as f:
         return f.read()
@@ -17,7 +20,7 @@ def load_filepath(path_file):
 
 def get_interfaces(file_path):
     parser = BlinkIDLParser(debug=False)
-    class_name = 'Interface' 
+    class_name = 'Interface'
     definitions = parse_file(parser, file_path)
     for definition in definitions.GetChildren():
             if definition.GetClass() == class_name:
@@ -53,11 +56,13 @@ def get_extattirbutes(node):
         for extattribute_list in extattributes.GetChildren():
             yield extattribute_list
 
+
 def extattr_dict(node):
     for extattribute in get_extattirbutes(node):
         yield {
             'Name': extattribute.GetName()
         }
+
 
 def attributes_dict(interface_node):
     for attribute in get_attributes(interface_node):
@@ -86,11 +91,11 @@ def argument_dict(argument):
 
 
 def get_operation_name(operation):
-    if operation.GetProperty('GETTER',default=None):
+    if operation.GetProperty('GETTER', default=None):
         return '__getter__'
-    elif operation.GetProperty('SETTER',default=None):
+    elif operation.GetProperty('SETTER', default=None):
         return '__setter__'
-    elif operation.GetProperty('DELETER',default=None):
+    elif operation.GetProperty('DELETER', default=None):
         return '__deleter__'
     else:
         return operation.GetName()
@@ -124,7 +129,7 @@ def const_dict(interface_node):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const)
-        }        
+        }
 
 
 def format_interface_dict(interface_node):
@@ -154,7 +159,7 @@ def export_jsonfile(dictionary, json_file):
     filename = json_file
     indent_size = 4
     f = open(filename, 'w')
-    json.dump(dictionary, f, sort_keys = True, indent = indent_size)
+    json.dump(dictionary, f, sort_keys=True, indent=indent_size)
     f.close()
 
 
@@ -175,8 +180,7 @@ def main(args):
             name = interface_node.GetName()
             d[name] = format_interface_dict(interface_node)
     export_jsonfile(d, jsonfile_name)
-    #for k,v in d.items():
-        #print k, v
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
