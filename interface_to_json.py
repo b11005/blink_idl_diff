@@ -15,7 +15,7 @@ def load_filepath(path_file):
 
 def get_interface_nodes(dir_path):
     parser = BlinkIDLParser(debug=False)
-    class_name = 'Interface' 
+    class_name = 'Interface'
     for node_path in load_filepath(dir_path):
         node = node_path
         definitions = parse_file(parser, node)
@@ -55,11 +55,13 @@ def get_extattirbutes(node):
         for extattribute_list in extattributes.GetChildren():
             yield extattribute_list
 
+
 def extattr_dict(node):
     for extattribute in get_extattirbutes(node):
         yield {
             'Name': extattribute.GetName()
         }
+
 
 def attributes_dict(interface_node):
     for attribute in get_attributes(interface_node):
@@ -126,7 +128,7 @@ def const_dict(interface_node):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const)
-        }        
+        }
 
 
 def format_interface_dict(interface_node):
@@ -156,7 +158,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
 def format_dictionary(dictionary_list):
     dictionary = {}
     for interface_dict in dictionary_list:
-        dictionary.setdefault(interface_dict['Name'],interface_dict)
+        dictionary.setdefault(interface_dict['Name'], interface_dict)
     return dictionary
 
 
@@ -164,7 +166,7 @@ def export_jsonfile(dictionary, json_file):
     filename = json_file
     indent_size = 4
     f = open(filename, 'w')
-    json.dump(dictionary, f, sort_keys = True, indent = indent_size)
+    json.dump(dictionary, f, sort_keys=True, indent=indent_size)
     f.close()
 
 
@@ -176,7 +178,7 @@ def main(args):
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_dictionary(dictionary_list)
     export_jsonfile(dictionary, json_file)
-    #print dictionary
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
