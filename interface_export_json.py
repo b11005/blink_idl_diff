@@ -24,30 +24,18 @@ def get_interfaces(file_path):
                 return definition
 
 
-'''def get_interface_nodes(dir_path):
-    parser = BlinkIDLParser(debug=False)
-    class_name = 'Interface' 
-    for node_path in get_idl_files(dir_path):
-        definitions = parse_file(parser, node_path)
-        for definition in definitions.GetChildren():
-            if definition.GetClass() == class_name:
-                yield definition'''
-
-
 def get_filepath(interface_node):
     filename = interface_node.GetProperty('FILENAME')
     filepath = os.path.relpath(filename)
     return filepath
 
 
-def get_partial(interface_node_list):
-    #for interface_node in interface_node_list:
+def get_partial(interface_node):
     if interface_node.GetProperty('Partial', default=False):
         return interface_node
 
 
 def get_non_partial(interface_node):
-    #for interface_node in interface_node_list:
     if not interface_node.GetProperty('Partial', default=False):
         return interface_node
 
@@ -66,18 +54,17 @@ def get_extattirbutes(node):
             yield extattribute_list
 
 def extattr_dict(node):
-    extattributes_dict = {}
     for extattribute in get_extattirbutes(node):
-        extattributes_dict['Name'] = extattribute.GetName()
-    return extattributes_dict
-
+        yield {
+            'Name': extattribute.GetName()
+        }
 
 def attributes_dict(interface_node):
     attr_dict = {}
     for attribute in get_attributes(interface_node):
         attr_dict['Name'] = attribute.GetName()
         attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttribute'] = extattr_dict(attribute)
+        attr_dict['ExtAttribute'] = [extattr for extattr in extattr_dict(attribute)]
     return attr_dict
 
 
@@ -116,8 +103,8 @@ def operation_dict(interface_node):
         operate_dict['Name'] = get_operation_name(operation)
         operate_dict['Argument'] = argument_dict(operation)
         operate_dict['Type'] = get_type(operation)
-        operate_dict['ExtAttributes'] = extattr_dict(operation)
-    return operate_dict
+        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation)]
+        yield operate_dict
 
 
 def get_consts(interface_node):
@@ -134,7 +121,7 @@ def get_const_value(node):
 
 def const_dict(interface_node):
     for const in get_consts(interface_node):
-        return {
+        yield {
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const)
@@ -145,16 +132,15 @@ def format_interface_dict(interface_node):
     interface_dict = {}
     interface_dict['Name'] = interface_node.GetName()
     interface_dict['FilePath'] = get_filepath(interface_node)
-    interface_dict['Attribute'] = [attributes_dict(interface_node)]
-    interface_dict['Operation'] = [operation_dict(interface_node)]
-    interface_dict['ExtAttributes'] = [extattr_dict(interface_node)]
-    interface_dict['Constant'] = const_dict(interface_node)
+    interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node)]
+    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
+    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node)]
+    interface_dict['Constant'] = [const for const in const_dict(interface_node)]
     return interface_dict
 
 
 def merge_partial_interface(interface_dict, partial_dict_list):
     for partial in partial_dict_list:
-        #for interface in interface_dict_list:
         if interface_dict['Name'] == partial['Name']:
             interface_dict['Attribute'].append(partial['Attribute'])
             interface_dict['Operation'].append(partial['Operation'])
@@ -163,13 +149,6 @@ def merge_partial_interface(interface_dict, partial_dict_list):
             if interface_dict['Constant']:
                 interface_dict.setdefault('Constant', []).append(partial['Constant'])
     return interface_dict
-
-
-'''def format_dictionary(dictionary_list):
-    dictionary = {}
-    for interface_dict in dictionary_list:
-        dictionary.setdefault(interface_dict['Name'],interface_dict)
-    return dictionary'''
 
 
 def export_jsonfile(dictionary, json_file):
@@ -181,33 +160,24 @@ def export_jsonfile(dictionary, json_file):
 
 
 def main(args):
-    path = args[0]
-    path_file = args[1]
-    jsonfile_name = args[2]
+    path_file = args[0]
+    jsonfile_name = args[1]
     d = {}
     partial_dict_list = []
     for filepath in load_filepath(path_file).split():
         interface_node = get_interfaces(filepath)
         if not interface_node:
             pass
-        elif get_non_partial(interface_node):
+        elif get_partial(interface_node):
             name = interface_node.GetName()
             if get_non_partial(interface_node):
                 d[name] = format_interface_dict(interface_node)
         else:
-            format_interface_dict(interface_node)
+            name = interface_node.GetName()
+            d[name] = format_interface_dict(interface_node)
     export_jsonfile(d, jsonfile_name)
-    #merge_partial_interface(d, partial_interface_list)
     #for k,v in d.items():
-        #interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(filepath)]
-        #partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(interface_node)]
-        #print partial_dict_list
-        #dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
-        #dictionary = format_dictionary(dictionary_list)
-        #export_jsonfile(dictionary, json_file)
-        #for i in dictionary_list:
-            #print i
-
+        #print k, v
 
 if __name__ == '__main__':
     main(sys.argv[1:])
