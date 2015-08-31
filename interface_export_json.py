@@ -60,12 +60,12 @@ def extattr_dict(node):
         }
 
 def attributes_dict(interface_node):
-    attr_dict = {}
     for attribute in get_attributes(interface_node):
-        attr_dict['Name'] = attribute.GetName()
-        attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttribute'] = [extattr for extattr in extattr_dict(attribute)]
-    return attr_dict
+        yield {
+            'Name': attribute.GetName(),
+            'Type': get_type(attribute),
+            'ExtAttribute': [extattr for extattr in extattr_dict(attribute)]
+        }
 
 
 def get_operations(interface_node):
@@ -79,7 +79,6 @@ def get_arguments(operation):
 
 def argument_dict(argument):
     for arg_name in get_arguments(argument):
-        #for arg_name in arg_list:
         arg_dict = {}
         arg_dict['Name'] = arg_name.GetName()
         arg_dict['Type'] = get_type(arg_name)
