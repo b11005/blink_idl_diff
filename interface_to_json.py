@@ -69,7 +69,7 @@ def attributes_dict(interface_node):
         attr_dict = {}
         attr_dict['Name'] = attribute.GetName()
         attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttribute'] = [extattr for extattr in extattr_dict(attribute)]
+        attr_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(attribute) if extattr]
         yield attr_dict
 
 
@@ -105,9 +105,9 @@ def operation_dict(interface_node):
     for operation in get_operations(interface_node):
         operate_dict = {}
         operate_dict['Name'] = get_operation_name(operation)
-        operate_dict['Argument'] = [args for args in argument_dict(operation)]
+        operate_dict['Argument'] = [args for args in argument_dict(operation) if args]
         operate_dict['Type'] = get_type(operation)
-        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation)]
+        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation) if extattr]
         yield operate_dict
 
 
@@ -136,10 +136,10 @@ def format_interface_dict(interface_node):
     interface_dict = {}
     interface_dict['Name'] = interface_node.GetName()
     interface_dict['FilePath'] = get_filepath(interface_node)
-    interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node)]
-    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
-    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node)]
-    interface_dict['Constant'] = [const for const in const_dict(interface_node)]
+    interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node) if attr]
+    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node) if operation]
+    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node) if extattr]
+    interface_dict['Constant'] = [const for const in const_dict(interface_node) if const]
     return interface_dict
 
 
@@ -150,9 +150,9 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['Attribute'].append(partial['Attribute'])
                 interface['Operation'].append(partial['Operation'])
                 interface['ExtAttributes'].append(partial['ExtAttributes'])
-                interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
+                interface.setdefault('Partial_FilePath', []).extend(partial['FilePath'])
                 if interface['Constant']:
-                    interface.setdefault('Constant', []).append(partial['Constant'])
+                    interface.setdefault('Constant', []).extend(partial['Constant'])
     return interface_dict_list
 
 
