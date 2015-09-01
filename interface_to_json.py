@@ -16,10 +16,10 @@ def load_filepaths(path_file):
         yield path
 
 
-def get_interface_nodes(path):
+def get_interfaces(path_file):
     parser = BlinkIDLParser(debug=False)
     class_name = 'Interface'
-    for node_path in load_filepaths(path):
+    for node_path in load_filepaths(path_file):
         definitions = parse_file(parser, node_path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == class_name:
@@ -69,7 +69,7 @@ def attributes_dict(interface_node):
         attr_dict = {}
         attr_dict['Name'] = attribute.GetName()
         attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(attribute) if extattr]
+        attr_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(attribute)]
         yield attr_dict
 
 
@@ -107,7 +107,7 @@ def operation_dict(interface_node):
         operate_dict['Name'] = get_operation_name(operation)
         operate_dict['Argument'] = [args for args in argument_dict(operation)]
         operate_dict['Type'] = get_type(operation)
-        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation) if extattr]
+        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation)]
         yield operate_dict
 
 
@@ -136,9 +136,9 @@ def format_interface_dict(interface_node):
     interface_dict = {}
     interface_dict['Name'] = interface_node.GetName()
     interface_dict['FilePath'] = get_filepath(interface_node)
-    interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node) if attr]
-    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node) if operation]
-    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node) if extattr]
+    interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node)]
+    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
+    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node)]
     interface_dict['Constant'] = [const for const in const_dict(interface_node) if const]
     return interface_dict
 
@@ -174,8 +174,8 @@ def export_jsonfile(dictionary, json_file):
 def main(args):
     path_file = args[0]
     json_file = args[1]
-    interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interface_nodes(path_file))]
-    partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interface_nodes(path_file))]
+    interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
+    partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_dictionary(dictionary_list)
     export_jsonfile(dictionary, json_file)
