@@ -10,16 +10,16 @@ import json
 from blink_idl_parser import parse_file, BlinkIDLParser
 
 
-def load_filepath(path_file):
+def load_filepaths(path_file):
     for line in open(path_file, 'r'):
-        path = line[:-1].split('\t')
-        yield ','.join(map(str, path))
+        path = line.strip()
+        yield path
 
 
 def get_interface_nodes(path):
     parser = BlinkIDLParser(debug=False)
     class_name = 'Interface'
-    for node_path in load_filepath(path):
+    for node_path in load_filepaths(path):
         definitions = parse_file(parser, node_path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == class_name:
@@ -105,7 +105,7 @@ def operation_dict(interface_node):
     for operation in get_operations(interface_node):
         operate_dict = {}
         operate_dict['Name'] = get_operation_name(operation)
-        operate_dict['Argument'] = [args for args in argument_dict(operation) if is args]
+        operate_dict['Argument'] = [args for args in argument_dict(operation)]
         operate_dict['Type'] = get_type(operation)
         operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation) if extattr]
         yield operate_dict
@@ -150,9 +150,9 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['Attribute'].append(partial['Attribute'])
                 interface['Operation'].append(partial['Operation'])
                 interface['ExtAttributes'].append(partial['ExtAttributes'])
-                interface.setdefault('Partial_FilePath', []).extend(partial['FilePath'])
+                interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
                 if interface['Constant']:
-                    interface.setdefault('Constant', []).extend(partial['Constant'])
+                    interface.setdefault('Constant', []).append(partial['Constant'])
     return interface_dict_list
 
 
