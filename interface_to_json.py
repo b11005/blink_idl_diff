@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-"""Usage: interface_to_json.py [text file which has idl file pathes] [json file name]
+"""
+
+The goal of this script is to integrate and dump interface node information to json file.
 """
 
 import os
@@ -11,12 +13,20 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 
 
 def load_filepaths(path_file):
+    """
+    Args:
+      path_file: text file
+    """
     for line in open(path_file, 'r'):
         path = line.strip()
         yield path
 
 
 def get_interfaces(path_file):
+    """
+    Args:
+      path_file: text file
+    """
     parser = BlinkIDLParser(debug=False)
     class_name = 'Interface'
     for node_path in load_filepaths(path_file):
@@ -27,37 +37,65 @@ def get_interfaces(path_file):
 
 
 def get_filepath(interface_node):
+    """
+    Args:
+      interface_node: interface node class object
+    """
     filename = interface_node.GetProperty('FILENAME')
     return os.path.relpath(filename)
 
 
 def get_partial(interface_node_list):
+    """
+    Args:
+      interface_node_list: interface node class generator
+    """
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
             yield interface_node
 
 
 def get_non_partial(interface_node_list):
+    """
+    Args:
+      interface_node_list: interface node class generator
+    """
     for interface_node in interface_node_list:
         if not interface_node.GetProperty('Partial', default=False):
             yield interface_node
 
 
 def get_attributes(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    """
     return interface_node.GetListOf('Attribute')
 
 
 def get_type(node):
+    """
+    Args:
+      node: interface node object
+    """
     return node.GetListOf('Type')[0].GetChildren()[0].GetName()
 
 
 def get_extattirbutes(node):
+    """
+    Args:
+      node: interface node object
+    """
     for extattributes in node.GetListOf('ExtAttributes'):
         for extattribute_list in extattributes.GetChildren():
             yield extattribute_list
 
 
 def extattr_dict(node):
+    """
+    Args:
+      node: interface node object
+    """
     for extattribute in get_extattirbutes(node):
         yield {
             'Name': extattribute.GetName()
@@ -65,6 +103,10 @@ def extattr_dict(node):
 
 
 def attributes_dict(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    """
     for attribute in get_attributes(interface_node):
         attr_dict = {}
         attr_dict['Name'] = attribute.GetName()
@@ -74,15 +116,27 @@ def attributes_dict(interface_node):
 
 
 def get_operations(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    """
     return interface_node.GetListOf('Operation')
 
 
 def get_arguments(operation):
+    """
+    Args:
+      operation: interface node object
+    """
     argument_node = operation.GetListOf('Arguments')[0]
     return argument_node.GetListOf('Argument')
 
 
 def argument_dict(argument):
+    """
+    Args:
+    argument: interface node object
+    """
     for arg_name in get_arguments(argument):
         arg_dict = {}
         arg_dict['Name'] = arg_name.GetName()
@@ -91,6 +145,10 @@ def argument_dict(argument):
 
 
 def get_operation_name(operation):
+    """
+    Args:
+      operation: operation object in interface node object
+    """
     if operation.GetProperty('GETTER', default=None):
         return '__getter__'
     elif operation.GetProperty('SETTER', default=None):
@@ -102,6 +160,10 @@ def get_operation_name(operation):
 
 
 def operation_dict(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    """
     for operation in get_operations(interface_node):
         operate_dict = {}
         operate_dict['Name'] = get_operation_name(operation)
@@ -133,6 +195,10 @@ def const_dict(interface_node):
 
 
 def format_interface_dict(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    """
     interface_dict = {}
     interface_dict['Name'] = interface_node.GetName()
     interface_dict['FilePath'] = get_filepath(interface_node)
@@ -144,6 +210,11 @@ def format_interface_dict(interface_node):
 
 
 def merge_partial_interface(interface_dict_list, partial_dict_list):
+    """
+    Args:
+      interface_dict_list: list
+      partial_dict_list: list
+    """
     for partial in partial_dict_list:
         for interface in interface_dict_list:
             if interface['Name'] == partial['Name']:

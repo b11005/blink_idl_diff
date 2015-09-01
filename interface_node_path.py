@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
-"""Return text file which is contained IDL file paths
-  Args:
-    path: absolute directory path 
-    filename: text file name for output
-  Return:
-    str, IDL filepath in each line
+"""
+The goal of this script is to integrate IDL file path under the directory to text file.
 """
 import os
 import sys
 
 
 def get_idl_files(path):
+    """Return file path
+    
+    Args:
+      path: directory path
+    Return:
+      str, absolute IDL file path
+    """
     file_type = '.idl'
     non_idl_set = (
         'InspectorInstrumentation.idl',
@@ -19,7 +22,7 @@ def get_idl_files(path):
     for dir_path, dir_names, file_names in os.walk(path):
         for file_name in file_names:
             if file_name.endswith(file_type) and file_name not in non_idl_set:
-                yield os.path.join(path, file_name)
+                yield os.path.join(dir_path, file_name)
 
 
 def main(args):
