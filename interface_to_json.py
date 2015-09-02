@@ -16,7 +16,6 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 
 def load_filepaths(path_file):
     """Returns a generator which yields absolute path of IDL files written in text file.
-
     Args:
       path_file: text file
     Return:
@@ -29,7 +28,6 @@ def load_filepaths(path_file):
 
 def get_interfaces(path_file):
     """Returns generator which yields interface IDL nodes.
-
     Args:
       path_file: text file
     Return:
@@ -56,7 +54,7 @@ def get_filepath(interface_node):
 
 
 def get_partial(interface_node_list):
-    """Returns generator which yields partial interface node
+    """Returns generator which yields partial interface node.
     Args:
       interface_node_list: generator, interface node class object
     Return:
@@ -68,7 +66,7 @@ def get_partial(interface_node_list):
 
 
 def get_non_partial(interface_node_list):
-    """Returns generator which yields interface node
+    """Returns generator which yields interface node.
     Args:
       interface_node_list: generator interface node class object
     Return:
@@ -80,7 +78,7 @@ def get_non_partial(interface_node_list):
 
 
 def get_attributes(interface_node):
-    """Returns list of Attribute object
+    """Returns list of Attribute object.
     Args:
       interface_node: interface node object
     Return:
@@ -90,7 +88,7 @@ def get_attributes(interface_node):
 
 
 def get_type(node):
-    """Returns type of attribute or operation's type
+    """Returns type of attribute or operation's type.
     Args:
       node: interface node object
     """
@@ -98,7 +96,7 @@ def get_type(node):
 
 
 def get_extattirbutes(node):
-    """Returns generator which yields list of Extattribute object
+    """Returns generator which yields list of Extattribute object.
     Args:
       node: interface node object
     Return:
@@ -110,7 +108,7 @@ def get_extattirbutes(node):
 
 
 def extattr_dict(node):
-    """Returns generator which yields Extattribute's information dictionary
+    """Returns generator which yields Extattribute's information dictionary.
     Args:
       node: interface node object
     Return:
@@ -123,7 +121,7 @@ def extattr_dict(node):
 
 
 def attributes_dict(interface_node):
-    """Returns generator which yields dictioary of Extattribute object information
+    """Returns generator which yields dictioary of Extattribute object information.
     Args:
       interface_node: interface node object
     Return:
@@ -138,7 +136,7 @@ def attributes_dict(interface_node):
 
 
 def get_operations(interface_node):
-    """Returns list of Operations object under the interface_node
+    """Returns list of Operations object under the interface_node.
     Args:
       interface_node: interface node object
     Return:
@@ -148,7 +146,7 @@ def get_operations(interface_node):
 
 
 def get_arguments(operation):
-    """Returns list of Arguments object under the operation object
+    """Returns list of Arguments object under the operation object.
     Args:
       operation: interface node object
     Return:
@@ -159,7 +157,7 @@ def get_arguments(operation):
 
 
 def argument_dict(argument):
-    """Returns generator which yields dictionary of Argument object information
+    """Returns generator which yields dictionary of Argument object information.
     Args:
       argument: interface node object
     Return:
@@ -173,7 +171,7 @@ def argument_dict(argument):
 
 
 def get_operation_name(operation):
-    """Returns openration object name
+    """Returns openration object name.
     Args:
       operation: operation object in interface node object
     Return:
@@ -190,7 +188,7 @@ def get_operation_name(operation):
 
 
 def operation_dict(interface_node):
-    """Returns generator which yields dictionary of Operation object information
+    """Returns generator which yields dictionary of Operation object information.
     Args:
     interface_node: interface node object
     Return:
@@ -206,7 +204,7 @@ def operation_dict(interface_node):
 
 
 def get_consts(interface_node):
-    """Returns list of Constant object
+    """Returns list of Constant object.
     Args:
       interface_node: interface node object
     Return:
@@ -216,7 +214,7 @@ def get_consts(interface_node):
 
 
 def get_const_type(node):
-    """Returns constant type
+    """Returns constant's type.
     Args:
       node: interface node's attribute or operation object
     Return:
@@ -226,7 +224,7 @@ def get_const_type(node):
 
 
 def get_const_value(node):
-    """Returns constant value
+    """Returns constant's value.
     Args:
       node: interface node's attribute or operation object
     Return:
@@ -236,7 +234,7 @@ def get_const_value(node):
 
 
 def const_dict(interface_node):
-    """Returns generator which yields dictionary of constant object information
+    """Returns generator which yields dictionary of constant object information.
     Args:
       interface_node: interface node object
     Return:
@@ -251,7 +249,7 @@ def const_dict(interface_node):
 
 
 def format_interface_dict(interface_node):
-    """Returns dictioanry of each interface_node information
+    """Returns dictioanry of each interface_node information.
     Args:
       interface_node: interface node object
     Return:
@@ -268,7 +266,7 @@ def format_interface_dict(interface_node):
 
 
 def merge_partial_interface(interface_dict_list, partial_dict_list):
-    """Returns list of interface_node information dictioary
+    """Returns list of interface_node information dictioary.
     Args:
       interface_dict_list: list
       partial_dict_list: list
@@ -288,7 +286,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
 
 
 def format_dictionary(dictionary_list):
-    """Returns dictioary which is changed reformat interface_dict_list
+    """Returns dictioary which is changed structure of interface_dict_list.
     Args:
       dictirary_list: list, list of interface node dictionary
     Return:
@@ -301,7 +299,7 @@ def format_dictionary(dictionary_list):
 
 
 def export_jsonfile(dictionary, json_file):
-    """Returns jsonfile which is dumped each interface_node information dictionary
+    """Returns jsonfile which is dumped each interface_node information dictionary to json.
     Args:
       dictioary: dict, output of format_dictinatry
       json_file: json file for output
