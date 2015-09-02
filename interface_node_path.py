@@ -8,8 +8,7 @@ import sys
 
 
 def get_idl_files(path):
-    """Return file path
-    
+    """
     Args:
       path: directory path
     Return:

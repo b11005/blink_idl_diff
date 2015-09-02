@@ -16,6 +16,8 @@ def load_filepaths(path_file):
     """
     Args:
       path_file: text file
+    Return:
+      path: str, absolute file path
     """
     for line in open(path_file, 'r'):
         path = line.strip()
@@ -26,6 +28,8 @@ def get_interfaces(path_file):
     """
     Args:
       path_file: text file
+    Return:
+      definition: node class object, interface node objects
     """
     parser = BlinkIDLParser(debug=False)
     class_name = 'Interface'
@@ -40,6 +44,8 @@ def get_filepath(interface_node):
     """
     Args:
       interface_node: interface node class object
+    Return:
+      os.path.relpath(filename): str, interface_node's file path
     """
     filename = interface_node.GetProperty('FILENAME')
     return os.path.relpath(filename)
@@ -48,7 +54,9 @@ def get_filepath(interface_node):
 def get_partial(interface_node_list):
     """
     Args:
-      interface_node_list: interface node class generator
+      interface_node_list: generator, interface node class object
+    Return:
+      interface_node: generator, interface node class object
     """
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
@@ -58,7 +66,9 @@ def get_partial(interface_node_list):
 def get_non_partial(interface_node_list):
     """
     Args:
-      interface_node_list: interface node class generator
+      interface_node_list: generator interface node class object
+    Return:
+      interface_node: generator, interface node class object
     """
     for interface_node in interface_node_list:
         if not interface_node.GetProperty('Partial', default=False):
@@ -69,6 +79,8 @@ def get_attributes(interface_node):
     """
     Args:
       interface_node: interface node object
+    Return:
+      interface_node.GetListOf('Attribute'): list, Attribute object list
     """
     return interface_node.GetListOf('Attribute')
 
@@ -85,6 +97,8 @@ def get_extattirbutes(node):
     """
     Args:
       node: interface node object
+    Return:
+      extattribute_list: list, extattribute object list generator
     """
     for extattributes in node.GetListOf('ExtAttributes'):
         for extattribute_list in extattributes.GetChildren():
@@ -95,6 +109,8 @@ def extattr_dict(node):
     """
     Args:
       node: interface node object
+    Return:
+      {'Name': extattribute.GetName()}: dict, extattribute dictionary generator
     """
     for extattribute in get_extattirbutes(node):
         yield {
@@ -106,6 +122,8 @@ def attributes_dict(interface_node):
     """
     Args:
       interface_node: interface node object
+    Return:
+      attr_dict: dict, dictionary of attribite information generator
     """
     for attribute in get_attributes(interface_node):
         attr_dict = {}
@@ -119,6 +137,8 @@ def get_operations(interface_node):
     """
     Args:
       interface_node: interface node object
+    Return:
+      interface_node.GetListOf('Operation'): list, list of oparation object
     """
     return interface_node.GetListOf('Operation')
 
@@ -127,6 +147,8 @@ def get_arguments(operation):
     """
     Args:
       operation: interface node object
+    Return:
+      argument_node.GetListOf('Argument'): list, list of argument object
     """
     argument_node = operation.GetListOf('Arguments')[0]
     return argument_node.GetListOf('Argument')
@@ -135,7 +157,9 @@ def get_arguments(operation):
 def argument_dict(argument):
     """
     Args:
-    argument: interface node object
+      argument: interface node object
+    Return:
+      arg_dict: dict, generator of argument information's dictionary
     """
     for arg_name in get_arguments(argument):
         arg_dict = {}
@@ -148,6 +172,8 @@ def get_operation_name(operation):
     """
     Args:
       operation: operation object in interface node object
+    Return:
+      str, operation's name
     """
     if operation.GetProperty('GETTER', default=None):
         return '__getter__'
@@ -162,7 +188,9 @@ def get_operation_name(operation):
 def operation_dict(interface_node):
     """
     Args:
-      interface_node: interface node object
+    interface_node: interface node object
+    Return:
+      operate_dict: generator of operation dictionary
     """
     for operation in get_operations(interface_node):
         operate_dict = {}
@@ -174,18 +202,42 @@ def operation_dict(interface_node):
 
 
 def get_consts(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    Return:
+      interface_node.GetListOf('Const'): list, list of constant object
+    """
     return interface_node.GetListOf('Const')
 
 
 def get_const_type(node):
+    """
+    Args:
+      node: interface node's attribute or operation object
+    Return:
+      node.GetChildren()[0].GetName(): str, constant object's name
+    """
     return node.GetChildren()[0].GetName()
 
 
 def get_const_value(node):
+    """
+    Args:
+      node: interface node's attribute or operation object
+    Return:
+      node.GetChildren()[1].GetName(): list, list of oparation object
+    """
     return node.GetChildren()[1].GetName()
 
 
 def const_dict(interface_node):
+    """
+    Args:
+      interface_node: interface node object
+    Return:
+      {}: generator, dict of constant object information
+    """
     for const in get_consts(interface_node):
         yield {
             'Name': const.GetName(),
@@ -198,6 +250,8 @@ def format_interface_dict(interface_node):
     """
     Args:
       interface_node: interface node object
+    Return:
+      interface_dict: dict, dictionary of interface node information
     """
     interface_dict = {}
     interface_dict['Name'] = interface_node.GetName()
@@ -214,6 +268,8 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
     Args:
       interface_dict_list: list
       partial_dict_list: list
+    Return:
+      interface_dict_list: list, list of interface node's dictionry merged with partial interface node
     """
     for partial in partial_dict_list:
         for interface in interface_dict_list:
@@ -228,6 +284,12 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
 
 
 def format_dictionary(dictionary_list):
+    """
+    Args:
+      dictirary_list: list, list of interface node dictionary
+    Return:
+      dictionary: dict, {interface_node name: interface node dictionary}
+    """
     dictionary = {}
     for interface_dict in dictionary_list:
         dictionary.setdefault(interface_dict['Name'], interface_dict)
