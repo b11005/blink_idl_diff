@@ -131,11 +131,11 @@ def attributes_dict(interface_node):
       attr_dict: generator, dictionary of attribite information
     """
     for attribute in get_attributes(interface_node):
-        attr_dict = {}
-        attr_dict['Name'] = attribute.GetName()
-        attr_dict['Type'] = get_type(attribute)
-        attr_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(attribute)]
-        yield attr_dict
+        yield {
+            'Name': attribute.GetName()
+            'Type': get_type(attribute)
+            'ExtAttributes': [extattr for extattr in extattr_dict(attribute)]
+        }
 
 
 def get_operations(interface_node):
@@ -167,10 +167,10 @@ def argument_dict(argument):
       arg_dict: dict, generator of argument information's dictionary
     """
     for arg_name in get_arguments(argument):
-        arg_dict = {}
-        arg_dict['Name'] = arg_name.GetName()
-        arg_dict['Type'] = get_type(arg_name)
-        yield arg_dict
+        yield {
+            'Name': arg_name.GetName()
+            'Type': get_type(arg_name)
+        }
 
 
 def get_operation_name(operation):
@@ -198,12 +198,12 @@ def operation_dict(interface_node):
       operate_dict: generator of operation dictionary
     """
     for operation in get_operations(interface_node):
-        operate_dict = {}
-        operate_dict['Name'] = get_operation_name(operation)
-        operate_dict['Argument'] = [args for args in argument_dict(operation)]
-        operate_dict['Type'] = get_type(operation)
-        operate_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(operation)]
-        yield operate_dict
+        yield {
+            'Name': get_operation_name(operation)
+            'Argument': [args for args in argument_dict(operation)]
+            'Type': get_type(operation)
+            'ExtAttributes': [extattr for extattr in extattr_dict(operation)]
+        }
 
 
 def get_consts(interface_node):
