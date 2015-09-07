@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 """Usage: interface_node_path.py directory-path text_file
 
@@ -17,8 +20,8 @@ def get_idl_files(path):
     """Return a generator which has absolute path of IDL files.
     Args:
       path: directory path
-    Return:
-      generator, absolute IDL file path
+    Returns:
+      a generator which yields absolute IDL file path
     """
     for dir_path, dir_names, file_names in os.walk(path):
         for file_name in file_names:
