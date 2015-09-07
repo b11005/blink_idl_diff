@@ -2,9 +2,7 @@
 
 """Usage: interface_to_json.py path_file.txt json_file.json
 
-path_file.txt: output of interface_node_path.py#path
-
-# This script is to integrate and dump interface node information to json file.
+path_file.txt: output of interface_node_path.py #path
 """
 
 import os
@@ -17,7 +15,7 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 def load_filepaths(path_file):
     """Returns a generator which yields absolute path of IDL files written in the |path_file|.
     Args:
-      path_file: text file, #\n
+      path_file: text file with '\n'
     Returns:
       a generator which yileds absolute file path
     """
@@ -88,7 +86,7 @@ def get_attributes(interface_node):
     return interface_node.GetListOf('Attribute')
 
 
-def get_type(node):
+def get_attribute_type(node):
     """Returns type of attribute or operation's type.
     Args:
       node: attribute or operation node object
@@ -98,7 +96,11 @@ def get_type(node):
     return node.GetListOf('Type')[0].GetChildren()[0].GetName()
 
 
-def get_extattributes(node):
+get_operation_type = get_attribute_type
+get_argument_type = get_attribute_type
+
+
+'''def get_extattributes(node):
     """Returns generator which yields list of Extattribute object.
     Args:
       node: interface, attribute or operation node object#node which has extattr object
@@ -109,7 +111,7 @@ def get_extattributes(node):
         for extattribute_list in extattributes.GetChildren():
             yield extattribute_list
 
-### converter or translater  ==> @@_to_!!
+
 def extattr_dict(node):
     """Returns a generator which yields Extattribute's information dictionary.
     Args:
@@ -120,8 +122,18 @@ def extattr_dict(node):
     for extattribute in get_extattributes(node):
         yield {
             'Name': extattribute.GetName(),
+        }'''
+
+def get_extattributes(node):
+    def get_extattr_nodes(node):
+        for extattributes in node.GetListOf('ExtAttributes'):
+            for extattribute_list in extattributes.GetChildren():
+                yield extattribute_list
+    for extattr_node in get_extattr_nodes(node):
+        yield {
+            'Name': extattr_node.GetName()
         }
-### ==>dicts =  map(extattr_dict, get_extattributes), dicts = [conv(extattr) for extattr in get_extattrs(node)]
+
 
 def attributes_dict(interface_node):
     """Returns generator which yields dictioary of Extattribute object information.
@@ -132,9 +144,9 @@ def attributes_dict(interface_node):
     """
     for attribute in get_attributes(interface_node):
         yield {
-            'Name': attribute.GetName()
-            'Type': get_type(attribute)
-            'ExtAttributes': [extattr for extattr in extattr_dict(attribute)]
+            'Name': attribute.GetName(),
+            'Type': get_attribute_type(attribute),
+            'ExtAttributes': [extattr for extattr in get_extattributes(attribute)],
         }
 
 
@@ -168,8 +180,8 @@ def argument_dict(argument):
     """
     for arg_name in get_arguments(argument):
         yield {
-            'Name': arg_name.GetName()
-            'Type': get_type(arg_name)
+            'Name': arg_name.GetName(),
+            'Type': get_argument_type(arg_name),
         }
 
 
@@ -199,10 +211,10 @@ def operation_dict(interface_node):
     """
     for operation in get_operations(interface_node):
         yield {
-            'Name': get_operation_name(operation)
-            'Argument': [args for args in argument_dict(operation)]
-            'Type': get_type(operation)
-            'ExtAttributes': [extattr for extattr in extattr_dict(operation)]
+            'Name': get_operation_name(operation),
+            'Argument': [args for args in argument_dict(operation)],
+            'Type': get_operation_type(operation),
+            'ExtAttributes': [extattr for extattr in get_extattributes(operation)],
         }
 
 
@@ -263,7 +275,7 @@ def format_interface_dict(interface_node):
     interface_dict['FilePath'] = get_filepath(interface_node)
     interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node)]
     interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
-    interface_dict['ExtAttributes'] = [extattr for extattr in extattr_dict(interface_node)]
+    interface_dict['ExtAttributes'] = [extattr for extattr in get_extattributes(interface_node)]
     interface_dict['Constant'] = [const for const in const_dict(interface_node) if const]
     return interface_dict
 
@@ -301,7 +313,7 @@ def format_dictionary(dictionary_list):
     return dictionary
 
 ### export_to_jsonfile(), + indent command line argument
-def export_jsonfile(dictionary, json_file):
+def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface_node information dictionary to json.
     Args:
       dictioary: dict, output of format_dictinatry
@@ -322,7 +334,7 @@ def main(args):
     partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_dictionary(dictionary_list)
-    export_jsonfile(dictionary, json_file)
+    export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
