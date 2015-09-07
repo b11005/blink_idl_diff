@@ -100,31 +100,6 @@ get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
 
 
-'''def get_extattributes(node):
-    """Returns generator which yields list of Extattribute object.
-    Args:
-      node: interface, attribute or operation node object#node which has extattr object
-    Returns:
-      extattribute_list: generator, extattribute object list
-    """
-    for extattributes in node.GetListOf('ExtAttributes'):
-        for extattribute_list in extattributes.GetChildren():
-            yield extattribute_list
-
-
-def extattr_dict(node):
-    """Returns a generator which yields Extattribute's information dictionary.
-    Args:
-      node: interface node object
-    Returns:
-      generator, extattribute dictionary
-    """
-    for extattribute in get_extattributes(node):
-        yield {
-            'Name': extattribute.GetName(),
-        }'''
-
-
 def get_extattributes(node):
     """Return a generator which yields Extattribute's object dictionary
     Args:
