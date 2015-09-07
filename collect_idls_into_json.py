@@ -24,10 +24,10 @@ def load_filepaths(path_file):
     Returns:
       a generator which yileds absolute file path
     """
-    with open(path_file, 'r') as f:
+    '''with open(path_file, 'r') as f:
         for line in f:
             path = line.strip()
-            yield path
+            yield path'''
 
 
 def get_interfaces(idl_paths):
@@ -37,6 +37,11 @@ def get_interfaces(idl_paths):
     Returns:
       a generator which yields interface node objects
     """
+    def load_filepaths(path_file):
+        with open(path_file, 'r') as f:
+            for line in f:
+                path = line.strip()
+                yield path
     parser = BlinkIDLParser(debug=False)
     for idl_path in load_filepaths(idl_paths):
         definitions = parse_file(parser, idl_path)
