@@ -86,14 +86,14 @@ def get_attributes(interface_node):
     return interface_node.GetListOf('Attribute')
 
 
-def get_attribute_type(node):
+def get_attribute_type(attribute):
     """Returns type of attribute or operation's type.
     Args:
-      node: attribute or operation node object
+      node: attribute node object
     Returns:
-      str, 
+      str,
     """
-    return node.GetListOf('Type')[0].GetChildren()[0].GetName()
+    return attribute.GetListOf('Type')[0].GetChildren()[0].GetName()
 
 
 get_operation_type = get_attribute_type
@@ -124,7 +124,14 @@ def extattr_dict(node):
             'Name': extattribute.GetName(),
         }'''
 
+
 def get_extattributes(node):
+    """Return a generator which yields Extattribute's object dictionary
+    Args:
+      node: interface, attribute or operation node object#node which has extattr object
+    Returns:
+      generator, extattribute dictionary
+    """
     def get_extattr_nodes(node):
         for extattributes in node.GetListOf('ExtAttributes'):
             for extattribute_list in extattributes.GetChildren():
@@ -312,7 +319,8 @@ def format_dictionary(dictionary_list):
         dictionary.setdefault(interface_dict['Name'], interface_dict)
     return dictionary
 
-### export_to_jsonfile(), + indent command line argument
+
+# export_to_jsonfile(), + indent command line argument
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface_node information dictionary to json.
     Args:
