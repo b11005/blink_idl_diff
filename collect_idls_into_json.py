@@ -17,18 +17,6 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 _class_name = 'Interface'
 _partial = 'Partial'
 
-def load_filepaths(path_file):
-    """Return a generator which yields absolute path of IDL files written in the |path_file|.
-    Args:
-      path_file: text file with '\n'
-    Returns:
-      a generator which yileds absolute file path
-    """
-    '''with open(path_file, 'r') as f:
-        for line in f:
-            path = line.strip()
-            yield path'''
-
 
 def get_interfaces(idl_paths):
     """Return a generator which yields interface IDL nodes.
