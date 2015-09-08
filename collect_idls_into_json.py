@@ -241,7 +241,7 @@ def const_dict(interface_node):
         }
 
 
-def format_interface_dict(interface_node):
+def format_interface_to_dict(interface_node):
     """Returns dictioanry of each interface_node information.
     Args:
       interface_node: interface node object
@@ -272,13 +272,13 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['Attribute'].append(partial['Attribute'])
                 interface['Operation'].append(partial['Operation'])
                 interface['ExtAttributes'].append(partial['ExtAttributes'])
+                interface['Constant'].append(partial['Constant'])
                 interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
-                interface.setdefault('Constant', []).append(partial['Constant'])
     return interface_dict_list
 
 
-def format_interface_to_dict(dictionary_list):
-    """Returns dictioary which is changed structure of interface_dict_list.
+def format_list_to_dict(dictionary_list):
+    """Returns dictioary whose key is interface name and value is interface dictioary.
     Args:
       dictirary_list: list, list of interface node dictionary
     Returns:
@@ -286,7 +286,7 @@ def format_interface_to_dict(dictionary_list):
     """
     dictionary = {}
     for interface_dict in dictionary_list:
-        dictionary.setdefault(interface_dict['Name'], interface_dict)
+        dictionary[interface_dict['Name']] = interface_dict
     return dictionary
 
 
@@ -307,10 +307,10 @@ def export_to_jsonfile(dictionary, json_file):
 def main(args):
     path_file = args[0]
     json_file = args[1]
-    interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
-    partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
+    interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
+    partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
-    dictionary = format_interface_to_dict(dictionary_list)
+    dictionary = format_list_to_dict(dictionary_list)
     export_to_jsonfile(dictionary, json_file)
 
 
