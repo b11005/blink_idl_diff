@@ -18,10 +18,10 @@ _class_name = 'Interface'
 _partial = 'Partial'
 
 
-def get_interfaces(idl_paths):
+def get_interfaces(path_file):
     """Returns a generator which yields interface IDL nodes.
     Args:
-      path_file: text file
+      path_file: text file path
     Returns:
       a generator which yields interface node objects
     """
@@ -31,7 +31,7 @@ def get_interfaces(idl_paths):
                 path = line.strip()
                 yield path
     parser = BlinkIDLParser(debug=False)
-    for idl_path in load_filepaths(idl_paths):
+    for idl_path in load_filepaths(path_file):
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == _class_name:
@@ -300,17 +300,16 @@ def export_to_jsonfile(dictionary, json_file):
     Returns:
       json file which is contained each interface node dictionary
     """
-    filename = json_file
     indent_size = 4
-    with open(filename, 'w') as f:
+    with open(json_file, 'w') as f:
         json.dump(dictionary, f, sort_keys=True, indent=indent_size)
 
 
 def main(args):
-    path_filename = args[0]
+    path_file = args[0]
     json_file = args[1]
-    interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_filename))]
-    partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_filename))]
+    interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
+    partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_dictionary(dictionary_list)
     export_to_jsonfile(dictionary, json_file)
