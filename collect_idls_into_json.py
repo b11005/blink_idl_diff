@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 
 """Usage: collect_idls_into_json.py path_file.txt json_file.json
-
-path_file.txt: output of interface_node_path.py #path
 """
 
 import os
@@ -20,7 +18,6 @@ sys.path.insert(0, blink_bindings_path)
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 import utilities
-
 
 
 _class_name = 'Interface'
@@ -52,7 +49,7 @@ def get_interfaces(path):
 def get_filepath(interface_node):
     """Returns relative path to the IDL file in which the |interface_node| is defined.
     Args:
-      interface_node: interface node class object
+      interface_node: IDL interface node
     Returns:
       str which is interface_node's file path
     """
@@ -60,7 +57,7 @@ def get_filepath(interface_node):
     return os.path.relpath(filename)
 
 
-def get_partial(interface_node_list):
+def filter_partial(interface_node_list):
     """Returns a generator which yields partial interface node.
     Args:
       interface_node_list: a generator which is interface IDL node
@@ -72,7 +69,7 @@ def get_partial(interface_node_list):
             yield interface_node
 
 
-def get_non_partial(interface_node_list):
+def filter_non_partial(interface_node_list):
     """Returns a generator which yields interface node.
     Args:
       interface_node_list: a generator which is interface IDL node
@@ -110,14 +107,14 @@ get_argument_type = get_attribute_type
 def get_extattributes(node):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
-      node: interface, attribute or operation node object#node which has extattr object
+      node: interface, attribute or operation node which has extattribute
     Returns:
       a generator which yields extattribute dictionary
     """
     def get_extattr_nodes():
-        for extattributes in node.GetListOf('ExtAttributes'):
-            for extattribute_list in extattributes.GetChildren():
-                yield extattribute_list
+        for extattribute_list in node.GetListOf('ExtAttributes'):
+            for extattribute in extattribute_list.GetChildren():
+                yield extattribute
     for extattr_node in get_extattr_nodes():
         yield {
             'Name': extattr_node.GetName()
@@ -282,7 +279,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
             if interface['Name'] == partial['Name']:
                 interface['Attribute'].append(partial['Attribute'])
                 interface['Operation'].append(partial['Operation'])
-                # TODO(natsukoa): filter extattribute
+                # TODO(natsukoa): filter extattribute of Web IDL or Blink
                 # interface['ExtAttributes'].append(partial['ExtAttributes'])
                 interface['Constant'].append(partial['Constant'])
                 interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
@@ -320,8 +317,8 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_non_partial(get_interfaces(file_to_list))]
-    partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_partial(get_interfaces(file_to_list))]
+    interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))]
+    partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_list_to_dict(dictionary_list)
     export_to_jsonfile(dictionary, json_file)

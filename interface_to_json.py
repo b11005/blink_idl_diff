@@ -19,7 +19,7 @@ def load_filepaths(path_file):
     Args:
       path_file: text file
     Return:
-      path: generator, absolute file path
+      path: a generator, absolute file path
     """
     for line in open(path_file, 'r'):
         path = line.strip()
@@ -31,7 +31,7 @@ def get_interfaces(path_file):
     Args:
       path_file: text file
     Return:
-      definition: generator, interface node objects
+      definition: a generator, interface node objects
     """
     parser = BlinkIDLParser(debug=False)
     class_name = 'Interface'
@@ -58,7 +58,7 @@ def get_partial(interface_node_list):
     Args:
       interface_node_list: generator, interface node class object
     Return:
-      interface_node: generator, interface node class object
+      interface_node: a generator, interface node class object
     """
     for interface_node in interface_node_list:
         if interface_node.GetProperty('Partial', default=False):
@@ -70,7 +70,7 @@ def get_non_partial(interface_node_list):
     Args:
       interface_node_list: generator interface node class object
     Return:
-      interface_node: generator, interface node class object
+      interface_node: a generator, interface node class object
     """
     for interface_node in interface_node_list:
         if not interface_node.GetProperty('Partial', default=False):
@@ -100,7 +100,7 @@ def get_extattirbutes(node):
     Args:
       node: interface node object
     Return:
-      extattribute_list: generator, extattribute object list
+      extattribute_list: a generator, extattribute object list
     """
     for extattributes in node.GetListOf('ExtAttributes'):
         for extattribute_list in extattributes.GetChildren():
@@ -125,7 +125,7 @@ def attributes_dict(interface_node):
     Args:
       interface_node: interface node object
     Return:
-      attr_dict: generator, dictionary of attribite information
+      attr_dict: a generator, dictionary of attribite information
     """
     for attribute in get_attributes(interface_node):
         attr_dict = {}
@@ -161,7 +161,7 @@ def argument_dict(argument):
     Args:
       argument: interface node object
     Return:
-      arg_dict: dict, generator of argument information's dictionary
+      arg_dict: dict, a generator of argument information's dictionary
     """
     for arg_name in get_arguments(argument):
         arg_dict = {}
@@ -192,7 +192,7 @@ def operation_dict(interface_node):
     Args:
     interface_node: interface node object
     Return:
-      operate_dict: generator of operation dictionary
+      operate_dict: a generator of operation dictionary
     """
     for operation in get_operations(interface_node):
         operate_dict = {}
