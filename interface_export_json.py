@@ -52,9 +52,9 @@ def get_type(node):
 
 
 def get_extattirbutes(node):
-    for extattributes in node.GetListOf('ExtAttributes'):
-        for extattribute_list in extattributes.GetChildren():
-            yield extattribute_list
+    for extattribute_list in node.GetListOf('ExtAttributes'):
+        for extattribute in extattribute_list.GetChildren():
+            yield extattribute
 
 
 def extattr_dict(node):
