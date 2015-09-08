@@ -12,26 +12,37 @@ import os
 import sys
 import json
 
+chromium_path = os.path.abspath(
+    os.path.join(os.environ['HOME'], 'chromium', 'src'))
+blink_bindings_path = os.path.join(
+    chromium_path, 'third_party', 'WebKit', 'Source', 'bindings', 'scripts')
+sys.path.insert(0, blink_bindings_path)
+
 from blink_idl_parser import parse_file, BlinkIDLParser
+import utilities
+
+
 
 _class_name = 'Interface'
 _partial = 'Partial'
 
 
-def get_interfaces(path_file):
+def load_filepaths(path_file):
+    with open(path_file, 'r') as f:
+        for line in f:
+            path = line.strip()
+            yield path
+
+
+def get_interfaces(path):
     """Returns a generator which yields interface IDL nodes.
     Args:
       path_file: text file path
     Returns:
       a generator which yields interface node objects
     """
-    def load_filepaths():
-        with open(path_file, 'r') as f:
-            for line in f:
-                path = line.strip()
-                yield path
     parser = BlinkIDLParser(debug=False)
-    for idl_path in load_filepaths():
+    for idl_path in path:
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == _class_name:
@@ -271,7 +282,8 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
             if interface['Name'] == partial['Name']:
                 interface['Attribute'].append(partial['Attribute'])
                 interface['Operation'].append(partial['Operation'])
-                interface['ExtAttributes'].append(partial['ExtAttributes'])
+                # TODO(natsukoa): filter extattribute
+                # interface['ExtAttributes'].append(partial['ExtAttributes'])
                 interface['Constant'].append(partial['Constant'])
                 interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
     return interface_dict_list
@@ -290,7 +302,7 @@ def format_list_to_dict(dictionary_list):
     return dictionary
 
 
-# export_to_jsonfile(), + indent command line argument
+# TODO(natsukoa): Supports a command line flag to indent the json
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface_node information dictionary to json.
     Args:
@@ -307,8 +319,9 @@ def export_to_jsonfile(dictionary, json_file):
 def main(args):
     path_file = args[0]
     json_file = args[1]
-    interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
-    partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
+    file_to_list = utilities.read_file_to_list(path_file)
+    interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_non_partial(get_interfaces(file_to_list))]
+    partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in get_partial(get_interfaces(file_to_list))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
     dictionary = format_list_to_dict(dictionary_list)
     export_to_jsonfile(dictionary, json_file)
