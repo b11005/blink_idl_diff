@@ -261,8 +261,8 @@ def format_interface_dict(interface_node):
 def merge_partial_interface(interface_dict_list, partial_dict_list):
     """Returns list of interface_node information dictioary.
     Args:
-      interface_dict_list: list
-      partial_dict_list: list
+      interface_dict_list: list of interface node dictionary
+      partial_dict_list: list of partial interface node dictionary
     Returns:
       list which is list of interface node's dictionry merged with partial interface node
     """
@@ -273,8 +273,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['Operation'].append(partial['Operation'])
                 interface['ExtAttributes'].append(partial['ExtAttributes'])
                 interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
-                if interface['Constant']:
-                    interface.setdefault('Constant', []).append(partial['Constant'])
+                interface.setdefault('Constant', []).append(partial['Constant'])
     return interface_dict_list
 
 
