@@ -25,13 +25,13 @@ def get_interfaces(path_file):
     Returns:
       a generator which yields interface node objects
     """
-    def load_filepaths(path_file):
+    def load_filepaths():
         with open(path_file, 'r') as f:
             for line in f:
                 path = line.strip()
                 yield path
     parser = BlinkIDLParser(debug=False)
-    for idl_path in load_filepaths(path_file):
+    for idl_path in load_filepaths():
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == _class_name:
@@ -39,7 +39,7 @@ def get_interfaces(path_file):
 
 
 def get_filepath(interface_node):
-    """Returns relative path which is contained in interface_node.
+    """Returns relative path to the IDL file in which the |interface_node| is defined.
     Args:
       interface_node: interface node class object
     Returns:
@@ -52,9 +52,9 @@ def get_filepath(interface_node):
 def get_partial(interface_node_list):
     """Returns a generator which yields partial interface node.
     Args:
-      interface_node_list: generator, interface node class object
+      interface_node_list: a generator which is interface IDL node
     Return:
-      a generator which yields interface node class object
+      a generator which yields partial interface node
     """
     for interface_node in interface_node_list:
         if interface_node.GetProperty(_partial):
@@ -64,9 +64,9 @@ def get_partial(interface_node_list):
 def get_non_partial(interface_node_list):
     """Returns a generator which yields interface node.
     Args:
-      interface_node_list: generator interface node class object
+      interface_node_list: a generator which is interface IDL node
     Returns:
-      a generator which yields interface node class object
+      a generator which yields interface node
     """
     for interface_node in interface_node_list:
         if not interface_node.GetProperty(_partial):
@@ -74,17 +74,17 @@ def get_non_partial(interface_node_list):
 
 
 def get_attributes(interface_node):
-    """Returns list of Attribute object.
+    """Returns list of Attribute that interface_node have.
     Args:
       interface_node: interface node object
     Returns:
-      list which is Attribute object list
+      a list of attribute
     """
     return interface_node.GetListOf('Attribute')
 
 
 def get_attribute_type(attribute):
-    """Returns type of attribute or operation's type.
+    """Returns type of attribute or operation's argument.
     Args:
       node: attribute node object
     Returns:
@@ -103,11 +103,11 @@ def get_extattributes(node):
     Returns:
       a generator which yields extattribute dictionary
     """
-    def get_extattr_nodes(node):
+    def get_extattr_nodes():
         for extattributes in node.GetListOf('ExtAttributes'):
             for extattribute_list in extattributes.GetChildren():
                 yield extattribute_list
-    for extattr_node in get_extattr_nodes(node):
+    for extattr_node in get_extattr_nodes():
         yield {
             'Name': extattr_node.GetName()
         }
@@ -248,14 +248,14 @@ def format_interface_dict(interface_node):
     Returns:
       dictionary which has interface node information
     """
-    interface_dict = {}
-    interface_dict['Name'] = interface_node.GetName()
-    interface_dict['FilePath'] = get_filepath(interface_node)
-    interface_dict['Attribute'] = [attr for attr in attributes_dict(interface_node)]
-    interface_dict['Operation'] = [operation for operation in operation_dict(interface_node)]
-    interface_dict['ExtAttributes'] = [extattr for extattr in get_extattributes(interface_node)]
-    interface_dict['Constant'] = [const for const in const_dict(interface_node) if const]
-    return interface_dict
+    return {
+        'Name': interface_node.GetName(),
+        'FilePath': get_filepath(interface_node),
+        'Attribute': [attr for attr in attributes_dict(interface_node)],
+        'Operation': [operation for operation in operation_dict(interface_node)],
+        'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
+        'Constant': [const for const in const_dict(interface_node) if const],
+    }
 
 
 def merge_partial_interface(interface_dict_list, partial_dict_list):
@@ -278,7 +278,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
     return interface_dict_list
 
 
-def format_dictionary(dictionary_list):
+def format_interface_to_dict(dictionary_list):
     """Returns dictioary which is changed structure of interface_dict_list.
     Args:
       dictirary_list: list, list of interface node dictionary
@@ -311,7 +311,7 @@ def main(args):
     interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
     partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
-    dictionary = format_dictionary(dictionary_list)
+    dictionary = format_interface_to_dict(dictionary_list)
     export_to_jsonfile(dictionary, json_file)
 
 
