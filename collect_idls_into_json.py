@@ -262,7 +262,7 @@ def format_interface_to_dict(interface_node):
         'Attribute': [attr for attr in attributes_dict(interface_node)],
         'Operation': [operation for operation in operation_dict(interface_node)],
         'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
-        'Constant': [const for const in const_dict(interface_node) if const],
+        'Const': [const for const in const_dict(interface_node) if const],
     }
 
 
@@ -281,7 +281,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 interface['Operation'].append(partial['Operation'])
                 # TODO(natsukoa): filter extattribute of Web IDL or Blink
                 # interface['ExtAttributes'].append(partial['ExtAttributes'])
-                interface['Constant'].append(partial['Constant'])
+                interface['Const'].append(partial['Const'])
                 interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
     return interface_dict_list
 
@@ -308,6 +308,7 @@ def export_to_jsonfile(dictionary, json_file):
     Returns:
       json file which is contained each interface node dictionary
     """
+    # TODO(natsukoa): Remove indent_size
     indent_size = 4
     with open(json_file, 'w') as f:
         json.dump(dictionary, f, sort_keys=True, indent=indent_size)
