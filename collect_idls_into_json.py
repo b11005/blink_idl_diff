@@ -246,7 +246,7 @@ def const_dict(interface_node):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const),
-            'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
+            'ExtAttributes': [extattr for extattr in get_extattributes(const)],
         }
 
 
@@ -263,7 +263,7 @@ def format_interface_to_dict(interface_node):
         'Attributes': [attr for attr in attributes_dict(interface_node)],
         'Operations': [operation for operation in operation_dict(interface_node)],
         'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
-        'Consts': [const for const in const_dict(interface_node) if const],
+        'Consts': [const for const in const_dict(interface_node)],
     }
 
 
