@@ -246,6 +246,7 @@ def const_dict(interface_node):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const),
+            'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
         }
 
 
@@ -259,10 +260,10 @@ def format_interface_to_dict(interface_node):
     return {
         'Name': interface_node.GetName(),
         'FilePath': get_filepath(interface_node),
-        'Attribute': [attr for attr in attributes_dict(interface_node)],
-        'Operation': [operation for operation in operation_dict(interface_node)],
+        'Attributes': [attr for attr in attributes_dict(interface_node)],
+        'Operations': [operation for operation in operation_dict(interface_node)],
         'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
-        'Const': [const for const in const_dict(interface_node) if const],
+        'Consts': [const for const in const_dict(interface_node) if const],
     }
 
 
@@ -277,11 +278,11 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
     for partial in partial_dict_list:
         for interface in interface_dict_list:
             if interface['Name'] == partial['Name']:
-                interface['Attribute'].append(partial['Attribute'])
-                interface['Operation'].append(partial['Operation'])
+                interface['Attributes'].append(partial['Attributes'])
+                interface['Operations'].append(partial['Operations'])
                 # TODO(natsukoa): filter extattribute of Web IDL or Blink
                 # interface['ExtAttributes'].append(partial['ExtAttributes'])
-                interface['Const'].append(partial['Const'])
+                interface['Consts'].append(partial['Consts'])
                 interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
     return interface_dict_list
 
