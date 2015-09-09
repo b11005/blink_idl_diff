@@ -51,7 +51,7 @@ def get_filepath(interface_node):
     Args:
       interface_node: IDL interface node
     Returns:
-      str which is interface_node's file path
+      str which is |interface_node| file path
     """
     filename = interface_node.GetProperty('FILENAME')
     return os.path.relpath(filename)
@@ -82,7 +82,7 @@ def filter_non_partial(interface_node_list):
 
 
 def get_attributes(interface_node):
-    """Returns list of Attribute that interface_node have.
+    """Returns list of Attribute if the interface_node have one.
     Args:
       interface_node: interface node object
     Returns:
