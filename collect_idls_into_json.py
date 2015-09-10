@@ -130,14 +130,14 @@ def extattr_dict(extattribute_list):
         }
 
 
-def attributes_dict(interface_node):
+def attributes_dict(attribute_list):
     """Returns a generator which yields dictioary of Extattribute object information.
     Args:
       interface_node: interface node object
     Returns:
       a generator which yields dictionary of attribite information
     """
-    for attribute in get_attributes(interface_node):
+    for attribute in attribute_list:
         yield {
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
@@ -173,7 +173,7 @@ def argument_dict(argument):
     Returns:
       a generator which yields dictionary of argument information
     """
-    for arg_name in get_arguments(argument):
+    for arg_name in argument:
         yield {
             'Name': arg_name.GetName(),
             'Type': get_argument_type(arg_name),
@@ -197,17 +197,17 @@ def get_operation_name(operation):
         return operation.GetName()
 
 
-def operation_dict(interface_node):
+def operation_dict(operations):
     """Returns a generator which yields dictionary of Operation object information.
     Args:
     interface_node: interface node object
     Returns:
       a generator which yields dictionary of operation's informantion
     """
-    for operation in get_operations(interface_node):
+    for operation in operations:
         yield {
             'Name': get_operation_name(operation),
-            'Argument': [args for args in argument_dict(operation)],
+            'Argument': [args for args in argument_dict(get_arguments(operation))],
             'Type': get_operation_type(operation),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(operation))],
         }
@@ -243,14 +243,14 @@ def get_const_value(node):
     return node.GetChildren()[1].GetName()
 
 
-def const_dict(interface_node):
+def const_dict(consts):
     """Returns generator which yields dictionary of constant object information.
     Args:
       interface_node: interface node object
     Returns:
       a generator which yields dictionary of constant object information
     """
-    for const in get_consts(interface_node):
+    for const in consts:
         yield {
             'Name': const.GetName(),
             'Type': get_const_type(const),
@@ -269,10 +269,10 @@ def format_interface_to_dict(interface_node):
     return {
         'Name': interface_node.GetName(),
         'FilePath': get_filepath(interface_node),
-        'Attributes': [attr for attr in attributes_dict(interface_node)],
-        'Operations': [operation for operation in operation_dict(interface_node)],
+        'Attributes': [attr for attr in attributes_dict(get_attributes(interface_node))],
+        'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
         'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
-        'Consts': [const for const in const_dict(interface_node)],
+        'Consts': [const for const in const_dict(get_consts(interface_node))],
     }
 
 
