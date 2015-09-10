@@ -105,10 +105,16 @@ get_argument_type = get_attribute_type
 
 
 def get_extattributes(node):
-        extattributes = node.GetOneOf('ExtAttributes')
-        if extattributes:
-            for extattribute_list in extattributes.GetChildren():
-                yield extattribute_list
+    """Returns a generator which yields list of ExtAttribute.
+    Args:
+      node which has ExtAttribute
+    Returns:
+      a generator which yields list of ExtAttribute
+    """ 
+    extattributes = node.GetOneOf('ExtAttributes')
+    if extattributes:
+        for extattribute_list in extattributes.GetChildren():
+            yield extattribute_list
 
 
 def extattr_dict(extattribute_list):
