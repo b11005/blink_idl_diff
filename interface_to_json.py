@@ -92,7 +92,7 @@ def get_type(node):
     Args:
       node: interface node object
     """
-    return node.GetListOf('Type')[0].GetChildren()[0].GetName()
+    return node.GetOneOf('Type').GetChildren()[0].GetName()
 
 
 def get_extattirbutes(node):
@@ -102,9 +102,17 @@ def get_extattirbutes(node):
     Return:
       extattribute_list: a generator, extattribute object list
     """
+    extattr = node.GetOneOf('ExtAttributes')
+    if extattr:
+        for i in extattr.GetChildren():
+            #print i.GetName()
+            extattr = i
     for extattributes in node.GetListOf('ExtAttributes'):
-        for extattribute_list in extattributes.GetChildren():
-            yield extattribute_list
+        for extattribute in extattributes.GetChildren():
+            yield extattribute
+
+
+    
 
 
 def extattr_dict(node):
@@ -116,7 +124,7 @@ def extattr_dict(node):
     """
     for extattribute in get_extattirbutes(node):
         yield {
-            'Name': extattribute.GetName()
+            'Name': extattribute.GetName(),
         }
 
 
@@ -307,7 +315,7 @@ def export_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     filename = json_file
-    indent_size = None
+    indent_size = 4
     with open(filename, 'w') as f:
         json.dump(dictionary, f, sort_keys=True, indent=indent_size)
 

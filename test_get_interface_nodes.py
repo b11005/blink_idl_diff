@@ -1,10 +1,10 @@
 #/usr/bin/env python
 
 import unittest, os
-import interface_to_json
+import collect_idls_into_json
 
 path = os.path.abspath(
-    os.path.join(os.environ['HOME'], 'blink_idl_diff', 'test_interface.txt'))
+    os.path.join(os.environ['HOME'], 'blink_idl_diff', 'sample1.txt'))
 
 class TestFunctions(unittest.TestCase):
     def setup(self):
@@ -12,8 +12,13 @@ class TestFunctions(unittest.TestCase):
 
 
     def test_interfaces(self):
-        for actual in interface_to_json.get_interfaces('test_interface.txt'):
-            self.assertEqual(actual.GetName(), "GarbageCollectedScriptWrappable")
+        for actual in collect_idls_into_json.get_interfaces(collect_idls_into_json.load_filepaths('sample1.txt')):
+            #self.assertEqual(actual.GetName(), "GarbageCollectedScriptWrappable")
+            #print actual.GetName()
+            const = collect_idls_into_json.const_dict(actual)
+            if const:
+                print const['ExtAttributes'], const['Name']
+
 
 if __name__ == '__main__':
     unittest.main()
