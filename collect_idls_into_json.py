@@ -105,18 +105,20 @@ get_argument_type = get_attribute_type
 
 
 def get_extattributes(node):
+        extattributes = node.GetOneOf('ExtAttributes')
+        if extattributes:
+            for extattribute_list in extattributes.GetChildren():
+                yield extattribute_list
+
+
+def extattr_dict(extattribute_list):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
       node: interface, attribute or operation node which has extattribute
     Returns:
       a generator which yields extattribute dictionary
     """
-    def get_extattr_nodes():
-        extattributes = node.GetOneOf('ExtAttributes')
-        if extattributes:
-            for extattribute in extattributes.GetChildren():
-                yield extattribute
-    for extattr_node in get_extattr_nodes():
+    for extattr_node in extattribute_list:
         yield {
             'Name': extattr_node.GetName(),
         }
@@ -133,7 +135,7 @@ def attributes_dict(interface_node):
         yield {
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
-            'ExtAttributes': [extattr for extattr in get_extattributes(attribute)],
+            'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(attribute))],
         }
 
 
@@ -201,7 +203,7 @@ def operation_dict(interface_node):
             'Name': get_operation_name(operation),
             'Argument': [args for args in argument_dict(operation)],
             'Type': get_operation_type(operation),
-            'ExtAttributes': [extattr for extattr in get_extattributes(operation)],
+            'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(operation))],
         }
 
 
@@ -247,7 +249,7 @@ def const_dict(interface_node):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const),
-            'ExtAttributes': [extattr for extattr in get_extattributes(const)],
+            'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(const))],
         }
 
 
@@ -263,7 +265,7 @@ def format_interface_to_dict(interface_node):
         'FilePath': get_filepath(interface_node),
         'Attributes': [attr for attr in attributes_dict(interface_node)],
         'Operations': [operation for operation in operation_dict(interface_node)],
-        'ExtAttributes': [extattr for extattr in get_extattributes(interface_node)],
+        'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
         'Consts': [const for const in const_dict(interface_node)],
     }
 
