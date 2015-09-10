@@ -98,7 +98,7 @@ def get_attribute_type(attribute):
     Returns:
       str which is Attribute object type
     """
-    return attribute.GetListOf('Type')[0].GetChildren()[0].GetName()
+    return attribute.GetOneOf('Type').GetChildren()[0].GetName()
 
 get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
@@ -117,7 +117,7 @@ def get_extattributes(node):
                 yield extattribute
     for extattr_node in get_extattr_nodes():
         yield {
-            'Name': extattr_node.GetName()
+            'Name': extattr_node.GetName(),
         }
 
 
@@ -153,7 +153,7 @@ def get_arguments(operation):
     Returns:
       list which is list of argument object
     """
-    argument_node = operation.GetListOf('Arguments')[0]
+    argument_node = operation.GetOneOf('Arguments')
     return argument_node.GetListOf('Argument')
 
 
