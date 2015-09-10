@@ -112,8 +112,9 @@ def get_extattributes(node):
       a generator which yields extattribute dictionary
     """
     def get_extattr_nodes():
-        for extattribute_list in node.GetListOf('ExtAttributes'):
-            for extattribute in extattribute_list.GetChildren():
+        extattributes = node.GetOneOf('ExtAttributes')
+        if extattributes:
+            for extattribute in extattributes.GetChildren():
                 yield extattribute
     for extattr_node in get_extattr_nodes():
         yield {
