@@ -250,6 +250,12 @@ def get_name(interface_node):
 
 
 def get_dict(interface_node):
+    """Returns dictioary whose key is interface name and value is interface dictioary.
+    Args:
+      dictirary_list: list, list of interface node dictionary
+    Returns:
+      dictionary, {interface_node name: interface node dictionary}
+    """
     return {
         'Attributes': [attr for attr in attributes_dict(get_attributes(interface_node))],
         'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
@@ -260,63 +266,20 @@ def get_dict(interface_node):
 
 
 def merge_dict(interface_dict, partial_dict):
-    for key in partial_dict.keys():
-        if key in interface_dict:
-            #print interface_dict[key]['Attributes']
-            interface_dict[key]['Attributes'].append(partial_dict[key]['Attributes'])
-            interface_dict[key]['Operations'].append(partial_dict[key]['Operations'])
-            interface_dict[key]['Consts'].append(partial_dict[key]['Consts'])
-            interface_dict[key].setdefault('Partial_FilePath', []).append(partial_dict[key]['FilePath'])
-    return interface_dict
-
-def format_interface_to_dict(interface_node):
-    """Returns dictioanry of each interface_node information.
-    Args:
-      interface_node: interface node object
-    Returns:
-      dictionary which has interface node information
-    """
-    return {
-        'Name': interface_node.GetName(),
-        'FilePath': get_filepath(interface_node),
-        'Attributes': [attr for attr in attributes_dict(get_attributes(interface_node))],
-        'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
-        'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
-        'Consts': [const for const in const_dict(get_consts(interface_node))],
-    }
-
-
-def merge_partial_interface(interface_dict_list, partial_dict_list):
     """Returns list of interface_node information dictioary.
     Args:
-      interface_dict_list: list of interface node dictionary
-      partial_dict_list: list of partial interface node dictionary
+      interface_dict: interface node dictionary
+      partial_dict: partial interface node dictionary
     Returns:
       list which is list of interface node's dictionry merged with partial interface node
     """
-    for partial in partial_dict_list:
-        for interface in interface_dict_list:
-            if interface['Name'] == partial['Name']:
-                interface['Attributes'].append(partial['Attributes'])
-                interface['Operations'].append(partial['Operations'])
-                # TODO(natsukoa): filter extattribute of Web IDL or Blink
-                # interface['ExtAttributes'].append(partial['ExtAttributes'])
-                interface['Consts'].append(partial['Consts'])
-                interface.setdefault('Partial_FilePaths', []).append(partial['FilePath'])
-    return interface_dict_list
-
-
-def format_list_to_dict(dictionary_list):
-    """Returns dictioary whose key is interface name and value is interface dictioary.
-    Args:
-      dictirary_list: list, list of interface node dictionary
-    Returns:
-      dictionary, {interface_node name: interface node dictionary}
-    """
-    dictionary = {}
-    for interface_dict in dictionary_list:
-        dictionary[interface_dict['Name']] = interface_dict
-    return dictionary
+    for key in partial_dict.keys():
+        if key in interface_dict:
+            interface_dict[key]['Attributes'].append(partial_dict[key]['Attributes'])
+            interface_dict[key]['Operations'].append(partial_dict[key]['Operations'])
+            interface_dict[key]['Consts'].append(partial_dict[key]['Consts'])
+            interface_dict[key].setdefault('Partial_FilePaths', []).append(partial_dict[key]['FilePath'])
+    return interface_dict
 
 
 # TODO(natsukoa): Supports a command line flag to indent the json
@@ -338,13 +301,9 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    interface_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
-    partial_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
+    interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
+    partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
-    #interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))]
-    #partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))]
-    #dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
-    #dictionary = format_list_to_dict(dictionary_list)
     export_to_jsonfile(dictionary, json_file)
 
 
