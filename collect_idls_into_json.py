@@ -129,6 +129,7 @@ def attributes_dict(attribute_list):
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(attribute))],
+            'Readonly': attribute.GetProperty('READONLY', default=False)
         }
 
 
@@ -197,7 +198,7 @@ def operation_dict(operations):
             'Arguments': [args for args in argument_dict(get_arguments(operation))],
             'Type': get_operation_type(operation),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(operation))],
-            'static': operation.GetProperty('STATIC', default=False)
+            'Static': operation.GetProperty('STATIC', default=False)
         }
 
 
