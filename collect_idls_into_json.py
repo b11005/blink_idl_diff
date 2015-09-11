@@ -193,7 +193,7 @@ def operation_dict(operations):
     for operation in operations:
         yield {
             'Name': get_operation_name(operation),
-            'Argument': [args for args in argument_dict(get_arguments(operation))],
+            'Arguments': [args for args in argument_dict(get_arguments(operation))],
             'Type': get_operation_type(operation),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(operation))],
         }
@@ -245,6 +245,29 @@ def const_dict(consts):
         }
 
 
+def get_name(interface_node):
+    return interface_node.GetName()
+
+
+def get_dict(interface_node):
+    return {
+        'Attributes': [attr for attr in attributes_dict(get_attributes(interface_node))],
+        'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
+        'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
+        'Consts': [const for const in const_dict(get_consts(interface_node))],
+        'FilePath': get_filepath(interface_node),
+    }
+
+
+def merge_dict(interface_dict, partial_dict):
+    for key in partial_dict.keys():
+        if key in interface_dict:
+            interface_dict['Attributes'].append(partial_dict['Attributes'])
+            #interface_dict['Operations'].append(partial_dict['Operations'])
+            #interface_dict['Consts'].append(partial_dict['Consts'])
+            #interface_dict.setdefault('Partial_FilePath', []).append(partial_dict['FilePath'])
+    #print interface_dict
+
 def format_interface_to_dict(interface_node):
     """Returns dictioanry of each interface_node information.
     Args:
@@ -278,7 +301,7 @@ def merge_partial_interface(interface_dict_list, partial_dict_list):
                 # TODO(natsukoa): filter extattribute of Web IDL or Blink
                 # interface['ExtAttributes'].append(partial['ExtAttributes'])
                 interface['Consts'].append(partial['Consts'])
-                interface.setdefault('Partial_FilePath', []).append(partial['FilePath'])
+                interface.setdefault('Partial_FilePaths', []).append(partial['FilePath'])
     return interface_dict_list
 
 
@@ -314,6 +337,9 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
+    #interface_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
+    #partial_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
+    #print merge_dict(interface_dict, partial_dict)
     interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))]
     partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
