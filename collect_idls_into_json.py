@@ -9,26 +9,12 @@
 import os
 import sys
 import json
-
-chromium_path = os.path.abspath(
-    os.path.join(os.environ['HOME'], 'chromium', 'src'))
-blink_bindings_path = os.path.join(
-    chromium_path, 'third_party', 'WebKit', 'Source', 'bindings', 'scripts')
-sys.path.insert(0, blink_bindings_path)
-
-from blink_idl_parser import parse_file, BlinkIDLParser
 import utilities
 
+from blink_idl_parser import parse_file, BlinkIDLParser
 
 _class_name = 'Interface'
 _partial = 'Partial'
-
-
-def load_filepaths(path_file):
-    with open(path_file, 'r') as f:
-        for line in f:
-            path = line.strip()
-            yield path
 
 
 def get_interfaces(path):
@@ -110,7 +96,7 @@ def get_extattributes(node):
       node which has ExtAttribute
     Returns:
       a generator which yields list of ExtAttribute
-    """ 
+    """
     extattributes = node.GetOneOf('ExtAttributes')
     if extattributes:
         for extattribute_list in extattributes.GetChildren():
