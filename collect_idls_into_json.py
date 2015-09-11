@@ -262,11 +262,12 @@ def get_dict(interface_node):
 def merge_dict(interface_dict, partial_dict):
     for key in partial_dict.keys():
         if key in interface_dict:
-            interface_dict['Attributes'].append(partial_dict['Attributes'])
-            #interface_dict['Operations'].append(partial_dict['Operations'])
-            #interface_dict['Consts'].append(partial_dict['Consts'])
-            #interface_dict.setdefault('Partial_FilePath', []).append(partial_dict['FilePath'])
-    #print interface_dict
+            #print interface_dict[key]['Attributes']
+            interface_dict[key]['Attributes'].append(partial_dict[key]['Attributes'])
+            interface_dict[key]['Operations'].append(partial_dict[key]['Operations'])
+            interface_dict[key]['Consts'].append(partial_dict[key]['Consts'])
+            interface_dict[key].setdefault('Partial_FilePath', []).append(partial_dict[key]['FilePath'])
+    return interface_dict
 
 def format_interface_to_dict(interface_node):
     """Returns dictioanry of each interface_node information.
@@ -337,13 +338,13 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    #interface_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
-    #partial_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
-    #print merge_dict(interface_dict, partial_dict)
-    interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))]
-    partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))]
-    dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
-    dictionary = format_list_to_dict(dictionary_list)
+    interface_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
+    partial_dict = {get_name(interface_node):get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
+    dictionary = merge_dict(interface_dict, partial_dict)
+    #interface_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))]
+    #partial_dict_list = [format_interface_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))]
+    #dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
+    #dictionary = format_list_to_dict(dictionary_list)
     export_to_jsonfile(dictionary, json_file)
 
 
