@@ -124,6 +124,7 @@ def attributes_dict(attribute_list):
       a generator which yields dictionary of attribite information
     """
     for attribute in attribute_list:
+        #print attribute.GetProperties()
         yield {
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
@@ -196,6 +197,7 @@ def operation_dict(operations):
             'Arguments': [args for args in argument_dict(get_arguments(operation))],
             'Type': get_operation_type(operation),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(operation))],
+            'static': operation.GetProperty('STATIC', default=False)
         }
 
 
