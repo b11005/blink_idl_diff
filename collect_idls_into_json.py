@@ -205,10 +205,9 @@ def get_inherit(interface_node):
     return interface_node.GetOneOf('Inherit')
 
 
-def g(inherit):
-    #for i in inherit:
+def get_inherit_name(inherit):
     if inherit != None:
-        return inherit.GetName()
+        return {'Name': inherit.GetName()}
 
 def get_consts(interface_node):
     """Returns list of Constant object.
@@ -272,6 +271,7 @@ def get_dict(interface_node):
         'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
         'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
         'Consts': [const for const in const_dict(get_consts(interface_node))],
+        'Inherit': get_inherit_name(get_inherit(interface_node)),
         'FilePath': get_filepath(interface_node),
     }
 
@@ -312,7 +312,6 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    print [g(get_inherit(interface)) for interface in get_interfaces(file_to_list)]
     interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
     partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
