@@ -124,7 +124,6 @@ def attributes_dict(attribute_list):
       a generator which yields dictionary of attribite information
     """
     for attribute in attribute_list:
-        #print attribute.GetProperties()
         yield {
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
@@ -201,6 +200,15 @@ def operation_dict(operations):
             'Static': operation.GetProperty('STATIC', default=False)
         }
 
+
+def get_inherit(interface_node):
+    return interface_node.GetOneOf('Inherit')
+
+
+def g(inherit):
+    #for i in inherit:
+    if inherit != None:
+        return inherit.GetName()
 
 def get_consts(interface_node):
     """Returns list of Constant object.
@@ -304,6 +312,7 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
+    print [g(get_inherit(interface)) for interface in get_interfaces(file_to_list)]
     interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
     partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
