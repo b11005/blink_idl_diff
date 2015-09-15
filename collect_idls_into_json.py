@@ -128,7 +128,8 @@ def attributes_dict(attribute_list):
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(attribute))],
-            'Readonly': attribute.GetProperty('READONLY', default=False)
+            'Readonly': attribute.GetProperty('READONLY', default=False),
+            'Static': attribute.GetProperty('STATIC', default=False),
         }
 
 
@@ -197,7 +198,7 @@ def operation_dict(operations):
             'Arguments': [args for args in argument_dict(get_arguments(operation))],
             'Type': get_operation_type(operation),
             'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(operation))],
-            'Static': operation.GetProperty('STATIC', default=False)
+            'Static': operation.GetProperty('STATIC', default=False),
         }
 
 
@@ -205,8 +206,10 @@ def get_inherit(interface_node):
     return interface_node.GetOneOf('Inherit')
 
 
-def get_inherit_name(inherit):
-    if inherit != None:
+def inherit_dict(inherit):
+    if inherit == None:
+        return []
+    else:
         return {'Name': inherit.GetName()}
 
 def get_consts(interface_node):
@@ -271,7 +274,7 @@ def get_dict(interface_node):
         'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
         'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
         'Consts': [const for const in const_dict(get_consts(interface_node))],
-        'Inherit': get_inherit_name(get_inherit(interface_node)),
+        'Inherit': inherit_dict(get_inherit(interface_node)),
         'FilePath': get_filepath(interface_node),
     }
 
