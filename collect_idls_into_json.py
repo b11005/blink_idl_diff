@@ -99,20 +99,56 @@ def get_extattributes(node):
     """
     extattributes = node.GetOneOf('ExtAttributes')
     if extattributes:
-        for extattribute_list in extattributes.GetChildren():
-            yield extattribute_list
+        for extattribute in extattributes.GetChildren():
+            yield extattribute
 
 
-def extattr_dict(extattribute_list):
+def extattr_argment(extattr_node):
+    if extattr_node.GetOneOf('Arguments'):
+        for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
+            yield arg
+
+def extattr_dict(extattribute):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
       node: interface, attribute or operation node which has extattribute
     Returns:
       a generator which yields extattribute dictionary
     """
-    for extattr_node in extattribute_list:
+    for extattr_node in extattribute:
+        if extattr_node.GetOneOf('Arguments'):
+            print extattr_node.GetOneOf('Arguments')
+            for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
+                print  '  ',arg
+                for i in arg.GetChildren():
+                    print '    ',i
+                    for j in i.GetChildren():
+                        print '      ',j
+                        for k in j.GetChildren():
+                            print '        ',k
+                            for h in k.GetChildren():
+                                print '          ', h
+                                for g in h.GetChildren():
+                                    print '            ',g
+                                    for a in g.GetChildren():
+                                        print '              ',a#.GetChildren()
+        #if extattr_node.GetOneOf('Arguments'):
+            #for i in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
+                #print i
+        if extattr_node.GetOneOf('Call'):
+            print extattr_node.GetOneOf('Call')
+            for u in extattr_node.GetOneOf('Call').GetChildren():
+                print '  ',u
+                for i in u.GetChildren():
+                    print '    ',i
+                    for j in i.GetChildren():
+                        print '      ',j
+                        for k in j.GetChildren():
+                            print '        ',k
         yield {
             'Name': extattr_node.GetName(),
+            #'Arguments': {'Name': arg.GetName() for arg in extattr_argment(extattr_node)}
+            #'Call':[extattr.GetName() for extattr in extattr_node.GetOneOf('Call') if extattr_node.GetOneOf('Call')!=None],
         }
 
 
