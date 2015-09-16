@@ -28,9 +28,9 @@ def get_interfaces(path):
     for idl_path in path:
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
-            #yield definition
-            if definition.GetClass() == _class_name and definition.GetClass() == 'Implements':
-                print definition
+            yield definition
+            #if definition.GetClass() == _class_name:
+                #print definition
                 #yield definition
 
 
@@ -360,8 +360,8 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    get_interfaces(file_to_list)
-    #get_implements(get_interfaces(file_to_list))
+    #get_interfaces(file_to_list)
+    get_implements(get_interfaces(file_to_list))
     #interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
     #partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
     #dictionary = merge_dict(interface_dict, partial_dict)
