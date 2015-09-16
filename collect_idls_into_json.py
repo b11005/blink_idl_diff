@@ -28,8 +28,16 @@ def get_interfaces(path):
     for idl_path in path:
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
-            if definition.GetClass() == _class_name:
-                yield definition
+            #yield definition
+            if definition.GetClass() == _class_name and definition.GetClass() == 'Implements':
+                print definition
+                #yield definition
+
+
+def get_implements(definitions):
+    for definition in definitions:
+        if definition.GetClass() == 'Implements':
+            print definition.GetName()
 
 
 def get_filepath(interface_node):
@@ -116,35 +124,35 @@ def extattr_dict(extattribute):
       a generator which yields extattribute dictionary
     """
     for extattr_node in extattribute:
-        if extattr_node.GetOneOf('Arguments'):
-            print extattr_node.GetOneOf('Arguments')
-            for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
-                print  '  ',arg
-                for i in arg.GetChildren():
-                    print '    ',i
-                    for j in i.GetChildren():
-                        print '      ',j
-                        for k in j.GetChildren():
-                            print '        ',k
-                            for h in k.GetChildren():
-                                print '          ', h
-                                for g in h.GetChildren():
-                                    print '            ',g
-                                    for a in g.GetChildren():
-                                        print '              ',a#.GetChildren()
+        #if extattr_node.GetOneOf('Arguments'):
+            #print extattr_node.GetOneOf('Arguments')
+            #for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
+                #print  '  ', arg
+                #for i in arg.GetChildren():
+                    #print '    ', i
+                    #for j in i.GetChildren():
+                        #print '      ', j
+                        #for k in j.GetChildren():
+                            #print '        ', k
+                            #for h in k.GetChildren():
+                                #print '          ', h
+                                #for g in h.GetChildren():
+                                    #print '            ', g
+                                    #for a in g.GetChildren():
+                                        #print '              ', a#.GetChildren()
         #if extattr_node.GetOneOf('Arguments'):
             #for i in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
                 #print i
-        if extattr_node.GetOneOf('Call'):
-            print extattr_node.GetOneOf('Call')
-            for u in extattr_node.GetOneOf('Call').GetChildren():
-                print '  ',u
-                for i in u.GetChildren():
-                    print '    ',i
-                    for j in i.GetChildren():
-                        print '      ',j
-                        for k in j.GetChildren():
-                            print '        ',k
+        #if extattr_node.GetOneOf('Call'):
+            #print extattr_node.GetOneOf('Call')
+            #for u in extattr_node.GetOneOf('Call').GetChildren():
+                #print '  ', u
+                #for i in u.GetChildren():
+                    #print '    ', i
+                    #for j in i.GetChildren():
+                        #print '      ', j
+                        #for k in j.GetChildren():
+                            #print '        ', k
         yield {
             'Name': extattr_node.GetName(),
             #'Arguments': {'Name': arg.GetName() for arg in extattr_argment(extattr_node)}
@@ -305,6 +313,7 @@ def get_dict(interface_node):
     Returns:
       dictionary, {interface_node name: interface node dictionary}
     """
+    
     return {
         'Attributes': [attr for attr in attributes_dict(get_attributes(interface_node))],
         'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
@@ -351,10 +360,12 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
-    partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
-    dictionary = merge_dict(interface_dict, partial_dict)
-    export_to_jsonfile(dictionary, json_file)
+    get_interfaces(file_to_list)
+    #get_implements(get_interfaces(file_to_list))
+    #interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
+    #partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
+    #dictionary = merge_dict(interface_dict, partial_dict)
+    #export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
