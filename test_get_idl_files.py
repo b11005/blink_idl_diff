@@ -12,7 +12,7 @@ class TestFunctions(unittest.TestCase):
         print 'Setup'
 
     def test_idlfile(self):
-        for i in interface_export_json.get_idl_files(path):
+        for i in interface_export_json.get_filepath(path):
             actual = i
             self.assertEqual(actual, os.path.join(path, "test_interface.idl"))
 

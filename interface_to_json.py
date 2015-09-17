@@ -50,7 +50,7 @@ def get_filepath(interface_node):
       os.path.relpath(filename): str, interface_node's file path
     """
     filename = interface_node.GetProperty('FILENAME')
-    return os.path.relpath(filename)
+    return os.path.splitdrive(filename)
 
 
 def get_partial(interface_node_list):
@@ -256,6 +256,13 @@ def const_dict(interface_node):
         }
 
 
+def get_implements(interface_node):
+    for interface in interface_node:
+        #if interface.GetProperty('Inherit')!=None:
+            #print interface
+        print interface.GetProperty('Inherit')
+
+
 def format_interface_dict(interface_node):
     """Returns dictioanry of each interface_node information.
     Args:
@@ -323,6 +330,8 @@ def export_jsonfile(dictionary, json_file):
 def main(args):
     path_file = args[0]
     json_file = args[1]
+    #print [u.GetProperty('Inherit').GetName() for u in get_interfaces(path_file)]
+    #print get_implements(get_interfaces(path_file))
     interface_dict_list = [format_interface_dict(interface_node) for interface_node in get_non_partial(get_interfaces(path_file))]
     partial_dict_list = [format_interface_dict(interface_node) for interface_node in get_partial(get_interfaces(path_file))]
     dictionary_list = merge_partial_interface(interface_dict_list, partial_dict_list)
