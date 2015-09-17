@@ -28,16 +28,15 @@ def get_interfaces(path):
     for idl_path in path:
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
-            yield definition
-            #if definition.GetClass() == _class_name:
-                #print definition
-                #yield definition
+            #yield definition
+            if definition.GetClass() == _class_name:
+                yield definition
 
 
 def get_implements(definitions):
     for definition in definitions:
         if definition.GetClass() == 'Implements':
-            print definition.GetName()
+            print definition
 
 
 def get_filepath(interface_node):
@@ -124,22 +123,22 @@ def extattr_dict(extattribute):
       a generator which yields extattribute dictionary
     """
     for extattr_node in extattribute:
-        #if extattr_node.GetOneOf('Arguments'):
-            #print extattr_node.GetOneOf('Arguments')
-            #for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
-                #print  '  ', arg
-                #for i in arg.GetChildren():
-                    #print '    ', i
-                    #for j in i.GetChildren():
-                        #print '      ', j
-                        #for k in j.GetChildren():
-                            #print '        ', k
-                            #for h in k.GetChildren():
-                                #print '          ', h
-                                #for g in h.GetChildren():
-                                    #print '            ', g
-                                    #for a in g.GetChildren():
-                                        #print '              ', a#.GetChildren()
+        if extattr_node.GetOneOf('Arguments'):
+            print extattr_node.GetOneOf('Arguments')
+            for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
+                print  '  ', arg
+                if arg.GetOneOf('Type'):
+                    print '    ', arg.GetOneOf('Type')
+                    for j in arg.GetOneOf('Type').GetChildren():
+                        print '      ', j
+                        for k in j.GetChildren():
+                            print '        ', k
+                            for h in k.GetChildren():
+                                print '          ', h
+                                for g in h.GetChildren():
+                                    print '            ', g
+                                    for a in g.GetChildren():
+                                        print '              ', a#.GetChildren()
         #if extattr_node.GetOneOf('Arguments'):
             #for i in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
                 #print i
@@ -361,8 +360,8 @@ def main(args):
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
     #get_interfaces(file_to_list)
-    get_implements(get_interfaces(file_to_list))
-    #interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
+    #get_implements(get_interfaces(file_to_list))
+    interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
     #partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
     #dictionary = merge_dict(interface_dict, partial_dict)
     #export_to_jsonfile(dictionary, json_file)
