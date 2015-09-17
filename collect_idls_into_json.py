@@ -28,15 +28,8 @@ def get_interfaces(path):
     for idl_path in path:
         definitions = parse_file(parser, idl_path)
         for definition in definitions.GetChildren():
-            #yield definition
             if definition.GetClass() == _class_name:
                 yield definition
-
-
-def get_implements(definitions):
-    for definition in definitions:
-        if definition.GetClass() == 'Implements':
-            print definition
 
 
 def get_filepath(interface_node):
@@ -47,8 +40,7 @@ def get_filepath(interface_node):
       str which is |interface_node| file path
     """
     filename = interface_node.GetProperty('FILENAME')
-    print os.path.relpath(filename).strip('../chromium/src/third_party')
-    return os.path.relpath(filename)
+    return os.path.relpath(filename).strip('../chromium/src/third_party/WebKit')
 
 
 def filter_partial(interface_node_list):
@@ -111,11 +103,6 @@ def get_extattributes(node):
             yield extattribute
 
 
-def extattr_argment(extattr_node):
-    if extattr_node.GetOneOf('Arguments'):
-        for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
-            yield arg
-
 def extattr_dict(extattribute):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
@@ -124,44 +111,8 @@ def extattr_dict(extattribute):
       a generator which yields extattribute dictionary
     """
     for extattr_node in extattribute:
-        #if extattr_node.GetName() == 'Constructor':
-            #if extattr_node.GetOneOf('Arguments') and extattr_node.GetOneOf('Arguments').GetChildren():
-                #print extattr_node.GetOneOf('Arguments').GetChildren()
-                #for i in extattr_node.GetOneOf('Arguments').GetChildren():
-                    #print i
-        #if extattr_node.GetOneOf('Arguments'):
-            #print extattr_node.GetOneOf('Arguments')
-            #for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
-                #print  '  ', arg
-                #if arg.GetOneOf('Type'):
-                    #print '    ', arg.GetOneOf('Type')
-                    #for j in arg.GetOneOf('Type').GetChildren():
-                        #print '      ', j
-                        #for k in j.GetChildren():
-                            #print '        ', k
-                            #for h in k.GetChildren():
-                                #print '          ', h
-                                #for g in h.GetChildren():
-                                    #print '            ', g
-                                    #for a in g.GetChildren():
-                                        #print '              ', a#.GetChildren()
-        #if extattr_node.GetOneOf('Arguments'):
-            #for i in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
-                #print i
-        #if extattr_node.GetOneOf('Call'):
-            #print extattr_node.GetOneOf('Call')
-            #for u in extattr_node.GetOneOf('Call').GetChildren():
-                #print '  ', u
-                #for i in u.GetChildren():
-                    #print '    ', i
-                    #for j in i.GetChildren():
-                        #print '      ', j
-                        #for k in j.GetChildren():
-                            #print '        ', k
         yield {
             'Name': extattr_node.GetName(),
-            #'Arguments': {'Name': arg.GetName() for arg in extattr_argment(extattr_node)}
-            #'Call':[extattr.GetName() for extattr in extattr_node.GetOneOf('Call') if extattr_node.GetOneOf('Call')!=None],
         }
 
 
@@ -256,10 +207,11 @@ def get_inherit(interface_node):
 
 
 def inherit_dict(inherit):
-    if inherit == None:
+    if inherit is None:
         return []
     else:
         return {'Name': inherit.GetName()}
+
 
 def get_consts(interface_node):
     """Returns list of Constant object.
@@ -318,7 +270,7 @@ def get_dict(interface_node):
     Returns:
       dictionary, {interface_node name: interface node dictionary}
     """
-    
+
     return {
         'Attributes': [attr for attr in attributes_dict(get_attributes(interface_node))],
         'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
@@ -365,12 +317,10 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    #get_interfaces(file_to_list)
-    #get_implements(get_interfaces(file_to_list))
     interface_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_non_partial(get_interfaces(file_to_list))}
-    #partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
-    #dictionary = merge_dict(interface_dict, partial_dict)
-    #export_to_jsonfile(dictionary, json_file)
+    partial_dict = {get_name(interface_node): get_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
+    dictionary = merge_dict(interface_dict, partial_dict)
+    export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
