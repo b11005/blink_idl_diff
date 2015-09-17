@@ -37,7 +37,7 @@ def get_filepath(interface_node):
     Args:
       interface_node: IDL interface node
     Returns:
-      str which is |interface_node| file path
+      str which is |interface_node| file path under WebKit directory
     """
     filename = interface_node.GetProperty('FILENAME')
     return os.path.relpath(filename).strip('../chromium/src/third_party/WebKit')
@@ -203,14 +203,13 @@ def operation_dict(operations):
 
 
 def get_inherit(interface_node):
-    return interface_node.GetOneOf('Inherit')
+    yield interface_node.GetOneOf('Inherit')
 
 
-def inherit_dict(inherit):
-    if inherit is None:
-        return []
-    else:
-        return {'Name': inherit.GetName()}
+def inherit_dict(inherits):
+    for inherit in inherits:
+        if inherit:
+            yield {'Name': inherit.GetName()}
 
 
 def get_consts(interface_node):
@@ -276,7 +275,7 @@ def get_dict(interface_node):
         'Operations': [operation for operation in operation_dict(get_operations(interface_node))],
         'ExtAttributes': [extattr for extattr in extattr_dict(get_extattributes(interface_node))],
         'Consts': [const for const in const_dict(get_consts(interface_node))],
-        'Inherit': inherit_dict(get_inherit(interface_node)),
+        'Inherit': [inherit for inherit in inherit_dict(get_inherit(interface_node))],
         'FilePath': get_filepath(interface_node),
     }
 
@@ -298,7 +297,6 @@ def merge_dict(interface_dict, partial_dict):
     return interface_dict
 
 
-# TODO(natsukoa): Supports a command line flag to indent the json
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface_node information dictionary to json.
     Args:
