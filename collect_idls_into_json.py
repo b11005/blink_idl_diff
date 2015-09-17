@@ -307,10 +307,8 @@ def export_to_jsonfile(dictionary, json_file):
     Returns:
       json file which is contained each interface node dictionary
     """
-    # TODO(natsukoa): Remove indent_size
-    indent_size = 4
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True, indent=indent_size)
+        json.dump(dictionary, f, sort_keys=True)
 
 
 def main(args):
