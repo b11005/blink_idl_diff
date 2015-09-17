@@ -123,22 +123,24 @@ def extattr_dict(extattribute):
       a generator which yields extattribute dictionary
     """
     for extattr_node in extattribute:
-        if extattr_node.GetOneOf('Arguments'):
-            print extattr_node.GetOneOf('Arguments')
-            for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
-                print  '  ', arg
-                if arg.GetOneOf('Type'):
-                    print '    ', arg.GetOneOf('Type')
-                    for j in arg.GetOneOf('Type').GetChildren():
-                        print '      ', j
-                        for k in j.GetChildren():
-                            print '        ', k
-                            for h in k.GetChildren():
-                                print '          ', h
-                                for g in h.GetChildren():
-                                    print '            ', g
-                                    for a in g.GetChildren():
-                                        print '              ', a#.GetChildren()
+        if extattr_node.GetName() == 'Constructor':
+            print extattr_node
+        #if extattr_node.GetOneOf('Arguments'):
+            #print extattr_node.GetOneOf('Arguments')
+            #for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
+                #print  '  ', arg
+                #if arg.GetOneOf('Type'):
+                    #print '    ', arg.GetOneOf('Type')
+                    #for j in arg.GetOneOf('Type').GetChildren():
+                        #print '      ', j
+                        #for k in j.GetChildren():
+                            #print '        ', k
+                            #for h in k.GetChildren():
+                                #print '          ', h
+                                #for g in h.GetChildren():
+                                    #print '            ', g
+                                    #for a in g.GetChildren():
+                                        #print '              ', a#.GetChildren()
         #if extattr_node.GetOneOf('Arguments'):
             #for i in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
                 #print i
