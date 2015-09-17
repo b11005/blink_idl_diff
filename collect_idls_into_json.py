@@ -90,22 +90,28 @@ get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
 
 
-def extattr_to_dict(node):
-    """Returns a generator which yields Extattribute's object dictionary
-    Args:
-      node: interface, attribute or operation node which has extattribute
-    Returns:
-      a generator which yields extattribute dictionary
-    """
+def get_extattributes(node):
+    
     extattributes = node.GetOneOf('ExtAttributes')
     if extattributes:
         for extattribute in extattributes.GetChildren():
-            yield {
-                'Name': extattribute.GetName(),
-            }
+            yield extattribute
 
 
-def attributes_dict(attributes):
+def extattr_to_dict(extattributes):
+    """Returns a generator which yields Extattribute's object dictionary
+    Args:
+      extattributes: interface, attribute or operation node which has extattribute
+    Returns:
+      a generator which yields extattribute dictionary
+    """
+    for extattribute in extattributes:
+        yield {
+            'Name': extattribute.GetName(),
+        }
+
+
+def attributes_to_dict(attributes):
     """Returns a generator which yields dictioary of Extattribute object information.
     Args:
       attributes: interface node object
@@ -116,7 +122,7 @@ def attributes_dict(attributes):
         yield {
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
-            'ExtAttributes': list(extattr_to_dict(attribute)),
+            'ExtAttributes': list(extattr_to_dict(get_attributes(attribute))),
             'Readonly': attribute.GetProperty('READONLY', default=False),
             'Static': attribute.GetProperty('STATIC', default=False),
         }
@@ -137,7 +143,7 @@ def get_arguments(operation):
     Args:
       operation: interface node object
     Returns:
-      list which is list of argument object
+      list of argument object
     """
     argument_node = operation.GetOneOf('Arguments')
     return argument_node.GetListOf('Argument')
@@ -186,7 +192,7 @@ def operation_dict(operations):
             'Name': get_operation_name(operation),
             'Arguments': list(argument_dict(get_arguments(operation))),
             'Type': get_operation_type(operation),
-            'ExtAttributes': list(extattr_to_dict(operation)),
+            'ExtAttributes': list(extattr_to_dict(get_attributes(operation))),
             'Static': operation.GetProperty('STATIC', default=False),
         }
 
@@ -238,7 +244,7 @@ def const_dict(consts):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const),
-            'ExtAttributes': list(extattr_to_dict(const)),
+            'ExtAttributes': list(extattr_to_dict(get_attributes(const))),
         }
 
 
@@ -249,11 +255,10 @@ def interface_to_dict(interface):
     Returns:
       dictionary, {interface name: interface node dictionary}
     """
-
     return {
-        'Attributes': list(attributes_dict(get_attributes(interface))),
+        'Attributes': list(attributes_to_dict(get_attributes(interface))),
         'Operations': list(operation_dict(get_operations(interface))),
-        'ExtAttributes': list(extattr_to_dict(interface)),
+        'ExtAttributes': list(extattr_to_dict(get_attributes(interface))),
         'Consts': list(const_dict(get_consts(interface))),
         'Inherit': list(inherit_to_dict(interface)),
         'FilePath': get_filepath(interface),
@@ -286,7 +291,7 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True, indent=4)
+        json.dump(dictionary, f, sort_keys=True)
 
 
 def main(args):
