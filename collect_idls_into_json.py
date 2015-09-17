@@ -47,6 +47,7 @@ def get_filepath(interface_node):
       str which is |interface_node| file path
     """
     filename = interface_node.GetProperty('FILENAME')
+    print os.path.relpath(filename).strip('../chromium/src/third_party')
     return os.path.relpath(filename)
 
 
@@ -123,11 +124,11 @@ def extattr_dict(extattribute):
       a generator which yields extattribute dictionary
     """
     for extattr_node in extattribute:
-        if extattr_node.GetName() == 'Constructor':
-            if extattr_node.GetOneOf('Arguments') and extattr_node.GetOneOf('Arguments').GetChildren():
+        #if extattr_node.GetName() == 'Constructor':
+            #if extattr_node.GetOneOf('Arguments') and extattr_node.GetOneOf('Arguments').GetChildren():
                 #print extattr_node.GetOneOf('Arguments').GetChildren()
-                for i in extattr_node.GetOneOf('Arguments').GetChildren():
-                    print i
+                #for i in extattr_node.GetOneOf('Arguments').GetChildren():
+                    #print i
         #if extattr_node.GetOneOf('Arguments'):
             #print extattr_node.GetOneOf('Arguments')
             #for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
