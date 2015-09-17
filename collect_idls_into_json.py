@@ -202,14 +202,10 @@ def operation_dict(operations):
         }
 
 
-def get_inherit(interface):
-    yield interface.GetOneOf('Inherit')
-
-
-def inherit_to_dict(inherits):
-    for inherit in inherits:
-        if inherit:
-            yield {'Name': inherit.GetName()}
+def inherit_to_dict(interface):
+    #for inherit in interface.GetOneOf('Inherit'):
+    if interface.GetOneOf('Inherit'):
+        yield {'Name': interface.GetOneOf('Inherit').GetName()}
 
 
 def get_consts(interface):
@@ -271,7 +267,7 @@ def interface_to_dict(interface):
         'Operations': list(operation_dict(get_operations(interface))),
         'ExtAttributes': list(extattr_to_dict(get_extattributes(interface))),
         'Consts': list(const_dict(get_consts(interface))),
-        'Inherit': list(inherit_to_dict(get_inherit(interface))),
+        'Inherit': list(inherit_to_dict(interface)),
         'FilePath': get_filepath(interface),
     }
 
