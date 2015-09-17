@@ -258,10 +258,6 @@ def const_dict(consts):
         }
 
 
-def get_name(interface):
-    return interface.GetName()
-
-
 def interface_to_dict(interface):
     """Returns dictioary whose key is interface name and value is interface dictioary.
     Args:
@@ -306,15 +302,15 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True, indent=4)
+        json.dump(dictionary, f, sort_keys=True)
 
 
 def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    interface_dict = {get_name(interface): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
-    partial_dict = {get_name(interface): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
+    interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
+    partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
     export_to_jsonfile(dictionary, json_file)
 
