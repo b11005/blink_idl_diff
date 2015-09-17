@@ -18,9 +18,9 @@ _partial = 'Partial'
 
 
 def get_interfaces(paths):
-    """Returns a generator which yields interface IDL nodes.
+    """Returns a generator which yields interface IDL.
     Args:
-      path_file: text file path
+      paths: IDL file path list
     Returns:
       a generator which yields interface node objects
     """
@@ -35,7 +35,7 @@ def get_interfaces(paths):
 def get_filepath(interface):
     """Returns relative path to the IDL file in which the |interface| is defined.
     Args:
-      interface: IDL interface node
+      interface: IDL interface
     Returns:
       str which is |interface| file path under WebKit directory
     """
@@ -44,9 +44,9 @@ def get_filepath(interface):
 
 
 def filter_partial(interfaces):
-    """Returns a generator which yields partial interface node.
+    """Returns a generator which yields partial interface.
     Args:
-      interface_list: a generator which is interface IDL node
+      interfaces: a generator which is interface IDL
     Return:
       a generator which yields partial interface node
     """
@@ -58,7 +58,7 @@ def filter_partial(interfaces):
 def filter_non_partial(interfaces):
     """Returns a generator which yields interface node.
     Args:
-      interface_list: a generator which is interface IDL node
+      interfaces: a generator which is interface IDL node
     Returns:
       a generator which yields interface node
     """
@@ -90,30 +90,19 @@ get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
 
 
-def get_extattributes(node):
-    """Returns a generator which yields list of ExtAttribute.
-    Args:
-      node which has ExtAttribute
-    Returns:
-      a generator which yields list of ExtAttribute
-    """
-    extattributes = node.GetOneOf('ExtAttributes')
-    if extattributes:
-        for extattribute in extattributes.GetChildren():
-            yield extattribute
-
-
-def extattr_to_dict(extattribute):
+def extattr_to_dict(node):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
       node: interface, attribute or operation node which has extattribute
     Returns:
       a generator which yields extattribute dictionary
     """
-    for extattr_node in extattribute:
-        yield {
-            'Name': extattr_node.GetName(),
-        }
+    extattributes = node.GetOneOf('ExtAttributes')
+    if extattributes:
+        for extattribute in extattributes.GetChildren():
+            yield {
+                'Name': extattribute.GetName(),
+            }
 
 
 def attributes_dict(attributes):
@@ -127,7 +116,7 @@ def attributes_dict(attributes):
         yield {
             'Name': attribute.GetName(),
             'Type': get_attribute_type(attribute),
-            'ExtAttributes': list(extattr_to_dict(get_extattributes(attribute))),
+            'ExtAttributes': list(extattr_to_dict(attribute)),
             'Readonly': attribute.GetProperty('READONLY', default=False),
             'Static': attribute.GetProperty('STATIC', default=False),
         }
@@ -197,13 +186,12 @@ def operation_dict(operations):
             'Name': get_operation_name(operation),
             'Arguments': list(argument_dict(get_arguments(operation))),
             'Type': get_operation_type(operation),
-            'ExtAttributes': list(extattr_to_dict(get_extattributes(operation))),
+            'ExtAttributes': list(extattr_to_dict(operation)),
             'Static': operation.GetProperty('STATIC', default=False),
         }
 
 
 def inherit_to_dict(interface):
-    #for inherit in interface.GetOneOf('Inherit'):
     if interface.GetOneOf('Inherit'):
         yield {'Name': interface.GetOneOf('Inherit').GetName()}
 
@@ -250,7 +238,7 @@ def const_dict(consts):
             'Name': const.GetName(),
             'Type': get_const_type(const),
             'Value': get_const_value(const),
-            'ExtAttributes': list(extattr_to_dict(get_extattributes(const))),
+            'ExtAttributes': list(extattr_to_dict(const)),
         }
 
 
@@ -265,7 +253,7 @@ def interface_to_dict(interface):
     return {
         'Attributes': list(attributes_dict(get_attributes(interface))),
         'Operations': list(operation_dict(get_operations(interface))),
-        'ExtAttributes': list(extattr_to_dict(get_extattributes(interface))),
+        'ExtAttributes': list(extattr_to_dict(interface)),
         'Consts': list(const_dict(get_consts(interface))),
         'Inherit': list(inherit_to_dict(interface)),
         'FilePath': get_filepath(interface),
@@ -298,7 +286,7 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True)
+        json.dump(dictionary, f, sort_keys=True, indent=4)
 
 
 def main(args):
