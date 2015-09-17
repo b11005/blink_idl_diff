@@ -80,7 +80,7 @@ def get_attributes(interface):
 def get_attribute_type(attribute):
     """Returns type of attribute or operation's argument.
     Args:
-      node: attribute node object
+      attribute: attribute node object
     Returns:
       str which is Attribute object type
     """
@@ -108,7 +108,7 @@ def extattr_to_dict(node):
 def attributes_dict(attributes):
     """Returns a generator which yields dictioary of Extattribute object information.
     Args:
-      interface: interface node object
+      attributes: interface node object
     Returns:
       a generator which yields dictionary of attribite information
     """
@@ -146,7 +146,7 @@ def get_arguments(operation):
 def argument_dict(arguments):
     """Returns generator which yields dictionary of Argument object information.
     Args:
-      argument: interface node object
+      arguments: interface node object
     Returns:
       a generator which yields dictionary of argument information
     """
@@ -177,7 +177,7 @@ def get_operation_name(operation):
 def operation_dict(operations):
     """Returns a generator which yields dictionary of Operation object information.
     Args:
-    interface: interface node object
+      operations: interface node object
     Returns:
       a generator which yields dictionary of operation's informantion
     """
@@ -229,7 +229,7 @@ def get_const_value(node):
 def const_dict(consts):
     """Returns generator which yields dictionary of constant object information.
     Args:
-      interface: interface node object
+      consts: interface node object
     Returns:
       a generator which yields dictionary of constant object information
     """
@@ -245,7 +245,7 @@ def const_dict(consts):
 def interface_to_dict(interface):
     """Returns dictioary whose key is interface name and value is interface dictioary.
     Args:
-      dictirary_list: list, list of interface node dictionary
+      interface: list, list of interface node dictionary
     Returns:
       dictionary, {interface name: interface node dictionary}
     """
@@ -280,7 +280,7 @@ def merge_dict(interface_dict, partial_dict):
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface information dictionary to json.
     Args:
-      dictioary: dict, output of format_dictinatry
+      dictioary: interface dictionary
       json_file: json file for output
     Returns:
       json file which is contained each interface node dictionary
