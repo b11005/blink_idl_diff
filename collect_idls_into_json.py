@@ -175,11 +175,11 @@ def get_operation_name(operation):
     Returns:
       str which is operation's name
     """
-    if operation.GetProperty('GETTER', default=None):
+    if operation.GetProperty('GETTER'):
         return '__getter__'
-    elif operation.GetProperty('SETTER', default=None):
+    elif operation.GetProperty('SETTER'):
         return '__setter__'
-    elif operation.GetProperty('DELETER', default=None):
+    elif operation.GetProperty('DELETER'):
         return '__deleter__'
     else:
         return operation.GetName()
