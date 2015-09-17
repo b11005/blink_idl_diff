@@ -124,7 +124,10 @@ def extattr_dict(extattribute):
     """
     for extattr_node in extattribute:
         if extattr_node.GetName() == 'Constructor':
-            print extattr_node
+            if extattr_node.GetOneOf('Arguments') and extattr_node.GetOneOf('Arguments').GetChildren():
+                #print extattr_node.GetOneOf('Arguments').GetChildren()
+                for i in extattr_node.GetOneOf('Arguments').GetChildren():
+                    print i
         #if extattr_node.GetOneOf('Arguments'):
             #print extattr_node.GetOneOf('Arguments')
             #for arg in  extattr_node.GetOneOf('Arguments').GetListOf('Argument'):
