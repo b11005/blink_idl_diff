@@ -17,7 +17,7 @@ _class_name = 'Interface'
 _partial = 'Partial'
 
 
-def get_idl_nodes(paths):
+def get_interfaces(paths):
     """Returns a generator which yields interface IDL.
     Args:
       paths: IDL file path list
@@ -28,11 +28,11 @@ def get_idl_nodes(paths):
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
-            #if definition.GetClass() == _class_name:
-            yield definition
+            if definition.GetClass() == _class_name:
+                yield definition
 
 
-def get_interfaces(definitions):
+'''def get_interfaces(definitions):
     for definition in definitions:
         if definition.GetClass() == _class_name:
             yield definition
@@ -48,7 +48,7 @@ def implement_to_dict():
     for implement in implements:
         if os.path.basename(get_filepath(interface_node)) == os.path.basename(implement.GetParent().GetName()):
             implement_dict = {'Name': implement.GetName()}
-            print implement_dict
+            print implement_dict'''
 
 def get_filepath(interface_node):
     """Returns relative path to the IDL file in which the |interface_node| is defined.
@@ -109,10 +109,16 @@ get_argument_type = get_attribute_type
 
 
 def get_extattributes(node):
+    """Returns agenerator which yields list of ExtAttribute.
+    Args:
+      IDL node object
+    Returns:
+      a generator which yields list of ExtAttrbute
+    """
     extattribute_nodes = node.GetOneOf('ExtAttributes')
-    if extattribute_nodes:
-        for extattribute_node in extattribute_nodes.GetChildren():
-            yield extattribute_node
+    if extattributes_nodes:
+        for extattribute_nodes in extattributes_nodes.GetChildren():
+            yield extattribute_nodes
 
 
 def extattr_to_dict(extattribute_nodes):
@@ -131,7 +137,7 @@ def extattr_to_dict(extattribute_nodes):
 def attributes_to_dict(attribute_nodes):
     """Returns a generator which yields dictioary of Extattribute object information.
     Args:
-      attribute_nodes: interface node object
+      attribute_nodes: list of interface node object
     Returns:
       a generator which yields dictionary of attribite information
     """
@@ -252,7 +258,7 @@ def get_const_value(node):
 def const_dict(const_nodes):
     """Returns generator which yields dictionary of constant object information.
     Args:
-      const_nodes: interface node object
+      const_nodes: list of interface node object which has constant
     Returns:
       a generator which yields dictionary of constant object information
     """
@@ -272,11 +278,6 @@ def interface_to_dict(interface_node):
     Returns:
       dictionary, {interface name: interface node dictionary}
     """
-    implements = get_implements(get_idl_nodes(utilities.read_file_to_list(sys.argv[1])))
-    for implement in implements:
-        if os.path.basename(get_filepath(interface_node)) == os.path.basename(implement.GetParent().GetName()):
-            implement_dict = {'Name': implement.GetName()}
-            print implement_dict
     return {
         'Attributes': list(attributes_to_dict(get_attributes(interface_node))),
         'Operations': list(operation_dict(get_operations(interface_node))),
@@ -319,18 +320,11 @@ def export_to_jsonfile(dictionary, json_file):
 def main(args):
     path_file = args[0]
     json_file = args[1]
-    file_to_list = get_idl_nodes(utilities.read_file_to_list(path_file))
+    file_to_list = utilities.read_file_to_list(path_file)
     interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
     partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
-    #implement_to_dict()
-    #export_to_jsonfile(dictionary, json_file)
-    #for implement in get_implements(get_idl_nodes(file_to_list)):
-        #print os.path.basename(implement.GetParent().GetName())
-    #for i in get_interfaces(get_idl_nodes(file_to_list)):
-        #if i.GetParent().GetName() in parent:
-            #print i
-        
+    export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
