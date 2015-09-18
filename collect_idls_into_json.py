@@ -32,24 +32,6 @@ def get_interfaces(paths):
                 yield definition
 
 
-'''def get_interfaces(definitions):
-    for definition in definitions:
-        if definition.GetClass() == _class_name:
-            yield definition
-
-
-def get_implements(definitions):
-    for definition in definitions:
-        if definition.GetClass() == 'Implements':
-            yield definition
-
-def implement_to_dict():
-    implements = get_implements(get_idl_nodes(utilities.read_file_to_list(sys.argv[1])))
-    for implement in implements:
-        if os.path.basename(get_filepath(interface_node)) == os.path.basename(implement.GetParent().GetName()):
-            implement_dict = {'Name': implement.GetName()}
-            print implement_dict'''
-
 def get_filepath(interface_node):
     """Returns relative path to the IDL file in which the |interface_node| is defined.
     Args:
