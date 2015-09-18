@@ -99,8 +99,7 @@ def get_extattributes(node):
     """
     extattribute_nodes = node.GetOneOf('ExtAttributes')
     if extattributes_nodes:
-        for extattribute_nodes in extattributes_nodes.GetChildren():
-            yield extattribute_nodes
+        yield extattributes_nodes.GetChildren()
 
 
 def extattr_to_dict(extattribute_nodes):
