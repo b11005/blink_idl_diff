@@ -17,7 +17,7 @@ _class_name = 'Interface'
 _partial = 'Partial'
 
 
-def get_interfaces(paths):
+def get_idl_nodes(paths):
     """Returns a generator which yields interface IDL.
     Args:
       paths: IDL file path list
@@ -28,9 +28,27 @@ def get_interfaces(paths):
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
-            if definition.GetClass() == _class_name:
-                yield definition
+            #if definition.GetClass() == _class_name:
+            yield definition
 
+
+def get_interfaces(definitions):
+    for definition in definitions:
+        if definition.GetClass() == _class_name:
+            yield definition
+
+
+def get_implements(definitions):
+    for definition in definitions:
+        if definition.GetClass() == 'Implements':
+            yield definition
+
+def implement_to_dict():
+    implements = get_implements(get_idl_nodes(utilities.read_file_to_list(sys.argv[1])))
+    for implement in implements:
+        if os.path.basename(get_filepath(interface_node)) == os.path.basename(implement.GetParent().GetName()):
+            implement_dict = {'Name': implement.GetName()}
+            print implement_dict
 
 def get_filepath(interface_node):
     """Returns relative path to the IDL file in which the |interface_node| is defined.
@@ -211,14 +229,14 @@ def get_consts(interface_node):
     return interface_node.GetListOf('Const')
 
 
-def get_const_type(node):
+def get_const_type(const_node):
     """Returns constant's type.
     Args:
-      node: interface node's attribute or operation object
+      const_node: interface node's attribute or operation object
     Returns:
       node.GetChildren()[0].GetName(): str, constant object's name
     """
-    return node.GetChildren()[0].GetName()
+    return const_node.GetChildren()[0].GetName()
 
 
 def get_const_value(node):
@@ -254,6 +272,11 @@ def interface_to_dict(interface_node):
     Returns:
       dictionary, {interface name: interface node dictionary}
     """
+    implements = get_implements(get_idl_nodes(utilities.read_file_to_list(sys.argv[1])))
+    for implement in implements:
+        if os.path.basename(get_filepath(interface_node)) == os.path.basename(implement.GetParent().GetName()):
+            implement_dict = {'Name': implement.GetName()}
+            print implement_dict
     return {
         'Attributes': list(attributes_to_dict(get_attributes(interface_node))),
         'Operations': list(operation_dict(get_operations(interface_node))),
@@ -290,17 +313,24 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True)
+        json.dump(dictionary, f, sort_keys=True, indent=4)
 
 
 def main(args):
     path_file = args[0]
     json_file = args[1]
-    file_to_list = utilities.read_file_to_list(path_file)
+    file_to_list = get_idl_nodes(utilities.read_file_to_list(path_file))
     interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
     partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
-    export_to_jsonfile(dictionary, json_file)
+    #implement_to_dict()
+    #export_to_jsonfile(dictionary, json_file)
+    #for implement in get_implements(get_idl_nodes(file_to_list)):
+        #print os.path.basename(implement.GetParent().GetName())
+    #for i in get_interfaces(get_idl_nodes(file_to_list)):
+        #if i.GetParent().GetName() in parent:
+            #print i
+        
 
 
 if __name__ == '__main__':
