@@ -105,7 +105,7 @@ def get_extattributes(node):
 def extattr_to_dict(extattribute_nodes):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
-      extattribute_nodes: interface, attribute or operation node which has extattribute
+      extattribute_nodes: list of extended attribute
     Returns:
       a generator which yields extattribute dictionary
     """
@@ -118,7 +118,7 @@ def extattr_to_dict(extattribute_nodes):
 def attributes_to_dict(attribute_nodes):
     """Returns a generator which yields dictioary of Extattribute object information.
     Args:
-      attribute_nodes: list of interface node object
+      attribute_nodes: list of attribute node object
     Returns:
       a generator which yields dictionary of attribite information
     """
@@ -145,18 +145,17 @@ def get_operations(interface_node):
 def get_arguments(operation_node):
     """Returns list of Arguments object under the operation object.
     Args:
-      operation_node: interface node object
+      operation_node: operation node object
     Returns:
       list of argument object
     """
-    argument_node = operation_node.GetOneOf('Arguments')
-    return argument_node.GetListOf('Argument')
+    return operation_node.GetOneOf('Arguments').GetListOf('Argument')
 
 
-def argument_dict(argument_nodes):
+def argument_to_dict(argument_nodes):
     """Returns generator which yields dictionary of Argument object information.
     Args:
-      arguments: interface node object
+      arguments: list of argument node object
     Returns:
       a generator which yields dictionary of argument information
     """
@@ -170,7 +169,7 @@ def argument_dict(argument_nodes):
 def get_operation_name(operation_node):
     """Returns openration object name.
     Args:
-      operation_node: operation object in interface node object
+      operation_node: operation node object
     Returns:
       str which is operation's name
     """
@@ -187,14 +186,14 @@ def get_operation_name(operation_node):
 def operation_dict(operation_nodes):
     """Returns a generator which yields dictionary of Operation object information.
     Args:
-      operation_nodes: interface node object
+      operation_nodes: list of operation node object
     Returns:
       a generator which yields dictionary of operation's informantion
     """
     for operation_node in operation_nodes:
         yield {
             'Name': get_operation_name(operation_node),
-            'Arguments': list(argument_dict(get_arguments(operation_node))),
+            'Arguments': list(argument_to_dict(get_arguments(operation_node))),
             'Type': get_operation_type(operation_node),
             'ExtAttributes': list(extattr_to_dict(get_attributes(operation_node))),
             'Static': operation_node.GetProperty('STATIC', default=False),
@@ -219,24 +218,24 @@ def get_consts(interface_node):
 def get_const_type(const_node):
     """Returns constant's type.
     Args:
-      const_node: interface node's attribute or operation object
+      const_node: constant node object
     Returns:
       node.GetChildren()[0].GetName(): str, constant object's name
     """
     return const_node.GetChildren()[0].GetName()
 
 
-def get_const_value(node):
+def get_const_value(const_node):
     """Returns constant's value.
     Args:
-      node: interface node's attribute or operation object
+      const_node: constant node object
     Returns:
       node.GetChildren()[1].GetName(): list, list of oparation object
     """
-    return node.GetChildren()[1].GetName()
+    return const_node.GetChildren()[1].GetName()
 
 
-def const_dict(const_nodes):
+def const_to_dict(const_nodes):
     """Returns generator which yields dictionary of constant object information.
     Args:
       const_nodes: list of interface node object which has constant
@@ -263,7 +262,7 @@ def interface_to_dict(interface_node):
         'Attributes': list(attributes_to_dict(get_attributes(interface_node))),
         'Operations': list(operation_dict(get_operations(interface_node))),
         'ExtAttributes': list(extattr_to_dict(get_attributes(interface_node))),
-        'Consts': list(const_dict(get_consts(interface_node))),
+        'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': list(inherit_to_dict(interface_node)),
         'FilePath': get_filepath(interface_node),
     }
@@ -278,11 +277,10 @@ def merge_dict(interface_dict, partial_dict):
       list which is list of interface node's dictionry merged with partial interface node
     """
     for key in partial_dict.keys():
-        if key in interface_dict:
-            interface_dict[key]['Attributes'].append(partial_dict[key]['Attributes'])
-            interface_dict[key]['Operations'].append(partial_dict[key]['Operations'])
-            interface_dict[key]['Consts'].append(partial_dict[key]['Consts'])
-            interface_dict[key].setdefault('Partial_FilePaths', []).append(partial_dict[key]['FilePath'])
+        interface_dict[key]['Attributes'].append(partial_dict[key]['Attributes'])
+        interface_dict[key]['Operations'].append(partial_dict[key]['Operations'])
+        interface_dict[key]['Consts'].append(partial_dict[key]['Consts'])
+        interface_dict[key].setdefault('Partial_FilePaths', []).append(partial_dict[key]['FilePath'])
     return interface_dict
 
 
