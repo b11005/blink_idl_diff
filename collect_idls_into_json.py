@@ -264,7 +264,6 @@ def interface_to_dict(interface_node):
         'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': list(inherit_to_dict(interface_node)),
         'FilePath': get_filepath(interface_node),
-        #'Implement': get_implements(),
     }
 
 
@@ -301,7 +300,6 @@ def main(args):
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
     interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
-    # {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
     partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
     export_to_jsonfile(dictionary, json_file)
