@@ -18,9 +18,9 @@ _partial = 'Partial'
 
 
 def get_interfaces(paths):
-    """Returns a generator which yields interface IDL.
+    """Returns interface IDL node.
     Args:
-      paths: IDL file path list
+      paths: list of IDL file path
     Returns:
       a generator which yields interface node objects
     """
@@ -29,22 +29,26 @@ def get_interfaces(paths):
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
             if definition.GetClass() == _class_name:
+                interface = definition
                 yield definition
+            elif definition.GetClass() == 'Implements':
+                if interface.GetParent() == definition.GetParent():
+                    print definition.GetProperty('REFERENCE')
 
 
 def get_filepath(interface_node):
-    """Returns relative path to the IDL file in which the |interface_node| is defined.
+    """Returns relative path under the WebKit directory which |interface_node| is defined.
     Args:
       interface_node: IDL interface
     Returns:
-      str which is |interface_node| file path under WebKit directory
+      str which is |interface_node| file path
     """
     filename = interface_node.GetProperty('FILENAME')
     return os.path.relpath(filename).strip('../chromium/src/third_party/WebKit')
 
 
 def filter_partial(interface_nodes):
-    """Returns a generator which yields partial interface.
+    """Returns partial interface node.
     Args:
       interface_nodes: a generator which is interface IDL
     Return:
@@ -56,7 +60,7 @@ def filter_partial(interface_nodes):
 
 
 def filter_non_partial(interface_nodes):
-    """Returns a generator which yields interface node.
+    """Returns interface node.
     Args:
       interface_nodes: a generator which is interface IDL node
     Returns:
@@ -78,11 +82,11 @@ def get_attributes(interface_node):
 
 
 def get_attribute_type(attribute_node):
-    """Returns type of attribute or operation's argument.
+    """Returns type of attribute.
     Args:
       attribute_node: attribute node object
     Returns:
-      str which is Attribute object type
+      str which is type of Attribute
     """
     return attribute_node.GetOneOf('Type').GetChildren()[0].GetName()
 
@@ -91,15 +95,13 @@ get_argument_type = get_attribute_type
 
 
 def get_extattributes(node):
-    """Returns agenerator which yields list of ExtAttribute.
+    """Returns list of ExtAttribute.
     Args:
       IDL node object
     Returns:
       a generator which yields list of ExtAttrbute
     """
-    extattribute_nodes = node.GetOneOf('ExtAttributes')
-    if extattributes_nodes:
-        yield extattributes_nodes.GetChildren()
+    yield node.GetOneOf('ExtAttributes').GetChildren()
 
 
 def extattr_to_dict(extattribute_nodes):
@@ -116,7 +118,7 @@ def extattr_to_dict(extattribute_nodes):
 
 
 def attributes_to_dict(attribute_nodes):
-    """Returns a generator which yields dictioary of Extattribute object information.
+    """Returns dictioary of attribute object information.
     Args:
       attribute_nodes: list of attribute node object
     Returns:
@@ -133,7 +135,7 @@ def attributes_to_dict(attribute_nodes):
 
 
 def get_operations(interface_node):
-    """Returns list of Operations object under the interface.
+    """Returns Operations object under the interface.
     Args:
       interface: interface node object
     Returns:
@@ -143,7 +145,7 @@ def get_operations(interface_node):
 
 
 def get_arguments(operation_node):
-    """Returns list of Arguments object under the operation object.
+    """Returns Argument object under the operation object.
     Args:
       operation_node: operation node object
     Returns:
@@ -183,8 +185,8 @@ def get_operation_name(operation_node):
         return operation_node.GetName()
 
 
-def operation_dict(operation_nodes):
-    """Returns a generator which yields dictionary of Operation object information.
+def operation_to_dict(operation_nodes):
+    """Returns  dictionary of Operation object information.
     Args:
       operation_nodes: list of operation node object
     Returns:
@@ -206,7 +208,7 @@ def inherit_to_dict(interface_node):
 
 
 def get_consts(interface_node):
-    """Returns list of Constant object.
+    """Returns Constant object.
     Args:
       interface_node: interface node object
     Returns:
@@ -236,7 +238,7 @@ def get_const_value(const_node):
 
 
 def const_to_dict(const_nodes):
-    """Returns generator which yields dictionary of constant object information.
+    """Returns dictionary of constant object information.
     Args:
       const_nodes: list of interface node object which has constant
     Returns:
@@ -260,7 +262,7 @@ def interface_to_dict(interface_node):
     """
     return {
         'Attributes': list(attributes_to_dict(get_attributes(interface_node))),
-        'Operations': list(operation_dict(get_operations(interface_node))),
+        'Operations': list(operation_to_dict(get_operations(interface_node))),
         'ExtAttributes': list(extattr_to_dict(get_attributes(interface_node))),
         'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': list(inherit_to_dict(interface_node)),
@@ -269,12 +271,12 @@ def interface_to_dict(interface_node):
 
 
 def merge_dict(interface_dict, partial_dict):
-    """Returns list of interface information dictioary.
+    """Returns interface information dictioary.
     Args:
       interface_dict: interface node dictionary
       partial_dict: partial interface node dictionary
     Returns:
-      list which is list of interface node's dictionry merged with partial interface node
+      a dictronary merged with interface_dict and  partial_dict
     """
     for key in partial_dict.keys():
         interface_dict[key]['Attributes'].append(partial_dict[key]['Attributes'])
