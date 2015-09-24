@@ -28,12 +28,27 @@ def get_interfaces(paths):
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
+            yield definition
             if definition.GetClass() == _class_name:
                 interface = definition
                 yield definition
             elif definition.GetClass() == 'Implements':
                 if interface.GetParent() == definition.GetParent():
-                    print definition.GetProperty('REFERENCE')
+                    yield definition
+                    #print definition#.GetProperty('REFERENCE')
+
+'''def get_interfaces(definitions):
+    for definition in definitions:
+        if definition.GetClass() == _class_name:
+            yield definition
+
+
+def get_implements(definition):
+    if definition.GetClass() == 'Implements':
+        yield {
+            'Name': definition.GetName()
+            'Reference': definition.GetProperty('REFERENCE')
+        }'''
 
 
 def get_filepath(interface_node):
@@ -261,12 +276,14 @@ def interface_to_dict(interface_node):
       dictionary, {interface name: interface node dictionary}
     """
     return {
+        'Name': interface_node.GetName(),
         'Attributes': list(attributes_to_dict(get_attributes(interface_node))),
         'Operations': list(operation_to_dict(get_operations(interface_node))),
         'ExtAttributes': list(extattr_to_dict(get_attributes(interface_node))),
         'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': list(inherit_to_dict(interface_node)),
         'FilePath': get_filepath(interface_node),
+        #'Implement': get_implements(),
     }
 
 
@@ -303,6 +320,7 @@ def main(args):
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
     interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
+    # {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
     partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
     dictionary = merge_dict(interface_dict, partial_dict)
     export_to_jsonfile(dictionary, json_file)
