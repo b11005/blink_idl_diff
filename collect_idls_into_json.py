@@ -28,27 +28,8 @@ def get_interfaces(paths):
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
-            yield definition
             if definition.GetClass() == _class_name:
-                interface = definition
                 yield definition
-            elif definition.GetClass() == 'Implements':
-                if interface.GetParent() == definition.GetParent():
-                    yield definition
-                    #print definition#.GetProperty('REFERENCE')
-
-'''def get_interfaces(definitions):
-    for definition in definitions:
-        if definition.GetClass() == _class_name:
-            yield definition
-
-
-def get_implements(definition):
-    if definition.GetClass() == 'Implements':
-        yield {
-            'Name': definition.GetName()
-            'Reference': definition.GetProperty('REFERENCE')
-        }'''
 
 
 def get_filepath(interface_node):
@@ -116,7 +97,7 @@ def get_extattributes(node):
     Returns:
       a generator which yields list of ExtAttrbute
     """
-    yield node.GetOneOf('ExtAttributes').GetChildren()
+    return node.GetOneOf('ExtAttributes').GetChildren()
 
 
 def extattr_to_dict(extattribute_nodes):
