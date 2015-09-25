@@ -104,7 +104,7 @@ def get_extattributes(node):
         return []
 
 
-def extattr_to_dict(extattribute_nodes):
+'''def extattr_to_dict(extattribute_nodes):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
       extattribute_nodes: list of extended attribute
@@ -114,11 +114,17 @@ def extattr_to_dict(extattribute_nodes):
     for extattribute_node in extattribute_nodes:
         yield {
             'Name': extattribute_node.GetName(),
-        }
+        }'''
 
 
 def extattr_node_to_dict(extattr):
-    return{
+    """Returns a generator which yields Extattribute's object dictionary
+    Args:
+      extattribute_nodes: list of extended attribute
+    Returns:
+      a generator which yields extattribute dictionary
+    """
+    return {
         'Name': extattr.GetName(),
         }
 
@@ -140,11 +146,16 @@ def extattr_node_to_dict(extattr):
 
 
 def attribute_node_to_dict(attribute_node):
-    return {
+     """Returns dictioary of attribute object information.
+    Args:
+      attribute_nodes: list of attribute node object
+    Returns:
+      a generator which yields dictionary of attribite information
+    """
+     return {
         'Name': attribute_node.GetName(),
         'Type': get_attribute_type(attribute_node),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(attribute_node)],
-        #'ExtAttributes': list(extattr_to_dict(get_extattributes(attribute_node))),
         'Readonly': attribute_node.GetProperty('READONLY', default=False),
         'Static': attribute_node.GetProperty('STATIC', default=False),
     }
@@ -213,7 +224,6 @@ def operation_to_dict(operation_nodes):
             'Arguments': list(argument_to_dict(get_arguments(operation_node))),
             'Type': get_operation_type(operation_node),
             'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(operation_node)],
-            #'ExtAttributes': list(extattr_to_dict(get_extattributes(operation_node))),
             'Static': operation_node.GetProperty('STATIC', default=False),
         }
 
@@ -266,7 +276,6 @@ def const_to_dict(const_nodes):
             'Type': get_const_type(const_node),
             'Value': get_const_value(const_node),
             'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(const_node)],
-            #'ExtAttributes': list(extattr_to_dict(get_extattributes(const_node))),
         }
 
 
@@ -280,10 +289,8 @@ def interface_to_dict(interface_node):
     return {
         'Name': interface_node.GetName(),
         'Attributes': [attribute_node_to_dict(attr)  for attr in get_attributes(interface_node)],
-        #'Attributes': list(attributes_to_dict(get_attributes(interface_node))),
         'Operations': list(operation_to_dict(get_operations(interface_node))),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(interface_node)],
-        #'ExtAttributes': list(extattr_to_dict(get_extattributes(interface_node))),
         'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': list(inherit_to_dict(interface_node)),
         'FilePath': get_filepath(interface_node),
