@@ -104,19 +104,6 @@ def get_extattributes(node):
         return []
 
 
-'''def extattr_to_dict(extattribute_nodes):
-    """Returns a generator which yields Extattribute's object dictionary
-    Args:
-      extattribute_nodes: list of extended attribute
-    Returns:
-      a generator which yields extattribute dictionary
-    """
-    for extattribute_node in extattribute_nodes:
-        yield {
-            'Name': extattribute_node.GetName(),
-        }'''
-
-
 def extattr_node_to_dict(extattr):
     """Returns a generator which yields Extattribute's object dictionary
     Args:
@@ -127,22 +114,6 @@ def extattr_node_to_dict(extattr):
     return {
         'Name': extattr.GetName(),
         }
-
-'''def attributes_to_dict(attribute_nodes):
-    """Returns dictioary of attribute object information.
-    Args:
-      attribute_nodes: list of attribute node object
-    Returns:
-      a generator which yields dictionary of attribite information
-    """
-    for attribute_node in attribute_nodes:
-        yield {
-            'Name': attribute_node.GetName(),
-            'Type': get_attribute_type(attribute_node),
-            'ExtAttributes': list(extattr_to_dict(get_extattributes(attribute_node))),
-            'Readonly': attribute_node.GetProperty('READONLY', default=False),
-            'Static': attribute_node.GetProperty('STATIC', default=False),
-        }'''
 
 
 def attribute_node_to_dict(attribute_node):
@@ -180,18 +151,17 @@ def get_arguments(operation_node):
     return operation_node.GetOneOf('Arguments').GetListOf('Argument')
 
 
-def argument_to_dict(argument_nodes):
+def argument_node_to_dict(argument_node):
     """Returns generator which yields dictionary of Argument object information.
     Args:
       arguments: list of argument node object
     Returns:
       a generator which yields dictionary of argument information
     """
-    for argument_node in argument_nodes:
-        yield {
-            'Name': argument_node.GetName(),
-            'Type': get_argument_type(argument_node),
-        }
+    return {
+        'Name': argument_node.GetName(),
+        'Type': get_argument_type(argument_node),
+    }
 
 
 def get_operation_name(operation_node):
@@ -211,7 +181,7 @@ def get_operation_name(operation_node):
         return operation_node.GetName()
 
 
-def operation_to_dict(operation_nodes):
+'''def operation_to_dict(operation_nodes):
     """Returns  dictionary of Operation object information.
     Args:
       operation_nodes: list of operation node object
@@ -225,7 +195,23 @@ def operation_to_dict(operation_nodes):
             'Type': get_operation_type(operation_node),
             'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(operation_node)],
             'Static': operation_node.GetProperty('STATIC', default=False),
-        }
+        }'''
+
+
+def operation_node_to_dict(operation_node):
+    """Returns  dictionary of Operation object information.
+    Args:
+      operation_nodes: list of operation node object
+    Returns:
+      dictionary of operation's informantion
+    """
+    return {
+        'Name': get_operation_name(operation_node),
+        'Arguments': [argument_node_to_dict(argument) for argument in get_arguments(operation_node)],
+        'Type': get_operation_type(operation_node),
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(operation_node)],
+        'Static': operation_node.GetProperty('STATIC', default=False),
+    }
 
 
 def inherit_to_dict(interface_node):
@@ -289,7 +275,8 @@ def interface_to_dict(interface_node):
     return {
         'Name': interface_node.GetName(),
         'Attributes': [attribute_node_to_dict(attr)  for attr in get_attributes(interface_node)],
-        'Operations': list(operation_to_dict(get_operations(interface_node))),
+        'Operations': [operation_node_to_dict(operation) for operation in get_operations(interface_node)],
+        #'Operations': list(operation_to_dict(get_operations(interface_node))),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(interface_node)],
         'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': list(inherit_to_dict(interface_node)),
