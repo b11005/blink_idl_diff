@@ -232,22 +232,6 @@ def get_const_value(const_node):
     return const_node.GetChildren()[1].GetName()
 
 
-'''def const_to_dict(const_nodes):
-    """Returns dictionary of constant object information.
-    Args:
-      const_nodes: list of interface node object which has constant
-    Returns:
-      a generator which yields dictionary of constant object information
-    """
-    for const_node in const_nodes:
-        yield {
-            'Name': const_node.GetName(),
-            'Type': get_const_type(const_node),
-            'Value': get_const_value(const_node),
-            'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(const_node)],
-        }'''
-
-
 def const_node_to_dict(const_node):
     """Returns dictionary of constant object information.
     Args:
@@ -276,7 +260,6 @@ def interface_to_dict(interface_node):
         'Operations': [operation_node_to_dict(operation) for operation in get_operations(interface_node)],
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(interface_node)],
         'Consts': [const_node_to_dict(const) for const in get_consts(interface_node)],
-        #'Consts': list(const_to_dict(get_consts(interface_node))),
         'Inherit': inherit_to_dict(interface_node),
         'FilePath': get_filepath(interface_node),
     }
