@@ -181,23 +181,6 @@ def get_operation_name(operation_node):
         return operation_node.GetName()
 
 
-'''def operation_to_dict(operation_nodes):
-    """Returns  dictionary of Operation object information.
-    Args:
-      operation_nodes: list of operation node object
-    Returns:
-      a generator which yields dictionary of operation's informantion
-    """
-    for operation_node in operation_nodes:
-        yield {
-            'Name': get_operation_name(operation_node),
-            'Arguments': list(argument_to_dict(get_arguments(operation_node))),
-            'Type': get_operation_type(operation_node),
-            'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(operation_node)],
-            'Static': operation_node.GetProperty('STATIC', default=False),
-        }'''
-
-
 def operation_node_to_dict(operation_node):
     """Returns  dictionary of Operation object information.
     Args:
@@ -216,7 +199,7 @@ def operation_node_to_dict(operation_node):
 
 def inherit_to_dict(interface_node):
     if interface_node.GetOneOf('Inherit'):
-        yield {'Name': interface_node.GetOneOf('Inherit').GetName()}
+        return {'Name': interface_node.GetOneOf('Inherit').GetName()}
 
 
 def get_consts(interface_node):
@@ -249,7 +232,7 @@ def get_const_value(const_node):
     return const_node.GetChildren()[1].GetName()
 
 
-def const_to_dict(const_nodes):
+'''def const_to_dict(const_nodes):
     """Returns dictionary of constant object information.
     Args:
       const_nodes: list of interface node object which has constant
@@ -262,7 +245,22 @@ def const_to_dict(const_nodes):
             'Type': get_const_type(const_node),
             'Value': get_const_value(const_node),
             'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(const_node)],
-        }
+        }'''
+
+
+def const_node_to_dict(const_node):
+    """Returns dictionary of constant object information.
+    Args:
+      const_nodes: list of interface node object which has constant
+    Returns:
+      a generator which yields dictionary of constant object information
+    """
+    return {
+        'Name': const_node.GetName(),
+        'Type': get_const_type(const_node),
+        'Value': get_const_value(const_node),
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(const_node)],
+    }
 
 
 def interface_to_dict(interface_node):
@@ -276,10 +274,10 @@ def interface_to_dict(interface_node):
         'Name': interface_node.GetName(),
         'Attributes': [attribute_node_to_dict(attr)  for attr in get_attributes(interface_node)],
         'Operations': [operation_node_to_dict(operation) for operation in get_operations(interface_node)],
-        #'Operations': list(operation_to_dict(get_operations(interface_node))),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattributes(interface_node)],
-        'Consts': list(const_to_dict(get_consts(interface_node))),
-        'Inherit': list(inherit_to_dict(interface_node)),
+        'Consts': [const_node_to_dict(const) for const in get_consts(interface_node)],
+        #'Consts': list(const_to_dict(get_consts(interface_node))),
+        'Inherit': inherit_to_dict(interface_node),
         'FilePath': get_filepath(interface_node),
     }
 
