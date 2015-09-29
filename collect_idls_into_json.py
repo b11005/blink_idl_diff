@@ -24,16 +24,20 @@ def get_interfaces(paths):
     Returns:
       a generator which yields interface node objects
     """
+    d = []
     parser = BlinkIDLParser(debug=False)
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
-            #yield definition
-            if definition.GetClass() == _class_name:
-                yield definition
+            yield definition
+            #if definition.GetClass() == _class_name:
+                #yield definition
             #elif definition.GetClass() == 'Implements':
                 #print definition.GetProperties()
                 #print definition, definition.GetProperty('REFERENCE')
+                #d.append({definition.GetName(),definition.GetProperty('REFERENCE')})
+    #print len(d)
+    #print d
 
 
 def get_interface_node(definition):
@@ -42,8 +46,7 @@ def get_interface_node(definition):
 
 
 def get_implements_node(definition):
-    if definition.GetClass() == 'Implements' and definition.GetProperties():
-        #print definition
+    if definition.GetClass() == 'Implements':
         return definition
 
 
@@ -268,7 +271,7 @@ def const_node_to_dict(const_node):
     }
 
 
-def interface_to_dict(interface_node):
+def interface_node_to_dict(interface_node):
     """Returns dictioary whose key is interface name and value is interface dictioary.
     Args:
       interface_node: interface node
@@ -302,6 +305,14 @@ def merge_dict(interface_dict, partial_dict):
     return interface_dict
 
 
+def merge_implement_node(interface_dict, implement_nodes):
+    for key in implement_nodes:
+        interface_dict[key.GetName()]['Attributes'].append(interface_dict[key.GetProperty('REFERENCE')]['Attributes'])
+        interface_dict[key.GetName()]['Operations'].append(interface_dict[key.GetProperty('REFERENCE')]['Operations'])
+        interface_dict[key.GetName()]['Consts'].append(interface_dict[key.GetProperty('REFERENCE')]['Consts'])
+    return interface_dict
+
+
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface information dictionary to json.
     Args:
@@ -318,17 +329,18 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    #definitions = get_definitions(file_to_list)
-    #implement_nodes = {get_implements_node(definition).GetName(): get_implements_node(definition).GetProperty('REFERENCE') for definition in get_interfaces(file_to_list) if get_implements_node(definition)}
-    interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
-    #interface_dict = {get_interface_node(definition).GetName(): interface_to_dict(get_interface_node(definition)) for definition in filter_non_partial(definitions) if get_interface_node(definition)}
-    #print interface_dict
-    partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
+    interface_nodes = [get_interface_node(definition) for definition in get_interfaces(file_to_list) if get_interface_node(definition)]
+    implement_nodes = [get_implements_node(definition) for definition in get_interfaces(file_to_list) if get_implements_node(definition)]
+    #interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
+    interface_dict = {interface_node.GetName(): interface_node_to_dict(interface_node) for interface_node in interface_nodes}
+    d = merge_implement_node(interface_dict, implement_nodes)
+    print d['Window']
+    #partial_dict = {interface_node.GetName(): interface_node_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
     #partial_dict = {get_interface_node(definition).GetName(): interface_to_dict(get_interface_node(definition)) for definition in definitions}
     #partial_dict = {get_interface_node(definition).GetName(): interface_to_dict(get_interface_node(definition)) for definition in filter_partial(definitions) if get_interface_node(definition)}
     #print partial_dict
-    dictionary = merge_dict(interface_dict, partial_dict)
-    export_to_jsonfile(dictionary, json_file)
+    #dictionary = merge_dict(interface_dict, partial_dict)
+    #export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
