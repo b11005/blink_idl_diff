@@ -30,14 +30,6 @@ def get_definitions(paths):
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
             yield definition
-            #if definition.GetClass() == _class_name:
-                #yield definition
-            #elif definition.GetClass() == 'Implements':
-                #print definition.GetProperties()
-                #print definition, definition.GetProperty('REFERENCE')
-                #d.append({definition.GetName(),definition.GetProperty('REFERENCE')})
-    #print len(d)
-    #print d
 
 
 def get_interface_node(definition):
