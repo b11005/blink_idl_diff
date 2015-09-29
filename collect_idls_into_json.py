@@ -17,7 +17,7 @@ _class_name = 'Interface'
 _partial = 'Partial'
 
 
-def get_interfaces(paths):
+def get_definitions(paths):
     """Returns interface IDL node.
     Args:
       paths: list of IDL file path
@@ -305,7 +305,7 @@ def merge_dict(interface_dict, partial_dict):
     return interface_dict
 
 
-def merge_implement_node(interface_dict, implement_nodes):
+def merge_implement_nodes(interface_dict, implement_nodes):
     for key in implement_nodes:
         interface_dict[key.GetName()]['Attributes'].append(interface_dict[key.GetProperty('REFERENCE')]['Attributes'])
         interface_dict[key.GetName()]['Operations'].append(interface_dict[key.GetProperty('REFERENCE')]['Operations'])
@@ -329,18 +329,13 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    interface_nodes = [get_interface_node(definition) for definition in get_interfaces(file_to_list) if get_interface_node(definition)]
-    implement_nodes = [get_implements_node(definition) for definition in get_interfaces(file_to_list) if get_implements_node(definition)]
-    #interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
-    interface_dict = {interface_node.GetName(): interface_node_to_dict(interface_node) for interface_node in interface_nodes}
-    d = merge_implement_node(interface_dict, implement_nodes)
-    print d['Window']
-    #partial_dict = {interface_node.GetName(): interface_node_to_dict(interface_node) for interface_node in filter_partial(get_interfaces(file_to_list))}
-    #partial_dict = {get_interface_node(definition).GetName(): interface_to_dict(get_interface_node(definition)) for definition in definitions}
-    #partial_dict = {get_interface_node(definition).GetName(): interface_to_dict(get_interface_node(definition)) for definition in filter_partial(definitions) if get_interface_node(definition)}
-    #print partial_dict
-    #dictionary = merge_dict(interface_dict, partial_dict)
-    #export_to_jsonfile(dictionary, json_file)
+    implement_nodes = [get_implements_node(definition) for definition in get_definitions(file_to_list) if get_implements_node(definition)]
+    interface_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) for definition in filter_non_partial(get_definitions(file_to_list)) if get_interface_node(definition)}
+    d = merge_implement_nodes(interface_dict, implement_nodes)
+    partial_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) for definition in filter_partial(get_definitions(file_to_list)) if get_interface_node(definition)}
+
+    dictionary = merge_dict(interface_dict, partial_dict)
+    export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
