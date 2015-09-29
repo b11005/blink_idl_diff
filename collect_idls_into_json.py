@@ -28,8 +28,23 @@ def get_interfaces(paths):
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
-            if definition.GetClass() == _class_name:
-                yield definition
+            yield definition
+            #if definition.GetClass() == _class_name:
+                #yield definition
+            #elif definition.GetClass() == 'Implements':
+                #print definition.GetProperties()
+                #print definition, definition.GetProperty('REFERENCE')
+
+
+def get_interface_node(definition):
+    if definition.GetClass() == _class_name:
+        return definition
+
+
+def get_implements_node(definition):
+    if definition.GetClass() == 'Implements' and definition.GetProperties():
+        #print definition
+        return definition
 
 
 def get_filepath(interface_node):
@@ -303,10 +318,12 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
-    partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
-    dictionary = merge_dict(interface_dict, partial_dict)
-    export_to_jsonfile(dictionary, json_file)
+    interface_nodes = [get_interface_node(definition).GetName() for definition in get_interfaces(file_to_list) if get_interface_node(definition)]
+    implement_nodes = {get_implements_node(definition).GetName(): get_implements_node(definition).GetProperty('REFERENCE') for definition in get_interfaces(file_to_list) if get_implements_node(definition)}
+    #interface_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_non_partial(get_interfaces(file_to_list))}
+    #partial_dict = {interface.GetName(): interface_to_dict(interface) for interface in filter_partial(get_interfaces(file_to_list))}
+    #dictionary = merge_dict(interface_dict, partial_dict)
+    #export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
