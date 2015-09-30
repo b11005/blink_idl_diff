@@ -6,23 +6,24 @@
 """Usage: collect_idls_into_json.py path_file.txt json_file.json
 """
 
+import json
 import os
 import sys
-import json
 import utilities
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
-_class_name = 'Interface'
-_partial = 'Partial'
+_CLASS_NAME = 'Interface'
+_PARTIAL = 'Partial'
+_strip_filepath = '../chromium/src/third_party/WebKit'
 
 
 def get_definitions(paths):
-    """Returns interface IDL node.
+    """Returns IDL node.
     Args:
       paths: list of IDL file path
     Returns:
-      a generator which yields interface node objects
+      a generator which yields IDL node objects
     """
     parser = BlinkIDLParser(debug=False)
     for path in paths:
@@ -32,11 +33,23 @@ def get_definitions(paths):
 
 
 def get_interface_node(definition):
-    if definition.GetClass() == _class_name:
+    """Returns interface node.
+    Args:
+      definition: IDL node
+    Returns:
+      interface node
+    """
+    if definition.GetClass() == _CLASS_NAME:
         return definition
 
 
 def get_implements_node(definition):
+    """Returns implement node.
+    Args:
+      definition: IDL node
+    Returns:
+      implement node
+    """
     if definition.GetClass() == 'Implements':
         return definition
 
@@ -60,7 +73,7 @@ def filter_partial(interface_nodes):
       a generator which yields partial interface node
     """
     for interface_node in interface_nodes:
-        if interface_node.GetProperty(_partial):
+        if interface_node.GetProperty(_PARTIAL):
             yield interface_node
 
 
@@ -72,7 +85,7 @@ def filter_non_partial(interface_nodes):
       a generator which yields interface node
     """
     for interface_node in interface_nodes:
-        if not interface_node.GetProperty(_partial):
+        if not interface_node.GetProperty(_PARTIAL):
             yield interface_node
 
 
@@ -281,7 +294,7 @@ def interface_node_to_dict(interface_node):
     }
 
 
-def merge_dict(interface_dict, partial_dict):
+def merge_partial_interface(interface_dict, partial_dict):
     """Returns interface information dictioary.
     Args:
       interface_dict: interface node dictionary
@@ -290,7 +303,7 @@ def merge_dict(interface_dict, partial_dict):
       a dictronary merged with interface_dict and  partial_dict
     """
     for key in partial_dict.keys():
-        interface_dict[key]['Attributes'].extend(partial_dict[key]['Attributes']) if partial_dict[key]['Attributes']!=[] else None
+        interface_dict[key]['Attributes'].extend(partial_dict[key]['Attributes']) if partial_dict[key]['Attributes'] != [] else None
         interface_dict[key]['Operations'].extend(partial_dict[key]['Operations'])if partial_dict[key]['Operations'] else None
         interface_dict[key]['Consts'].extend(partial_dict[key]['Consts']) if partial_dict[key]['Consts'] else None
         interface_dict[key].setdefault('Partial_FilePaths', []).append(partial_dict[key]['FilePath'])
@@ -305,6 +318,7 @@ def merge_implement_nodes(interface_dict, implement_nodes):
     return interface_dict
 
 
+# TODO(natsukoa): Remove indent
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface information dictionary to json.
     Args:
@@ -314,7 +328,6 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        # TODO(natsukoa): Remove indent
         json.dump(dictionary, f, sort_keys=True, indent=4)
 
 
@@ -326,7 +339,7 @@ def main(args):
     interface_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) for definition in filter_non_partial(get_definitions(file_to_list)) if get_interface_node(definition)}
     interface_dict = merge_implement_nodes(interface_dict, implement_nodes)
     partial_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) for definition in filter_partial(get_definitions(file_to_list)) if get_interface_node(definition)}
-    dictionary = merge_dict(interface_dict, partial_dict)
+    dictionary = merge_partial_interface(interface_dict, partial_dict)
     export_to_jsonfile(dictionary, json_file)
 
 
