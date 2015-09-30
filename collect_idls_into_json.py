@@ -41,6 +41,8 @@ def get_interface_node(definition):
     """
     if definition.GetClass() == _CLASS_NAME:
         return definition
+    else:
+        pass
 
 
 def get_implements_node(definition):
@@ -52,6 +54,8 @@ def get_implements_node(definition):
     """
     if definition.GetClass() == 'Implements':
         return definition
+    else:
+        pass
 
 
 def get_filepath(interface_node):
@@ -335,10 +339,16 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    implement_nodes = [get_implements_node(definition) for definition in get_definitions(file_to_list) if get_implements_node(definition)]
-    interface_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) for definition in filter_non_partial(get_definitions(file_to_list)) if get_interface_node(definition)}
+    implement_nodes = [get_implements_node(definition) 
+                       for definition in get_definitions(file_to_list) 
+                       if get_implements_node(definition)]
+    interface_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
+                      for definition in filter_non_partial(get_definitions(file_to_list)) 
+                      if get_interface_node(definition)}
     interface_dict = merge_implement_nodes(interface_dict, implement_nodes)
-    partial_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) for definition in filter_partial(get_definitions(file_to_list)) if get_interface_node(definition)}
+    partial_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
+                    for definition in filter_partial(get_definitions(file_to_list)) 
+                    if get_interface_node(definition)}
     dictionary = merge_partial_interface(interface_dict, partial_dict)
     export_to_jsonfile(dictionary, json_file)
 
