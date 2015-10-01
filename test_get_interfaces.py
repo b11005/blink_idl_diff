@@ -4,6 +4,7 @@ import unittest
 import collect_idls_into_json
 import utilities
 
+key_set = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
 
 class TestFunctions(unittest.TestCase):
     def setup(self):
@@ -14,7 +15,7 @@ class TestFunctions(unittest.TestCase):
        for actual in collect_idls_into_json.get_interfaces(utilities.read_file_to_list('sample0.txt')):
            self.assertEqual(actual.GetClass(), "Interface")
 
-# not good
+
     def test_get_filepaths(self):
         for actual in collect_idls_into_json.get_interfaces(utilities.read_file_to_list('sample0.txt')):
             path = collect_idls_into_json.get_filepath(actual)
@@ -22,14 +23,14 @@ class TestFunctions(unittest.TestCase):
             self.assertTrue(path.endswith('.idl'))
 
     #def test_get_attributes(self):
-    
+        #for actual in collect_idls_into_json.get_interfaces(utilities.read_file_to_list('sample0.txt')):
+            #self.assertEqual()
 
 
 
     def test_interface_to_dict(self):
         for actual in collect_idls_into_json.get_interfaces(utilities.read_file_to_list('sample0.txt')):
-            self.assertEqual(len(collect_idls_into_json.interface_to_dict(actual).keys()), 7)
-            #print collect_idls_into_json.interface_to_dict(actual).items()
+            self.assertTrue(key_set.issuperset(collect_idls_into_json.interface_to_dict(actual)))
 
 
 if __name__ == '__main__':
