@@ -42,7 +42,7 @@ def get_interface_node(definition):
     if definition.GetClass() == _CLASS_NAME:
         return definition
     else:
-        pass
+        return None
 
 
 def get_implements_node(definition):
@@ -55,7 +55,7 @@ def get_implements_node(definition):
     if definition.GetClass() == 'Implements':
         return definition
     else:
-        pass
+        return None
 
 
 def get_filepath(interface_node):
@@ -152,7 +152,7 @@ def attribute_node_to_dict(attribute_node):
     return {
         'Name': attribute_node.GetName(),
         'Type': get_attribute_type(attribute_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(attribute_node) if extattr_node_to_dict(extattr)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(attribute_node)],
         'Readonly': attribute_node.GetProperty('READONLY', default=False),
         'Static': attribute_node.GetProperty('STATIC', default=False),
     }
@@ -219,7 +219,7 @@ def operation_node_to_dict(operation_node):
         'Name': get_operation_name(operation_node),
         'Arguments': [argument_node_to_dict(argument) for argument in get_argument_node(operation_node) if argument_node_to_dict(argument)],
         'Type': get_operation_type(operation_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(operation_node) if extattr_node_to_dict(extattr)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(operation_node)],
         'Static': operation_node.GetProperty('STATIC', default=False),
     }
 
@@ -232,7 +232,7 @@ def get_inherit_node(interface_node):
 
 
 def inherit_node_to_dict(inherit):
-    return {'Name': inherit.GetName()}
+    return {'Parent': inherit.GetName()}
 
 
 def get_const_node(interface_node):
@@ -276,7 +276,7 @@ def const_node_to_dict(const_node):
         'Name': const_node.GetName(),
         'Type': get_const_type(const_node),
         'Value': get_const_value(const_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(const_node) if extattr_node_to_dict(extattr)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(const_node)],
     }
 
 
@@ -289,16 +289,16 @@ def interface_node_to_dict(interface_node):
     """
     return {
         'Name': interface_node.GetName(),
+        'Consts': [const_node_to_dict(const) for const in get_const_node(interface_node)],
         'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node(interface_node) if attribute_node_to_dict(attr)],
         'Operations': [operation_node_to_dict(operation) for operation in get_operation_node(interface_node) if operation_node_to_dict(operation)],
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(interface_node) if extattr_node_to_dict(extattr)],
-        'Consts': [const_node_to_dict(const) for const in get_const_node(interface_node)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(interface_node)],
         'Inherit': [inherit_node_to_dict(inherit) for inherit in get_inherit_node(interface_node)],
         'FilePath': get_filepath(interface_node),
     }
 
 
-def merge_partial_interface(interface_dict, partial_dict):
+def merge_partial_dicts(interfaces_dict, partials_dict):
     """Returns interface information dictioary.
     Args:
       interface_dict: interface node dictionary
@@ -306,19 +306,23 @@ def merge_partial_interface(interface_dict, partial_dict):
     Returns:
       a dictronary merged with interface_dict and  partial_dict
     """
-    for key in partial_dict.keys():
-        interface_dict[key]['Attributes'].extend(partial_dict[key]['Attributes']) if partial_dict[key]['Attributes'] != [] else None
-        interface_dict[key]['Operations'].extend(partial_dict[key]['Operations'])if partial_dict[key]['Operations'] else None
-        interface_dict[key]['Consts'].extend(partial_dict[key]['Consts']) if partial_dict[key]['Consts'] else None
-        interface_dict[key].setdefault('Partial_FilePaths', []).append(partial_dict[key]['FilePath'])
-    return interface_dict
+    for interface_name in partials_dict.keys():
+        interfaces_dict[interface_name]['Consts'].extend(partial_dict[key]['Consts']) if partials_dict[interface_name]['Consts'] else None
+        interfaces_dict[interface_name]['Attributes'].extend(partials_dict[interface_name]['Attributes']) if partials_dict[interface_name]['Attributes'] != [] else None
+        interfaces_dict[interface_name]['Operations'].extend(partials_dict[interface_name]['Operations'])if partials_dict[interface_name]['Operations'] else None
+        interfaces_dict[interface_name].setdefault('Partial_FilePaths', []).append(partials_dict[interface_name]['FilePath'])
+    return interfaces_dict
 
 
 def merge_implement_nodes(interface_dict, implement_nodes):
-    for key in implement_nodes:
-        interface_dict[key.GetName()]['Attributes'].extend(interface_dict[key.GetProperty('REFERENCE')]['Attributes'])
-        interface_dict[key.GetName()]['Operations'].extend(interface_dict[key.GetProperty('REFERENCE')]['Operations'])
-        interface_dict[key.GetName()]['Consts'].extend(interface_dict[key.GetProperty('REFERENCE')]['Consts'])
+    """Returns
+    
+    """
+    for implement_name in implement_nodes:
+        interface_dict[implement_name.GetName()]['Consts'].extend(interface_dict[implement_name.GetProperty('REFERENCE')]['Consts'])
+        interface_dict[implement_name.GetName()]['Attributes'].extend(interface_dict[implement_name.GetProperty('REFERENCE')]['Attributes'])
+        interface_dict[implement_name.GetName()]['Operations'].extend(interface_dict[implement_name.GetProperty('REFERENCE')]['Operations'])
+
     return interface_dict
 
 
@@ -345,11 +349,11 @@ def main(args):
     interface_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
                       for definition in filter_non_partial(get_definitions(file_to_list)) 
                       if get_interface_node(definition)}
-    interface_dict = merge_implement_nodes(interface_dict, implement_nodes)
-    partial_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
+    interfaces_dict = merge_implement_nodes(interface_dict, implement_nodes)
+    partials_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
                     for definition in filter_partial(get_definitions(file_to_list)) 
                     if get_interface_node(definition)}
-    dictionary = merge_partial_interface(interface_dict, partial_dict)
+    dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
     export_to_jsonfile(dictionary, json_file)
 
 
