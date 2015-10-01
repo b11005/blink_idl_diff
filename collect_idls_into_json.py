@@ -4,6 +4,8 @@
 # found in the LICENSE file.
 
 """Usage: collect_idls_into_json.py path_file.txt json_file.json
+
+This script 
 """
 
 import json
@@ -15,7 +17,7 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 
 _CLASS_NAME = 'Interface'
 _PARTIAL = 'Partial'
-_strip_filepath = '../chromium/src/third_party/WebKit'
+_STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
 
 
 def get_definitions(paths):
@@ -66,7 +68,7 @@ def get_filepath(interface_node):
       str which is |interface_node| file path
     """
     filename = interface_node.GetProperty('FILENAME')
-    return os.path.relpath(filename).strip('../chromium/src/third_party/WebKit')
+    return os.path.relpath(filename).strip(_STRIP_FILEPATH)
 
 
 def filter_partial(interface_nodes):
