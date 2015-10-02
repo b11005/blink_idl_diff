@@ -47,20 +47,13 @@ def get_interface_node(definition):
         return None
 
 
-'''def get_implements_node(definition):
+def is_implements(definition):
     """Returns implement node.
     Args:
       definition: IDL node
     Returns:
       implement node
     """
-    if definition.GetClass() == 'Implements':
-        return definition
-    else:
-        return None'''
-
-
-def is_implements(definition):
     if definition.GetClass() == 'Implements':
         return True
     else:
