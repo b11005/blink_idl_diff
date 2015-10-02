@@ -5,7 +5,7 @@
 
 """Usage: collect_idls_into_json.py path_file.txt json_file.json
 
-This script collects 
+This script collects and organizes interface information and that information dumps into json file.
 """
 
 import json
@@ -267,7 +267,7 @@ def extattr_node_to_dict(extattr):
       a generator which yields extattribute dictionary
     """
     return {
-       'Name': extattr.GetName(),
+        'Name': extattr.GetName(),
     }
 
 
@@ -280,7 +280,6 @@ def get_inherit_node(interface_node):
 
 def inherit_node_to_dict(inherit):
     return {'Parent': inherit.GetName()}
-
 
 
 def interface_node_to_dict(interface_node):
@@ -310,20 +309,20 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
       a dictronary merged with interfaces_dict and  partial_dict
     """
     for interface_name, information_dict in partials_dict.iteritems():
-        interfaces_dict[interface_name]['Consts'].extend(partial_dict[key]['Consts']) if partials_dict[interface_name]['Consts'] else None
-        interfaces_dict[interface_name]['Attributes'].extend(partials_dict[interface_name]['Attributes']) if partials_dict[interface_name]['Attributes'] != [] else None
-        interfaces_dict[interface_name]['Operations'].extend(partials_dict[interface_name]['Operations'])if partials_dict[interface_name]['Operations'] else None
-        interfaces_dict[interface_name].setdefault('Partial_FilePaths', []).append(partials_dict[interface_name]['FilePath'])
+        interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
+        interfaces_dict[interface_name]['Attributes'].extend(information_dict['Attributes']) if information_dict['Attributes'] != [] else None
+        interfaces_dict[interface_name]['Operations'].extend(information_dict['Operations'])if information_dict['Operations'] else None
+        interfaces_dict[interface_name].setdefault('Partial_FilePaths', []).append(information_dict['FilePath'])
     return interfaces_dict
 
 
 def merge_implement_nodes(interfaces_dict, implement_nodes):
     """Returns dict of interface information combined with referenced interface information
     Args:
-      interfaces_dict:
-      implement_nodes: list of implemented interface node and referenced interface node
+      interfaces_dict: dict of interface information
+      implement_nodes: list of implemented interface node
     Returns:
-      interfaces_dict: 
+      interfaces_dict: dict of interface information combine into implements node
     """
     for implement_name in implement_nodes:
         reference = implement_name.GetProperty('REFERENCE')
@@ -350,18 +349,18 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    implement_nodes = [definition.GetName()
+    implement_nodes = [definition
                        for definition in get_definitions(file_to_list)
                        if is_implements(definition)]
-    interfaces_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
-                      for definition in filter_non_partial(get_definitions(file_to_list)) 
-                      if get_interface_node(definition)}
-    partials_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
-                    for definition in filter_partial(get_definitions(file_to_list)) 
-                    if get_interface_node(definition)}
+    interfaces_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition))
+                       for definition in filter_non_partial(get_definitions(file_to_list))
+                       if get_interface_node(definition)}
+    partials_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition))
+                     for definition in filter_partial(get_definitions(file_to_list))
+                     if get_interface_node(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
     #interfaces_dict = merge_implement_nodes(interfaces_dict, implement_nodes)
-    export_to_jsonfile(dictionary, json_file)
+    #export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
