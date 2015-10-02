@@ -67,17 +67,6 @@ def is_implements(definition):
         return False
 
 
-def get_filepath(interface_node):
-    """Returns relative path under the WebKit directory which |interface_node| is defined.
-    Args:
-      interface_node: IDL interface
-    Returns:
-      str which is |interface_node| file path
-    """
-    filename = interface_node.GetProperty('FILENAME')
-    return os.path.relpath(filename).strip(_STRIP_FILEPATH)
-
-
 def filter_partial(interface_nodes):
     """Returns partial interface node.
     Args:
@@ -100,6 +89,18 @@ def filter_non_partial(interface_nodes):
     for interface_node in interface_nodes:
         if not interface_node.GetProperty(_PARTIAL):
             yield interface_node
+
+
+def get_filepath(interface_node):
+    """Returns relative path under the WebKit directory which |interface_node| is defined.
+    Args:
+      interface_node: IDL interface
+    Returns:
+      str which is |interface_node| file path
+    """
+    filename = interface_node.GetProperty('FILENAME')
+    return os.path.relpath(filename).strip(_STRIP_FILEPATH)
+
 
 def get_const_node(interface_node):
     """Returns Constant object.
@@ -168,31 +169,6 @@ def get_attribute_type(attribute_node):
 
 get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
-
-
-def get_extattribute_node(node):
-    """Returns list of ExtAttribute.
-    Args:
-      IDL node object
-    Returns:
-      a list of ExtAttrbute
-    """
-    if node.GetOneOf('ExtAttributes'):
-        return node.GetOneOf('ExtAttributes').GetListOf('ExtAttribute')
-    else:
-        return []
-
-
-def extattr_node_to_dict(extattr):
-    """Returns a generator which yields Extattribute's object dictionary
-    Args:
-      extattribute_nodes: list of extended attribute
-    Returns:
-      a generator which yields extattribute dictionary
-    """
-    return {
-       'Name': extattr.GetName(),
-    }
 
 
 def attribute_node_to_dict(attribute_node):
@@ -312,50 +288,6 @@ def get_inherit_node(interface_node):
 def inherit_node_to_dict(inherit):
     return {'Parent': inherit.GetName()}
 
-
-def get_const_node(interface_node):
-    """Returns Constant object.
-    Args:
-      interface_node: interface node object
-    Returns:
-      list which is list of constant object
-    """
-    return interface_node.GetListOf('Const')
-
-
-def get_const_type(const_node):
-    """Returns constant's type.
-    Args:
-      const_node: constant node object
-    Returns:
-      node.GetChildren()[0].GetName(): str, constant object's name
-    """
-    return const_node.GetChildren()[0].GetName()
-
-
-def get_const_value(const_node):
-    """Returns constant's value.
-    Args:
-      const_node: constant node object
-    Returns:
-      node.GetChildren()[1].GetName(): list, list of oparation object
-    """
-    return const_node.GetChildren()[1].GetName()
-
-
-def const_node_to_dict(const_node):
-    """Returns dictionary of constant object information.
-    Args:
-      const_nodes: list of interface node object which has constant
-    Returns:
-      a generator which yields dictionary of constant object information
-    """
-    return {
-        'Name': const_node.GetName(),
-        'Type': get_const_type(const_node),
-        'Value': get_const_value(const_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(const_node)],
-    }
 
 
 def interface_node_to_dict(interface_node):
