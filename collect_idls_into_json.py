@@ -309,10 +309,13 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
       a dictronary merged with interfaces_dict and  partial_dict
     """
     for interface_name, interface_dict in partials_dict.iteritems():
-        interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
-        interfaces_dict[interface_name]['Attributes'].extend(interface_dict['Attributes']) if interface_dict['Attributes'] != [] else None
-        interfaces_dict[interface_name]['Operations'].extend(interface_dict['Operations'])if interface_dict['Operations'] else None
-        interfaces_dict[interface_name].setdefault('Partial_FilePaths', []).append(interface_dict['FilePath'])
+        interface = interfaces_dict.get(interface_name)
+        if interface:
+            
+            interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
+            interfaces_dict[interface_name]['Attributes'].extend(interface_dict['Attributes']) if interface_dict['Attributes'] != [] else None
+            interfaces_dict[interface_name]['Operations'].extend(interface_dict['Operations'])if interface_dict['Operations'] else None
+            interfaces_dict[interface_name].setdefault('Partial_FilePaths', []).append(interface_dict['FilePath'])
     return interfaces_dict
 
 
@@ -359,8 +362,8 @@ def main(args):
                      for definition in filter_partial(get_definitions(file_to_list))
                      if get_interface_node(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
-    #interfaces_dict = merge_implement_nodes(interfaces_dict, implement_nodes)
-    #export_to_jsonfile(dictionary, json_file)
+    interfaces_dict = merge_implement_nodes(interfaces_dict, implement_nodes)
+    export_to_jsonfile(dictionary, json_file)
 
 
 if __name__ == '__main__':
