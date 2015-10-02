@@ -18,6 +18,7 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 _CLASS_NAME = 'Interface'
 _PARTIAL = 'Partial'
 _STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
+_MEMBERS = ['Attributes', 'Operations', 'Consts']
 
 
 def get_definitions(paths):
@@ -308,14 +309,17 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
     Returns:
       a dictronary merged with interfaces_dict and  partial_dict
     """
-    for interface_name, interface_dict in partials_dict.iteritems():
+    for interface_name, partial in partials_dict.iteritems():
         interface = interfaces_dict.get(interface_name)
-        if interface:
-            
-            interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
-            interfaces_dict[interface_name]['Attributes'].extend(interface_dict['Attributes']) if interface_dict['Attributes'] != [] else None
-            interfaces_dict[interface_name]['Operations'].extend(interface_dict['Operations'])if interface_dict['Operations'] else None
-            interfaces_dict[interface_name].setdefault('Partial_FilePaths', []).append(interface_dict['FilePath'])
+        if not interface:
+            continue
+        else:
+            for member in _MEMBERS:
+                interface[member].extend(partial.get(member))
+            interface.setdefault('Partial_FilePaths', []).append(partial['FilePath'])
+            #interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
+            #interfaces_dict[interface_name]['Attributes'].extend(interface_dict['Attributes']) if interface_dict['Attributes'] != [] else None
+            #interfaces_dict[interface_name]['Operations'].extend(interface_dict['Operations'])if interface_dict['Operations'] else None
     return interfaces_dict
 
 
