@@ -47,7 +47,7 @@ def get_interface_node(definition):
         return None
 
 
-def get_implements_node(definition):
+'''def get_implements_node(definition):
     """Returns implement node.
     Args:
       definition: IDL node
@@ -57,7 +57,14 @@ def get_implements_node(definition):
     if definition.GetClass() == 'Implements':
         return definition
     else:
-        return None
+        return None'''
+
+
+def is_implements(definition):
+    if definition.GetClass() == 'Implements':
+        return True
+    else:
+        return False
 
 
 def get_filepath(interface_node):
@@ -349,10 +356,10 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    implement_nodes = [get_implements_node(definition)
+    implement_nodes = [definition.GetName()
                        for definition in get_definitions(file_to_list)
-                       if get_implements_node(definition)]
-    #print implement_nodes
+                       if is_implements(definition)]
+    print implement_nodes
     interfaces_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
                       for definition in filter_non_partial(get_definitions(file_to_list)) 
                       if get_interface_node(definition)}
