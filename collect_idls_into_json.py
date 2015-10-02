@@ -5,7 +5,7 @@
 
 """Usage: collect_idls_into_json.py path_file.txt json_file.json
 
-This script 
+This script collects 
 """
 
 import json
@@ -140,7 +140,7 @@ def extattr_node_to_dict(extattr):
       a generator which yields extattribute dictionary
     """
     return {
-        'Name': extattr.GetName(),
+       'Name': extattr.GetName(),
     }
 
 
@@ -303,12 +303,12 @@ def interface_node_to_dict(interface_node):
 def merge_partial_dicts(interfaces_dict, partials_dict):
     """Returns interface information dictioary.
     Args:
-      interface_dict: interface node dictionary
+      interfaces_dict: interface node dictionary
       partial_dict: partial interface node dictionary
     Returns:
-      a dictronary merged with interface_dict and  partial_dict
+      a dictronary merged with interfaces_dict and  partial_dict
     """
-    for interface_name in partials_dict.keys():
+    for interface_name, information_dict in partials_dict.iteritems():
         interfaces_dict[interface_name]['Consts'].extend(partial_dict[key]['Consts']) if partials_dict[interface_name]['Consts'] else None
         interfaces_dict[interface_name]['Attributes'].extend(partials_dict[interface_name]['Attributes']) if partials_dict[interface_name]['Attributes'] != [] else None
         interfaces_dict[interface_name]['Operations'].extend(partials_dict[interface_name]['Operations'])if partials_dict[interface_name]['Operations'] else None
@@ -316,16 +316,20 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
     return interfaces_dict
 
 
-def merge_implement_nodes(interface_dict, implement_nodes):
-    """Returns
-    
+def merge_implement_nodes(interfaces_dict, implement_nodes):
+    """Returns dict of interface information combined with referenced interface information
+    Args:
+      interfaces_dict:
+      implement_nodes: list of implemented interface node and referenced interface node
+    Returns:
+      interfaces_dict: 
     """
     for implement_name in implement_nodes:
-        interface_dict[implement_name.GetName()]['Consts'].extend(interface_dict[implement_name.GetProperty('REFERENCE')]['Consts'])
-        interface_dict[implement_name.GetName()]['Attributes'].extend(interface_dict[implement_name.GetProperty('REFERENCE')]['Attributes'])
-        interface_dict[implement_name.GetName()]['Operations'].extend(interface_dict[implement_name.GetProperty('REFERENCE')]['Operations'])
-
-    return interface_dict
+        reference = implement_name.GetProperty('REFERENCE')
+        interfaces_dict[implement_name.GetName()]['Consts'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Consts'])
+        interfaces_dict[implement_name.GetName()]['Attributes'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Attributes'])
+        interfaces_dict[implement_name.GetName()]['Operations'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Operations'])
+    return interfaces_dict
 
 
 # TODO(natsukoa): Remove indent
@@ -345,13 +349,14 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     file_to_list = utilities.read_file_to_list(path_file)
-    implement_nodes = [get_implements_node(definition) 
-                       for definition in get_definitions(file_to_list) 
+    implement_nodes = [get_implements_node(definition)
+                       for definition in get_definitions(file_to_list)
                        if get_implements_node(definition)]
-    interface_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
+    #print implement_nodes
+    interfaces_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
                       for definition in filter_non_partial(get_definitions(file_to_list)) 
                       if get_interface_node(definition)}
-    interfaces_dict = merge_implement_nodes(interface_dict, implement_nodes)
+    #interfaces_dict = merge_implement_nodes(interfaces_dict, implement_nodes)
     partials_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition)) 
                     for definition in filter_partial(get_definitions(file_to_list)) 
                     if get_interface_node(definition)}
