@@ -36,16 +36,13 @@ def get_definitions(paths):
 
 
 def is_implements(definition):
-    """Returns implement node.
+    """Returns True if  class of definition is Implement, otherwise False.
     Args:
       definition: IDL node
     Returns:
-      implement node
+      boolean
     """
-    if definition.GetClass() == 'Implements':
-        return True
-    else:
-        return False
+    return definition.GetClass() == 'Implements'
 
 
 def filter_non_partial(definition):
@@ -102,7 +99,7 @@ def get_const_type(const_node):
     Args:
       const_node: constant node object
     Returns:
-      node.GetChildren()[0].GetName(): str, constant object's name
+      node.GetChildren()[0].GetName(): str which is constant type
     """
     return const_node.GetChildren()[0].GetName()
 
@@ -118,11 +115,11 @@ def get_const_value(const_node):
 
 
 def const_node_to_dict(const_node):
-    """Returns dictionary of constant object information.
+    """Returns dictionary of constant information.
     Args:
-      const_nodes: list of interface node object which has constant
+      const_node: interface node which has constant
     Returns:
-      a generator which yields dictionary of constant object information
+      dictionary of constant information
     """
     return {
         'Name': const_node.GetName(),
@@ -159,7 +156,7 @@ get_argument_type = get_attribute_type
 def attribute_node_to_dict(attribute_node):
     """Returns dictioary of attribute object information.
     Args:
-      attribute_nodes: list of attribute node object
+      attribute_node: list of attribute node object
     Returns:
       a generator which yields dictionary of attribite information
     """
