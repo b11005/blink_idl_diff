@@ -317,9 +317,9 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
             for member in _MEMBERS:
                 interface[member].extend(partial.get(member))
             interface.setdefault('Partial_FilePaths', []).append(partial['FilePath'])
-            #interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
-            #interfaces_dict[interface_name]['Attributes'].extend(interface_dict['Attributes']) if interface_dict['Attributes'] != [] else None
-            #interfaces_dict[interface_name]['Operations'].extend(interface_dict['Operations'])if interface_dict['Operations'] else None
+            # interfaces_dict[interface_name]['Consts'].extend(partials_dict[interface_name]['Consts']) if partials_dict[interface_name]['Consts'] else None
+            # interfaces_dict[interface_name]['Attributes'].extend(interface_dict['Attributes']) if interface_dict['Attributes'] != [] else None
+            # interfaces_dict[interface_name]['Operations'].extend(interface_dict['Operations'])if interface_dict['Operations'] else None
     return interfaces_dict
 
 
@@ -331,11 +331,17 @@ def merge_implement_nodes(interfaces_dict, implement_nodes):
     Returns:
       interfaces_dict: dict of interface information combine into implements node
     """
-    for implement_name in implement_nodes:
-        reference = implement_name.GetProperty('REFERENCE')
-        interfaces_dict[implement_name.GetName()]['Consts'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Consts'])
+    for implement in implement_nodes:
+        reference = implement.GetProperty('REFERENCE')
+        implement = implement.GetName()
+        if not reference:
+            continue
+        else:
+            for member in _MEMBERS:
+                interfaces_dict[implement][member].extend(interfaces_dict[reference].get(member))
+        '''interfaces_dict[implement_name.GetName()]['Consts'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Consts'])
         interfaces_dict[implement_name.GetName()]['Attributes'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Attributes'])
-        interfaces_dict[implement_name.GetName()]['Operations'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Operations'])
+        interfaces_dict[implement_name.GetName()]['Operations'].extend(interfaces_dict[implement_name.GetProperty('REFERENCE')]['Operations'])'''
     return interfaces_dict
 
 
