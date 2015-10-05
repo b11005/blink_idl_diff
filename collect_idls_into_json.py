@@ -35,17 +35,6 @@ def get_definitions(paths):
             yield definition
 
 
-'''def get_interface_node(definition):
-    """Returns interface node.
-    Args:
-      definition: IDL node
-    Returns:
-      interface node
-    """
-    if definition.GetClass() == _INTERFACE_CLASS_NAME:
-        return definition'''
-
-
 def is_implements(definition):
     """Returns implement node.
     Args:
@@ -59,15 +48,13 @@ def is_implements(definition):
         return False
 
 
-
-
 def filter_non_partial(definition):
     """Returns boolean.
     Args:
       definition: IDL node 
     Returns:
-      True: it's 'Interface' class node and not 'partial' node
-      False: it's not 'interface' class node and not 'partial' node
+      True: its 'Interface' class node and not 'partial' node
+      False: its not 'interface' class node and not 'partial' node
     """
     if definition.GetClass() == _INTERFACE_CLASS_NAME and not definition.GetProperty(_PARTIAL):
         return True
@@ -100,7 +87,7 @@ def get_filepath(interface_node):
     return os.path.relpath(filename).strip(_STRIP_FILEPATH)
 
 
-def get_const_node(interface_node):
+def get_const_node_list(interface_node):
     """Returns Constant object.
     Args:
       interface_node: interface node object
@@ -141,11 +128,11 @@ def const_node_to_dict(const_node):
         'Name': const_node.GetName(),
         'Type': get_const_type(const_node),
         'Value': get_const_value(const_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(const_node)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(const_node)],
     }
 
 
-def get_attribute_node(interface_node):
+def get_attribute_node_list(interface_node):
     """Returns list of Attribute if the interface have one.
     Args:
       interface_node: interface node object
@@ -179,13 +166,13 @@ def attribute_node_to_dict(attribute_node):
     return {
         'Name': attribute_node.GetName(),
         'Type': get_attribute_type(attribute_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(attribute_node)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(attribute_node)],
         'Readonly': attribute_node.GetProperty('READONLY', default=False),
         'Static': attribute_node.GetProperty('STATIC', default=False),
     }
 
 
-def get_operation_node(interface_node):
+def get_operation_node_list(interface_node):
     """Returns Operations object under the interface.
     Args:
       interface: interface node object
@@ -195,7 +182,7 @@ def get_operation_node(interface_node):
     return interface_node.GetListOf('Operation')
 
 
-def get_argument_node(operation_node):
+def get_argument_node_list(operation_node):
     """Returns Argument object under the operation object.
     Args:
       operation_node: operation node object
@@ -244,14 +231,14 @@ def operation_node_to_dict(operation_node):
     """
     return {
         'Name': get_operation_name(operation_node),
-        'Arguments': [argument_node_to_dict(argument) for argument in get_argument_node(operation_node) if argument_node_to_dict(argument)],
+        'Arguments': [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
         'Type': get_operation_type(operation_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(operation_node)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(operation_node)],
         'Static': operation_node.GetProperty('STATIC', default=False),
     }
 
 
-def get_extattribute_node(node):
+def get_extattribute_node_list(node):
     """Returns list of ExtAttribute.
     Args:
       IDL node object
@@ -297,10 +284,10 @@ def interface_node_to_dict(interface_node):
     return {
         'Name': interface_node.GetName(),
         'FilePath': get_filepath(interface_node),
-        'Consts': [const_node_to_dict(const) for const in get_const_node(interface_node)],
-        'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node(interface_node) if attribute_node_to_dict(attr)],
-        'Operations': [operation_node_to_dict(operation) for operation in get_operation_node(interface_node) if operation_node_to_dict(operation)],
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node(interface_node)],
+        'Consts': [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
+        'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attribute_node_to_dict(attr)],
+        'Operations': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation_node_to_dict(operation)],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
         'Inherit': [inherit_node_to_dict(inherit) for inherit in get_inherit_node(interface_node)],
     }
 
@@ -370,8 +357,6 @@ def main(args):
                      for definition in get_definitions(path_list)
                      if filter_partial(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
-    #for i in interfaces_dict.iteritems():
-        #print json.dumps(i, sort_keys=True, indent=4)
     interfaces_dict = merge_implement_node(interfaces_dict, implement_nodes)
     export_to_jsonfile(dictionary, json_file)
 
