@@ -15,7 +15,7 @@ import utilities
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
-_CLASS_NAME = 'Interface'
+_INTERFACE_CLASS_NAME = 'Interface'
 _PARTIAL = 'Partial'
 _STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
 _MEMBERS = ['Attributes', 'Operations', 'Consts']
@@ -35,15 +35,15 @@ def get_definitions(paths):
             yield definition
 
 
-def get_interface_node(definition):
+'''def get_interface_node(definition):
     """Returns interface node.
     Args:
       definition: IDL node
     Returns:
       interface node
     """
-    if definition.GetClass() == _CLASS_NAME:
-        return definition
+    if definition.GetClass() == _INTERFACE_CLASS_NAME:
+        return definition'''
 
 
 def is_implements(definition):
@@ -62,26 +62,28 @@ def is_implements(definition):
 
 
 def filter_non_partial(definition):
-    """Returns interface node.
+    """Returns boolean.
     Args:
-      interface_nodes: a generator which is interface IDL node
+      definition: IDL node 
     Returns:
-      a generator which yields interface node
+      True: it's 'Interface' class node and not 'partial' node
+      False: it's not 'interface' class node and not 'partial' node
     """
-    if definition.GetClass() == _CLASS_NAME and not definition.GetProperty(_PARTIAL):
+    if definition.GetClass() == _INTERFACE_CLASS_NAME and not definition.GetProperty(_PARTIAL):
         return True
     else:
         return False
 
 
 def filter_partial(definition):
-    """Returns partial interface node.
+    """Returns boolean.
     Args:
-      interface_nodes: a generator which is interface IDL
+      definition: IDL node
     Return:
-      a generator which yields partial interface node
+      True: it's 'interface' class node and 'partial' node
+      False: it's not 'interface' class node and 'partial' node
     """
-    if definition.GetClass() == _CLASS_NAME and definition.GetProperty(_PARTIAL):
+    if definition.GetClass() == _INTERFACE_CLASS_NAME and definition.GetProperty(_PARTIAL):
         return True
     else:
         return False
@@ -322,7 +324,7 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
     return interfaces_dict
 
 
-def merge_implement(interfaces_dict, implement_nodes):
+def merge_implement_node(interfaces_dict, implement_nodes):
     """Returns dict of interface information combined with referenced interface information
     Args:
       interfaces_dict: dict of interface information
@@ -357,18 +359,20 @@ def export_to_jsonfile(dictionary, json_file):
 def main(args):
     path_file = args[0]
     json_file = args[1]
-    file_to_list = utilities.read_file_to_list(path_file)
+    path_list = utilities.read_file_to_list(path_file)
     implement_nodes = [definition
-                       for definition in get_definitions(file_to_list)
+                       for definition in get_definitions(path_list)
                        if is_implements(definition)]
-    interfaces_dict = {definiton.GetName(): interface_node_to_dict(definiton)
-                       for definiton in get_definitions(file_to_list)
+    interfaces_dict = {definition.GetName(): interface_node_to_dict(definition)
+                       for definition in get_definitions(path_list)
                        if filter_non_partial(definition)}
     partials_dict = {definition.GetName(): interface_node_to_dict(definition)
-                     for definition in get_definitions(file_to_list)
+                     for definition in get_definitions(path_list)
                      if filter_partial(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
-    interfaces_dict = merge_implement(interfaces_dict, implement_nodes)
+    #for i in interfaces_dict.iteritems():
+        #print json.dumps(i, sort_keys=True, indent=4)
+    interfaces_dict = merge_implement_node(interfaces_dict, implement_nodes)
     export_to_jsonfile(dictionary, json_file)
 
 
