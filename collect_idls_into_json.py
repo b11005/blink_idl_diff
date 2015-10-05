@@ -28,7 +28,7 @@ def get_definitions(paths):
     Returns:
       a generator which yields IDL node objects
     """
-    parser = BlinkIDLParser(debug=False)
+    parser = BlinkIDLParser()
     for path in paths:
         definitions = parse_file(parser, path)
         for definition in definitions.GetChildren():
@@ -51,7 +51,7 @@ def is_implements(definition):
 def filter_non_partial(definition):
     """Returns boolean.
     Args:
-      definition: IDL node 
+      definition: IDL node
     Returns:
       True: its 'Interface' class node and not 'partial' node
       False: its not 'interface' class node and not 'partial' node
