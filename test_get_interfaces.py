@@ -5,7 +5,7 @@ import collect_idls_into_json
 import utilities
 
 _KEY_SET = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
-_FILE = 'sample0.txt'
+_FILE = 'sample1.txt'
 
 class TestFunctions(unittest.TestCase):
     def setUp(self):
@@ -17,13 +17,13 @@ class TestFunctions(unittest.TestCase):
            self.assertEqual(str(type(actual)), "<class 'idl_parser.idl_node.IDLNode'>")
 
 
-    def test_implements(self):
+    '''def test_get_implements(self):
         implements = [collect_idls_into_json.is_implements(actual) for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE))]
         for implement in implements:
             if implement:
-                self.assertEqual(collect_idls_into_json.get_interface_node(actual).GetClass(), 'Implement')
+                self.assertEqual(collect_idls_into_json.is_implements(actual).GetClass(), 'Implement')
             else:
-                self.assertFalse(implement)
+                self.assertFalse(implement)'''
 
 
     def test_fileter_non_partial(self):
@@ -56,7 +56,7 @@ class TestFunctions(unittest.TestCase):
                     self.assertEqual(const.GetClass(), 'Const')
 
 
-    '''def test_const_type(self):
+    def test_const_type(self):
         for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             pass
 
@@ -67,7 +67,7 @@ class TestFunctions(unittest.TestCase):
 
 
     def test_const_node_to_dict(self):
-    '''
+        pass
 
 
     def test_get_attribute_node_list(self):
@@ -76,12 +76,13 @@ class TestFunctions(unittest.TestCase):
                 if attribute:
                     self.assertEqual(attribute.GetClass(), 'Attribute')
 
-    '''def test_get_attribute_type(self):
+
+    def test_get_attribute_type(self):
         pass
 
 
     def test_attribute_node_to_dict(self):
-        pass'''
+        pass
 
 
     def test_get_operation_node_list(self):
@@ -92,10 +93,17 @@ class TestFunctions(unittest.TestCase):
 
 
     def test_get_argument_node_list(self):
-        pass
+        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
+            for child in actual.GetChildren():
+                if child.GetClass() == 'Operation':
+                    for argument in collect_idls_into_json.get_argument_node_list(child):
+                        if argument:
+                            self.assertEqual(argument.GetClass(), 'Argument')
+
 
     def test_argument_node_to_dict(self):
         pass
+
 
     def test_get_operation_name(self):
         pass
@@ -111,11 +119,16 @@ class TestFunctions(unittest.TestCase):
                 if extattr:
                     self.assertEqual(extattr.GetClass(), 'ExtAttribute')
 
+
     def test_extattr_node_to_dict(self):
         pass
 
+
     def test_get_inherit_node(self):
-        pass
+        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
+            for inherit in collect_idls_into_json.get_inherit_node(actual):
+                if inherit:
+                    self.assertEqual(inherit.GetClass(), 'Inherit')
 
     def test_inherit_node_to_dict(self):
         pass
