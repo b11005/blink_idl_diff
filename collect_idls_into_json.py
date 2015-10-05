@@ -44,8 +44,6 @@ def get_interface_node(definition):
     """
     if definition.GetClass() == _CLASS_NAME:
         return definition
-    else:
-        return None
 
 
 def is_implements(definition):
@@ -61,28 +59,32 @@ def is_implements(definition):
         return False
 
 
-def filter_partial(interface_nodes):
-    """Returns partial interface node.
-    Args:
-      interface_nodes: a generator which is interface IDL
-    Return:
-      a generator which yields partial interface node
-    """
-    for interface_node in interface_nodes:
-        if interface_node.GetProperty(_PARTIAL):
-            yield interface_node
 
 
-def filter_non_partial(interface_nodes):
+def filter_non_partial(definition):
     """Returns interface node.
     Args:
       interface_nodes: a generator which is interface IDL node
     Returns:
       a generator which yields interface node
     """
-    for interface_node in interface_nodes:
-        if not interface_node.GetProperty(_PARTIAL):
-            yield interface_node
+    if definition.GetClass() == _CLASS_NAME and not definition.GetProperty(_PARTIAL):
+        return True
+    else:
+        return False
+
+
+def filter_partial(definition):
+    """Returns partial interface node.
+    Args:
+      interface_nodes: a generator which is interface IDL
+    Return:
+      a generator which yields partial interface node
+    """
+    if definition.GetClass() == _CLASS_NAME and definition.GetProperty(_PARTIAL):
+        return True
+    else:
+        return False
 
 
 def get_filepath(interface_node):
@@ -320,7 +322,7 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
     return interfaces_dict
 
 
-def merge_implement_nodes(interfaces_dict, implement_nodes):
+def merge_implement(interfaces_dict, implement_nodes):
     """Returns dict of interface information combined with referenced interface information
     Args:
       interfaces_dict: dict of interface information
@@ -359,14 +361,14 @@ def main(args):
     implement_nodes = [definition
                        for definition in get_definitions(file_to_list)
                        if is_implements(definition)]
-    interfaces_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition))
-                       for definition in filter_non_partial(get_definitions(file_to_list))
-                       if get_interface_node(definition)}
-    partials_dict = {get_interface_node(definition).GetName(): interface_node_to_dict(get_interface_node(definition))
-                     for definition in filter_partial(get_definitions(file_to_list))
-                     if get_interface_node(definition)}
+    interfaces_dict = {definiton.GetName(): interface_node_to_dict(definiton)
+                       for definiton in get_definitions(file_to_list)
+                       if filter_non_partial(definition)}
+    partials_dict = {definition.GetName(): interface_node_to_dict(definition)
+                     for definition in get_definitions(file_to_list)
+                     if filter_partial(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
-    interfaces_dict = merge_implement_nodes(interfaces_dict, implement_nodes)
+    interfaces_dict = merge_implement(interfaces_dict, implement_nodes)
     export_to_jsonfile(dictionary, json_file)
 
 
