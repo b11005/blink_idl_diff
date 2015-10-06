@@ -13,6 +13,7 @@ import os
 import sys
 import utilities
 
+
 from blink_idl_parser import parse_file, BlinkIDLParser
 
 _INTERFACE_CLASS_NAME = 'Interface'
@@ -29,7 +30,6 @@ _ARGUMENT = 'Argument'
 _EXTATTRIBUTE = 'ExtAttribute'
 _INHERIT = 'Inherit'
 _MEMBERS = ['Consts', 'Attributes', 'Operations']
-_REFERENCE = 'REFERENCE'
 
 
 def get_definitions(paths):
@@ -167,7 +167,7 @@ def attribute_node_to_dict(attribute_node):
     Args:
       attribute_node: attribute node
     Returns:
-      dictionary of attribite's information
+      dictionary of attribute's information
     """
     return {
         _NAME: attribute_node.GetName(),
@@ -245,11 +245,11 @@ def operation_node_to_dict(operation_node):
 
 
 def get_extattribute_node_list(node):
-    """Returns list of extAttribute.
+    """Returns list of ExtAttribute.
     Args:
       node: IDL node
     Returns:
-      list of extAttrbute
+      list of ExtAttrbute
     """
     if node.GetOneOf('ExtAttributes'):
         return node.GetOneOf('ExtAttributes').GetListOf(_EXTATTRIBUTE)
@@ -258,11 +258,11 @@ def get_extattribute_node_list(node):
 
 
 def extattr_node_to_dict(extattr):
-    """Returns dictionary of extattribute's information.
+    """Returns dictionary of ExtAttribute's information.
     Args:
-      extattr: extended attribute node
+      extattr: ExtAttribute node
     Returns:
-      dictionary of extattribute's information
+      dictionary of ExtAttribute's information
     """
     return {
         _NAME: extattr.GetName(),
@@ -293,10 +293,10 @@ def interface_node_to_dict(interface_node):
     return {
         _NAME: interface_node.GetName(),
         _FILEPATH: get_filepath(interface_node),
-        _CONST + 's': [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
-        _ATTRIBUTE + 's': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
-        _OPERATION + 's': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
-        _EXTATTRIBUTE + 's': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
+        'Consts': [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
+        'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
+        'Operations': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
+        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
         _INHERIT: inherit_node_to_dict(interface_node)
     }
 
