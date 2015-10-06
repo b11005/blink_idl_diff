@@ -4,7 +4,7 @@ import unittest
 import collect_idls_into_json
 import utilities
 
-_FILE = 'sample0.txt'
+_FILE = 'sample1.txt'
 _KEY_SET = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
 
 class TestFunctions(unittest.TestCase):
@@ -62,6 +62,7 @@ class TestFunctions(unittest.TestCase):
         pass
         #for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             #self.assertEqual(collect_idls_into_json.get_const_type(actual))
+            #print collect_idls_into_json.get_const_type(actual)
 
 
     def test_get_const_value(self):
