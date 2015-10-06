@@ -18,7 +18,7 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 _INTERFACE_CLASS_NAME = 'Interface'
 _PARTIAL = 'Partial'
 _STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
-_MEMBERS = ['Attributes', 'Operations', 'Consts']
+_MEMBERS = ['Consts', 'Attributes', 'Operations']
 
 
 def get_definitions(paths):
@@ -36,7 +36,7 @@ def get_definitions(paths):
 
 
 def is_implements(definition):
-    """Returns True if  class of definition is Implement, otherwise False.
+    """Returns True if class of |definition| is Implement, otherwise False.
     Args:
       definition: IDL node
     Returns:
@@ -45,13 +45,12 @@ def is_implements(definition):
     return definition.GetClass() == 'Implements'
 
 
-def filter_non_partial(definition):
-    """Returns boolean.
+def is_non_partial(definition):
+    """Returns True if class of |definition| is 'interface' class and not 'partial' interface, otherwise False.
     Args:
       definition: IDL node
     Returns:
-      True: its 'Interface' class node and not 'partial' node
-      False: its not 'interface' class node and not 'partial' node
+      boolean
     """
     if definition.GetClass() == _INTERFACE_CLASS_NAME and not definition.GetProperty(_PARTIAL):
         return True
@@ -59,13 +58,12 @@ def filter_non_partial(definition):
         return False
 
 
-def filter_partial(definition):
-    """Returns boolean.
+def is_partial(definition):
+    """Returns True if |definition| is 'partial interface' class, otherwise False.
     Args:
       definition: IDL node
     Return:
-      True: it's 'interface' class node and 'partial' node
-      False: it's not 'interface' class node and 'partial' node
+      boolean
     """
     if definition.GetClass() == _INTERFACE_CLASS_NAME and definition.GetProperty(_PARTIAL):
         return True
@@ -74,30 +72,30 @@ def filter_partial(definition):
 
 
 def get_filepath(interface_node):
-    """Returns relative path under the WebKit directory which |interface_node| is defined.
+    """Returns relative path to the IDL in which "interface_node| is defined.
     Args:
       interface_node: IDL interface
     Returns:
-      str which is |interface_node| file path
+      str which is |interface_node|'s file path
     """
     filename = interface_node.GetProperty('FILENAME')
     return os.path.relpath(filename).strip(_STRIP_FILEPATH)
 
 
 def get_const_node_list(interface_node):
-    """Returns Constant object.
+    """Returns Const node.
     Args:
-      interface_node: interface node object
+      interface_node: interface node
     Returns:
-      list which is list of constant object
+      list of const node
     """
     return interface_node.GetListOf('Const')
 
 
 def get_const_type(const_node):
-    """Returns constant's type.
+    """Returns const's type.
     Args:
-      const_node: constant node object
+      const_node: const node
     Returns:
       node.GetChildren()[0].GetName(): str which is constant type
     """
@@ -105,21 +103,21 @@ def get_const_type(const_node):
 
 
 def get_const_value(const_node):
-    """Returns constant's value.
+    """Returns const's value.
     Args:
-      const_node: constant node object
+      const_node: const node
     Returns:
-      node.GetChildren()[1].GetName(): list, list of oparation object
+      node.GetChildren()[1].GetName(): name of oparation's value
     """
     return const_node.GetChildren()[1].GetName()
 
 
 def const_node_to_dict(const_node):
-    """Returns dictionary of constant information.
+    """Returns dictionary of const's information.
     Args:
-      const_node: interface node which has constant
+      const_node: const node
     Returns:
-      dictionary of constant information
+      dictionary of const's information
     """
     return {
         'Name': const_node.GetName(),
@@ -132,9 +130,9 @@ def const_node_to_dict(const_node):
 def get_attribute_node_list(interface_node):
     """Returns list of Attribute if the interface have one.
     Args:
-      interface_node: interface node object
+      interface_node: interface node
     Returns:
-      a list of attribute
+      list of attribute node
     """
     return interface_node.GetListOf('Attribute')
 
@@ -142,9 +140,9 @@ def get_attribute_node_list(interface_node):
 def get_attribute_type(attribute_node):
     """Returns type of attribute.
     Args:
-      attribute_node: attribute node object
+      attribute_node: attribute node
     Returns:
-      str which is type of Attribute
+      name of attribute's type
     """
     return attribute_node.GetOneOf('Type').GetChildren()[0].GetName()
 
@@ -154,11 +152,11 @@ get_argument_type = get_attribute_type
 
 
 def attribute_node_to_dict(attribute_node):
-    """Returns dictioary of attribute object information.
+    """Returns dictioary of attribute's information.
     Args:
-      attribute_node: list of attribute node object
+      attribute_node: attribute node
     Returns:
-      a generator which yields dictionary of attribite information
+      dictionary of attribite's information
     """
     return {
         'Name': attribute_node.GetName(),
@@ -170,31 +168,31 @@ def attribute_node_to_dict(attribute_node):
 
 
 def get_operation_node_list(interface_node):
-    """Returns Operations object under the interface.
+    """Returns operations node list.
     Args:
-      interface: interface node object
+      interface_node: interface node
     Returns:
-      list which is list of oparation object
+      list of oparation node
     """
     return interface_node.GetListOf('Operation')
 
 
 def get_argument_node_list(operation_node):
-    """Returns Argument object under the operation object.
+    """Returns list of argument.
     Args:
-      operation_node: operation node object
+      operation_node: operation node
     Returns:
-      list of argument object
+      list of argument node
     """
     return operation_node.GetOneOf('Arguments').GetListOf('Argument')
 
 
 def argument_node_to_dict(argument_node):
-    """Returns generator which yields dictionary of Argument object information.
+    """Returns dictionary of argument's information.
     Args:
-      arguments: list of argument node object
+      argument_node: argument node
     Returns:
-      a generator which yields dictionary of argument information
+      dictionary of argument's information
     """
     return {
         'Name': argument_node.GetName(),
@@ -203,11 +201,11 @@ def argument_node_to_dict(argument_node):
 
 
 def get_operation_name(operation_node):
-    """Returns openration object name.
+    """Returns openration's name.
     Args:
-      operation_node: operation node object
+      operation_node: operation node
     Returns:
-      str which is operation's name
+      name of operation
     """
     if operation_node.GetProperty('GETTER'):
         return '__getter__'
@@ -220,9 +218,9 @@ def get_operation_name(operation_node):
 
 
 def operation_node_to_dict(operation_node):
-    """Returns  dictionary of Operation object information.
+    """Returns dictionary of operation's information.
     Args:
-      operation_nodes: list of operation node object
+      operation_node: operation node
     Returns:
       dictionary of operation's informantion
     """
@@ -236,11 +234,11 @@ def operation_node_to_dict(operation_node):
 
 
 def get_extattribute_node_list(node):
-    """Returns list of ExtAttribute.
+    """Returns list of extAttribute.
     Args:
-      IDL node object
+      node: IDL node
     Returns:
-      a list of ExtAttrbute
+      list of extAttrbute
     """
     if node.GetOneOf('ExtAttributes'):
         return node.GetOneOf('ExtAttributes').GetListOf('ExtAttribute')
@@ -249,11 +247,11 @@ def get_extattribute_node_list(node):
 
 
 def extattr_node_to_dict(extattr):
-    """Returns a generator which yields Extattribute's object dictionary
+    """Returns dictionary of extattribute's information.
     Args:
-      extattribute_nodes: list of extended attribute
+      extattr: extended attribute node
     Returns:
-      a generator which yields extattribute dictionary
+      dictionary of extattribute's information
     """
     return {
         'Name': extattr.GetName(),
@@ -261,6 +259,12 @@ def extattr_node_to_dict(extattr):
 
 
 def get_inherit_node(interface_node):
+    """Returns inherit node
+    Args:
+      interface_node: interface node
+    Retruns:
+      list of inherit node
+    """
     if interface_node.GetListOf('Inherit'):
         return interface_node.GetListOf('Inherit')
     else:
@@ -268,11 +272,17 @@ def get_inherit_node(interface_node):
 
 
 def inherit_node_to_dict(inherit):
+    """Returns dictionary of inherit.
+    Args:
+      inhrit: inherit node
+    Returns:
+      dictioanry of inherit's information
+    """
     return {'Parent': inherit.GetName()}
 
 
 def interface_node_to_dict(interface_node):
-    """Returns dictioary whose key is interface name and value is interface dictioary.
+    """Returns dictioary whose key is interface name and value is dictioary of interface's information.
     Args:
       interface_node: interface node
     Returns:
@@ -295,7 +305,7 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
       interfaces_dict: interface node dictionary
       partial_dict: partial interface node dictionary
     Returns:
-      a dictronary merged with interfaces_dict and  partial_dict
+      a dictronary merged with interfaces_dict and partial_dict
     """
     for interface_name, partial in partials_dict.iteritems():
         interface = interfaces_dict.get(interface_name)
@@ -349,10 +359,10 @@ def main(args):
                        if is_implements(definition)]
     interfaces_dict = {definition.GetName(): interface_node_to_dict(definition)
                        for definition in get_definitions(path_list)
-                       if filter_non_partial(definition)}
+                       if is_non_partial(definition)}
     partials_dict = {definition.GetName(): interface_node_to_dict(definition)
                      for definition in get_definitions(path_list)
-                     if filter_partial(definition)}
+                     if is_partial(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
     interfaces_dict = merge_implement_node(interfaces_dict, implement_nodes)
     export_to_jsonfile(dictionary, json_file)
