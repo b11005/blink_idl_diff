@@ -225,7 +225,6 @@ def operation_node_to_dict(operation_node):
     Returns:
       dictionary of operation's informantion
     """
-    print operation_node
     return {
         'Name': get_operation_name(operation_node),
         'Arguments': [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
@@ -260,35 +259,27 @@ def extattr_node_to_dict(extattr):
     }
 
 
-def get_inherit_node(interface_node):
-    """Returns inherit node
-    Args:
-      interface_node: interface node
-    Retruns:
-      list of inherit node
-    """
-    if interface_node.GetOneOf('Inherit'):
-        return interface_node.GetOneOf('Inherit')
-    else:
-        return []
-
-
-def inherit_node_to_dict(inherit):
+def inherit_node_to_dict(interface_node):
     """Returns dictionary of inherit.
     Args:
-      inhrit: inherit node
+      interface_node: interface node
     Returns:
       dictioanry of inherit's information
     """
-    return {'Parent': inherit.GetName()}
-
+    inherit = interface_node.GetOneOf('Inherit')
+    if inherit:
+        return {'Parent': inherit.GetName()}
+    elif len(interface_node.GetListOf('Inherit'))>1:
+        assert 'Inherit must be one interface'
+    else:
+        return []
 
 def interface_node_to_dict(interface_node):
     """Returns dictioary whose key is interface name and value is dictioary of interface's information.
     Args:
       interface_node: interface node
     Returns:
-      dictionary, {interface name: interface node dictionary}
+      dictionary, {interface name: interface information dictionary}
     """
     return {
         'Name': interface_node.GetName(),
@@ -299,7 +290,8 @@ def interface_node_to_dict(interface_node):
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
         #'Inherit': [inherit_node_to_dict(inherit) for inherit in get_inherit_node(interface_node)],
         #'Inherit': {'Name': get_inherit_node(interface_node). if get_inherit_node(interface_node) else []},
-        'Inherit': inherit_node_to_dict(get_inherit_node(interface_node)) if get_inherit_node(interface_node) else [],
+        #'Inherit': inherit_node_to_dict(get_inherit_node(interface_node)) if get_inherit_node(interface_node) else [],
+        'Inherit': inherit_node_to_dict(interface_node)
     }
 
 
