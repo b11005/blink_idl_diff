@@ -16,8 +16,13 @@ import utilities
 from blink_idl_parser import parse_file, BlinkIDLParser
 
 _INTERFACE_CLASS_NAME = 'Interface'
+_IMPLEMENT_CLASS_NAME = 'Implements'
 _PARTIAL = 'Partial'
 _STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
+_CONST = 'Const'
+_ATTRIBUTE = 'Attribute'
+_OPERATION = 'Operation'
+_EXTATTRIBUTE = 'ExtAttribute'
 _MEMBERS = ['Consts', 'Attributes', 'Operations']
 
 
@@ -42,7 +47,7 @@ def is_implements(definition):
     Returns:
       boolean
     """
-    return definition.GetClass() == 'Implements'
+    return definition.GetClass() == _IMPLEMENT_CLASS_NAME
 
 
 def is_non_partial(definition):
@@ -89,7 +94,7 @@ def get_const_node_list(interface_node):
     Returns:
       list of const node
     """
-    return interface_node.GetListOf('Const')
+    return interface_node.GetListOf(_CONST)
 
 
 def get_const_type(const_node):
@@ -134,7 +139,7 @@ def get_attribute_node_list(interface_node):
     Returns:
       list of attribute node
     """
-    return interface_node.GetListOf('Attribute')
+    return interface_node.GetListOf(_ATTRIBUTE)
 
 
 def get_attribute_type(attribute_node):
@@ -174,7 +179,7 @@ def get_operation_node_list(interface_node):
     Returns:
       list of oparation node
     """
-    return interface_node.GetListOf('Operation')
+    return interface_node.GetListOf(_OPERATION)
 
 
 def get_argument_node_list(operation_node):
@@ -184,7 +189,6 @@ def get_argument_node_list(operation_node):
     Returns:
       list of argument node
     """
-    #print operation_node.GetOneOf('Arguments').GetOneOf('Argument')
     return operation_node.GetOneOf('Arguments').GetListOf('Argument')
 
 
@@ -269,10 +273,11 @@ def inherit_node_to_dict(interface_node):
     inherit = interface_node.GetOneOf('Inherit')
     if inherit:
         return {'Parent': inherit.GetName()}
-    elif len(interface_node.GetListOf('Inherit'))>1:
+    elif len(interface_node.GetListOf('Inherit')) > 1:
         assert 'Inherit must be one interface'
     else:
         return []
+
 
 def interface_node_to_dict(interface_node):
     """Returns dictioary whose key is interface name and value is dictioary of interface's information.
@@ -288,9 +293,6 @@ def interface_node_to_dict(interface_node):
         'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
         'Operations': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
-        #'Inherit': [inherit_node_to_dict(inherit) for inherit in get_inherit_node(interface_node)],
-        #'Inherit': {'Name': get_inherit_node(interface_node). if get_inherit_node(interface_node) else []},
-        #'Inherit': inherit_node_to_dict(get_inherit_node(interface_node)) if get_inherit_node(interface_node) else [],
         'Inherit': inherit_node_to_dict(interface_node)
     }
 
