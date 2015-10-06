@@ -270,7 +270,7 @@ def extattr_node_to_dict(extattr):
 
 
 def inherit_node_to_dict(interface_node):
-    """Returns dictionary of inherit.
+    """Returns dictionary of inherit if |interface_node| has inherit node.
     Args:
       interface_node: interface node
     Returns:
