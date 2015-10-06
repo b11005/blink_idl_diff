@@ -19,11 +19,17 @@ _INTERFACE_CLASS_NAME = 'Interface'
 _IMPLEMENT_CLASS_NAME = 'Implements'
 _PARTIAL = 'Partial'
 _STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
+_NAME = 'Name'
+_TYPE = 'Type'
+_FILEPATH = 'FilePath'
 _CONST = 'Const'
 _ATTRIBUTE = 'Attribute'
 _OPERATION = 'Operation'
+_ARGUMENT = 'Argument'
 _EXTATTRIBUTE = 'ExtAttribute'
+_INHERIT = 'Inherit'
 _MEMBERS = ['Consts', 'Attributes', 'Operations']
+_REFERENCE = 'REFERENCE'
 
 
 def get_definitions(paths):
@@ -125,8 +131,8 @@ def const_node_to_dict(const_node):
       dictionary of const's information
     """
     return {
-        'Name': const_node.GetName(),
-        'Type': get_const_type(const_node),
+        _NAME: const_node.GetName(),
+        _TYPE: get_const_type(const_node),
         'Value': get_const_value(const_node),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(const_node)],
     }
@@ -149,7 +155,7 @@ def get_attribute_type(attribute_node):
     Returns:
       name of attribute's type
     """
-    return attribute_node.GetOneOf('Type').GetChildren()[0].GetName()
+    return attribute_node.GetOneOf(_TYPE).GetChildren()[0].GetName()
 
 
 get_operation_type = get_attribute_type
@@ -164,8 +170,8 @@ def attribute_node_to_dict(attribute_node):
       dictionary of attribite's information
     """
     return {
-        'Name': attribute_node.GetName(),
-        'Type': get_attribute_type(attribute_node),
+        _NAME: attribute_node.GetName(),
+        _TYPE: get_attribute_type(attribute_node),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(attribute_node)],
         'Readonly': attribute_node.GetProperty('READONLY', default=False),
         'Static': attribute_node.GetProperty('STATIC', default=False),
@@ -189,7 +195,7 @@ def get_argument_node_list(operation_node):
     Returns:
       list of argument node
     """
-    return operation_node.GetOneOf('Arguments').GetListOf('Argument')
+    return operation_node.GetOneOf('Arguments').GetListOf(_ARGUMENT)
 
 
 def argument_node_to_dict(argument_node):
@@ -200,8 +206,8 @@ def argument_node_to_dict(argument_node):
       dictionary of argument's information
     """
     return {
-        'Name': argument_node.GetName(),
-        'Type': get_argument_type(argument_node),
+        _NAME: argument_node.GetName(),
+        _TYPE: get_argument_type(argument_node),
     }
 
 
@@ -230,9 +236,9 @@ def operation_node_to_dict(operation_node):
       dictionary of operation's informantion
     """
     return {
-        'Name': get_operation_name(operation_node),
+        _NAME: get_operation_name(operation_node),
         'Arguments': [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
-        'Type': get_operation_type(operation_node),
+        _TYPE: get_operation_type(operation_node),
         'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(operation_node)],
         'Static': operation_node.GetProperty('STATIC', default=False),
     }
@@ -246,7 +252,7 @@ def get_extattribute_node_list(node):
       list of extAttrbute
     """
     if node.GetOneOf('ExtAttributes'):
-        return node.GetOneOf('ExtAttributes').GetListOf('ExtAttribute')
+        return node.GetOneOf('ExtAttributes').GetListOf(_EXTATTRIBUTE)
     else:
         return []
 
@@ -259,7 +265,7 @@ def extattr_node_to_dict(extattr):
       dictionary of extattribute's information
     """
     return {
-        'Name': extattr.GetName(),
+        _NAME: extattr.GetName(),
     }
 
 
@@ -270,11 +276,9 @@ def inherit_node_to_dict(interface_node):
     Returns:
       dictioanry of inherit's information
     """
-    inherit = interface_node.GetOneOf('Inherit')
+    inherit = interface_node.GetOneOf(_INHERIT)
     if inherit:
         return {'Parent': inherit.GetName()}
-    elif len(interface_node.GetListOf('Inherit')) > 1:
-        assert 'Inherit must be one interface'
     else:
         return []
 
@@ -287,13 +291,13 @@ def interface_node_to_dict(interface_node):
       dictionary, {interface name: interface information dictionary}
     """
     return {
-        'Name': interface_node.GetName(),
-        'FilePath': get_filepath(interface_node),
-        'Consts': [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
-        'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
-        'Operations': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
-        'Inherit': inherit_node_to_dict(interface_node)
+        _NAME: interface_node.GetName(),
+        _FILEPATH: get_filepath(interface_node),
+        _CONST + 's': [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
+        _ATTRIBUTE + 's': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
+        _OPERATION + 's': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
+        _EXTATTRIBUTE + 's': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
+        _INHERIT: inherit_node_to_dict(interface_node)
     }
 
 
@@ -312,7 +316,7 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
         else:
             for member in _MEMBERS:
                 interface[member].extend(partial.get(member))
-            interface.setdefault('Partial_FilePaths', []).append(partial['FilePath'])
+            interface.setdefault('Partial_FilePaths', []).append(partial[_FILEPATH])
     return interfaces_dict
 
 
