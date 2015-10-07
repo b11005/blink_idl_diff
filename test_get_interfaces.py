@@ -18,8 +18,9 @@ class TestFunctions(unittest.TestCase):
         self.definition = definitions.GetChildren()[0]
 
 
-    def test_definitions(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
+    def test_get_definitions(self):
+        pathfile = utilities.read_file_to_list(_FILE)
+        for actual in collect_idls_into_json.get_definitions(pathfile):
             self.assertEqual(actual.GetName(), self.definition.GetName())
 
 
