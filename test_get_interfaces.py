@@ -17,11 +17,7 @@ class TestFunctions(unittest.TestCase):
         self.definition = definitions.GetChildren()[0]
 
 
-    '''def test1(self):
-        print self.definition
-
-
-    def test_definitions(self):
+    '''def test_definitions(self):
        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
            self.assertEqual(str(type(actual)), "<class 'idl_parser.idl_node.IDLNode'>")
 
@@ -43,30 +39,29 @@ class TestFunctions(unittest.TestCase):
                 
 
     '''def test_is_partial(self):
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            if node.GetClass() == 'Interface' and node.GetProperty('Partial'):
-                self.assertTrue(collect_idls_into_json.is_partial(node))
-            else:
-                self.assertFalse(collect_idls_into_json.is_partial(node))
+        if self.definition.GetClass() == 'Interface' and self.definition.GetProperty('Partial'):
+            self.assertTrue(collect_idls_into_json.is_partial(self.definition))
+        else:
+            self.assertFalse(collect_idls_into_json.is_partial(self.definition))'''
 
 
     def test_get_filepaths(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            path = collect_idls_into_json.get_filepath(actual)
-            self.assertTrue(path.startswith('Source'))
-            self.assertTrue(path.endswith('.idl'))
+        path = collect_idls_into_json.get_filepath(self.definition)
+        self.assertTrue(path.startswith('Source'))
+        self.assertTrue(path.endswith('.idl'))
 
 
     def test_get_const_node_list(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            for const in collect_idls_into_json.get_const_node_list(actual):
-                if const:
-                    self.assertEqual(const.GetClass(), 'Const')
-                else:
-                    self.assertEqual(const, None)
+        const_member = set(['Name', 'Type', 'Value', 'ExtAttributes'])
+        for const in collect_idls_into_json.get_const_node_list(self.definition):
+            if const:
+                self.assertEqual(const.GetClass(), 'Const')
+                self.assertTrue(const_member.issuperset(collect_idls_into_json.const_node_to_dict(const).keys()))
+            else:
+                self.assertEqual(const, None)
 
 
-    def test_const_type(self):
+    '''def test_const_type(self):
         pass
         #for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             #self.assertEqual(collect_idls_into_json.get_const_type(actual))
@@ -80,64 +75,38 @@ class TestFunctions(unittest.TestCase):
 
     def test_const_node_to_dict(self):
         const_member = set(['Name', 'Type', 'Value', 'ExtAttributes'])
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            consts = node.GetListOf('Const')
-            for const in consts:
-                if const:
-                    self.assertTrue(const_member.issuperset(collect_idls_into_json.const_node_to_dict(const).keys()))
+        for const in collect_idls_into_json.get_const_node_list(self.definition):
+            if const:
+                self.assertTrue(const_member.issuperset(collect_idls_into_json.const_node_to_dict(const).keys()))'''
 
 
     def test_get_attribute_node_list(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            for attribute in collect_idls_into_json.get_attribute_node_list(actual):
-                if attribute:
-                    self.assertEqual(attribute.GetClass(), 'Attribute')
-
-
-    def test_get_attribute_type(self):
-        pass
-
-
-    def test_attribute_node_to_dict(self):
         attribute_member = set(['Name', 'Type', 'ExtAttributes', 'Readonly', 'Static'])
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            attrs = node.GetListOf('Attribute')
-            for attr in attrs:
-                if attr:
-                    self.assertTrue(attribute_member.issuperset(collect_idls_into_json.attribute_node_to_dict(attr).keys()))
+        for attribute in collect_idls_into_json.get_attribute_node_list(self.definition):
+            if attribute:
+                self.assertEqual(attribute.GetClass(), 'Attribute')
+                self.assertTrue(attribute_member.issuperset(collect_idls_into_json.attribute_node_to_dict(attribute).keys()))
+            else:
+                self.assertEqual(attribute, None)
 
 
     def test_get_operation_node_list(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            for operation in collect_idls_into_json.get_operation_node_list(actual):
-                if operation:
-                    self.assertEqual(operation.GetClass(), 'Operation')
-
-
-    def test_get_argument_node_list(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            for child in actual.GetChildren():
-                if child.GetClass() == 'Operation':
-                    for argument in collect_idls_into_json.get_argument_node_list(child):
-                        if argument:
-                            self.assertEqual(argument.GetClass(), 'Argument')
-
-
-    def test_argument_node_to_dict(self):
+        operate_member = set(['Static', 'ExtAttributes', 'Type', 'Name', 'Arguments'])
         argument_member = set(['Name', 'Type'])
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            if node.GetOneOf('Arguments'):
-                args = node.GetOneOf('Arguments').GetListOf('Argument')
-                for arg in args:
-                    if arg:
-                        self.assertTrue(argument_member.issuperset(collect_idls_into_json.argument_node_to_dict(arg).keys()))
+        for operation in collect_idls_into_json.get_operation_node_list(self.definition):
+            if operation:
+                self.assertEqual(operation.GetClass(), 'Operation')
+                self.assertTrue(operate_member.issuperset(collect_idls_into_json.operation_node_to_dict(operation).keys()))
+                for argument in collect_idls_into_json.get_argument_node_list(operation):
+                    if argument:
+                        self.assertEqual(argument.GetClass(), 'Argument')
+                        self.assertTrue(argument_member.issuperset(collect_idls_into_json.argument_node_to_dict(argument).keys()))
+                    else:
+                        self.assertEqual(argument, None)
+            else:
+                self.assertEqual(operation, None)
 
-
-    def test_get_operation_name(self):
-        pass
-
-
-    def test_operation_node_to_dict(self):
+    '''def test_operation_node_to_dict(self):
         operate_member = set(['Static', 'ExtAttributes', 'Type', 'Name', 'Arguments'])
         for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             operations = node.GetListOf('Operation')
