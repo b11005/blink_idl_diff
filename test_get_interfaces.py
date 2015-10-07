@@ -9,6 +9,7 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 _FILE = 'test.txt'
 _KEY_SET = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
 
+
 class TestFunctions(unittest.TestCase):
     def setUp(self):
         parser = BlinkIDLParser()
@@ -17,18 +18,17 @@ class TestFunctions(unittest.TestCase):
         self.definition = definitions.GetChildren()[0]
 
 
-    '''def test_definitions(self):
-       for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-           self.assertEqual(str(type(actual)), "<class 'idl_parser.idl_node.IDLNode'>")
+    def test_definitions(self):
+        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
+            self.assertEqual(actual.GetName(), self.definition.GetName())
 
 
-    def test_get_implements(self):
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            implement = node.GetClass()
-            if implement == 'Implements':
-                self.assertTrue(collect_idls_into_json.is_implements(node))
-            else:
-                self.assertFalse(collect_idls_into_json.is_implements(node))'''
+    '''def test_get_implements(self):
+        implement = self.definition.GetClass()
+        if implement == 'Implements':
+            self.assertTrue(collect_idls_into_json.is_implements())
+        else:
+            self.assertFalse(collect_idls_into_json.is_implements(node))'''
 
 
     def test_is_non_partial(self):
@@ -46,12 +46,12 @@ class TestFunctions(unittest.TestCase):
 
 
     def test_get_filepaths(self):
-        path = collect_idls_into_json.get_filepath(self.definition)
-        self.assertTrue(path.startswith('Source'))
-        self.assertTrue(path.endswith('.idl'))
+        filepath = collect_idls_into_json.get_filepath(self.definition)
+        self.assertTrue(filepath.startswith('Source'))
+        self.assertTrue(filepath.endswith('.idl'))
 
 
-    def test_get_const_node_list(self):
+    def test_const_node_to_dict(self):
         const_member = set(['Name', 'Type', 'Value', 'ExtAttributes'])
         for const in collect_idls_into_json.get_const_node_list(self.definition):
             if const:
@@ -65,22 +65,15 @@ class TestFunctions(unittest.TestCase):
         pass
         #for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             #self.assertEqual(collect_idls_into_json.get_const_type(actual))
-            #print collect_idls_into_json.get_const_type(actual)
+            #collect_idls_into_json.get_const_type(actual)
 
 
     def test_get_const_value(self):
         for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            pass
+            pass'''
 
 
-    def test_const_node_to_dict(self):
-        const_member = set(['Name', 'Type', 'Value', 'ExtAttributes'])
-        for const in collect_idls_into_json.get_const_node_list(self.definition):
-            if const:
-                self.assertTrue(const_member.issuperset(collect_idls_into_json.const_node_to_dict(const).keys()))'''
-
-
-    def test_get_attribute_node_list(self):
+    def test_attribute_node_to_dict(self):
         attribute_member = set(['Name', 'Type', 'ExtAttributes', 'Readonly', 'Static'])
         for attribute in collect_idls_into_json.get_attribute_node_list(self.definition):
             if attribute:
@@ -90,7 +83,7 @@ class TestFunctions(unittest.TestCase):
                 self.assertEqual(attribute, None)
 
 
-    def test_get_operation_node_list(self):
+    def test_operation_node_to_dict(self):
         operate_member = set(['Static', 'ExtAttributes', 'Type', 'Name', 'Arguments'])
         argument_member = set(['Name', 'Type'])
         for operation in collect_idls_into_json.get_operation_node_list(self.definition):
@@ -106,34 +99,21 @@ class TestFunctions(unittest.TestCase):
             else:
                 self.assertEqual(operation, None)
 
-    '''def test_operation_node_to_dict(self):
-        operate_member = set(['Static', 'ExtAttributes', 'Type', 'Name', 'Arguments'])
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            operations = node.GetListOf('Operation')
-            for operation in operations:
-                if operation:
-                    self.assertTrue(operate_member.issuperset(collect_idls_into_json.operation_node_to_dict(operation).keys()))
 
+    def test_extattribute_node_to_dict(self):
+        for extattr in collect_idls_into_json.get_extattribute_node_list(self.definition):
+            if extattr:
+                self.assertEqual(extattr.GetClass(), 'ExtAttribute')
+            else:
+                self.assertEqual(extattr, None)
 
-    def test_get_extattribute_node_list(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            for extattr in collect_idls_into_json.get_extattribute_node_list(actual):
-                if extattr:
-                    self.assertEqual(extattr.GetClass(), 'ExtAttribute')
-
-
-    def test_extattr_node_to_dict(self):
-        pass
-
-
-    def test_get_inherit_node(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            for inherit in collect_idls_into_json.get_inherit_node(actual):
-                if inherit:
-                    self.assertEqual(inherit.GetClass(), 'Inherit')
 
     def test_inherit_node_to_dict(self):
-        pass'''
+        for inherit in collect_idls_into_json.inherit_node_to_dict(self.definition):
+            if inherit:
+                self.assertEqual(inherit.keys(), 'Parent')
+            else:
+                self.assertEqual(inherit, [])
 
 
     def test_interface_node_to_dict(self):
@@ -150,6 +130,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_export_to_jsonfile(self):
         pass'''
+
 
 if __name__ == '__main__':
     unittest.main()
