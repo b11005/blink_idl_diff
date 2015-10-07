@@ -4,12 +4,21 @@ import unittest
 import collect_idls_into_json
 import utilities
 
-_FILE = 'sample1.txt'
+from blink_idl_parser import parse_file, BlinkIDLParser
+
+_FILE = 'test.txt'
 _KEY_SET = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
 
 class TestFunctions(unittest.TestCase):
     def setUp(self):
-        pass
+        parser = BlinkIDLParser()
+        path = utilities.read_file_to_list(_FILE)[0]
+        definitions = parse_file(parser, path)
+        self.definition = definitions.GetChildren()[0]
+
+
+    '''def test1(self):
+        print self.definition
 
 
     def test_definitions(self):
@@ -23,18 +32,17 @@ class TestFunctions(unittest.TestCase):
             if implement == 'Implements':
                 self.assertTrue(collect_idls_into_json.is_implements(node))
             else:
-                self.assertFalse(collect_idls_into_json.is_implements(node))
+                self.assertFalse(collect_idls_into_json.is_implements(node))'''
 
 
     def test_is_non_partial(self):
-        for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
-            if node.GetClass() == 'Interface' and not node.GetProperty('Partial'):
-                self.assertTrue(collect_idls_into_json.is_non_partial(node))
-            else:
-                self.assertFalse(collect_idls_into_json.is_non_partial(node))
+        if self.definition.GetClass() == 'Interface' and not self.definition.GetProperty('Partial'):
+            self.assertTrue(collect_idls_into_json.is_non_partial(self.definition))
+        else:
+            self.assertFalse(collect_idls_into_json.is_non_partial(self.definition))
+                
 
-
-    def test_is_partial(self):
+    '''def test_is_partial(self):
         for node in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             if node.GetClass() == 'Interface' and node.GetProperty('Partial'):
                 self.assertTrue(collect_idls_into_json.is_partial(node))
@@ -149,22 +157,21 @@ class TestFunctions(unittest.TestCase):
         pass
 
 
-    '''def test_get_inherit_node(self):
+    def test_get_inherit_node(self):
         for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list(_FILE)):
             for inherit in collect_idls_into_json.get_inherit_node(actual):
                 if inherit:
-                    self.assertEqual(inherit.GetClass(), 'Inherit')'''
+                    self.assertEqual(inherit.GetClass(), 'Inherit')
 
     def test_inherit_node_to_dict(self):
-        pass
+        pass'''
 
 
-    def test_interface_to_dict(self):
-        for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list('sample0.txt')):
-            self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.interface_node_to_dict(actual)))
+    def test_interface_node_to_dict(self):
+        self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.interface_node_to_dict(self.definition)))
 
 
-    def test_merge_partial_dicts(self):
+    '''def test_merge_partial_dicts(self):
         #for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list('sample0.txt')):
             #self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.merge_partial_dicts(actual)))
         pass
@@ -173,7 +180,7 @@ class TestFunctions(unittest.TestCase):
         pass
 
     def test_export_to_jsonfile(self):
-        pass
+        pass'''
 
 if __name__ == '__main__':
     unittest.main()
