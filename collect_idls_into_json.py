@@ -16,37 +16,38 @@ import utilities
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
-_INTERFACE_CLASS_NAME = 'Interface'
-_IMPLEMENT_CLASS_NAME = 'Implements'
+_INTERFACE = 'Interface'
+_IMPLEMENT = 'Implements'
 _PARTIAL = 'Partial'
 _NAME = 'Name'
 _TYPE = 'Type'
 _VALUE = 'Value'
 _PARENT = 'Parent'
 _FILEPATH = 'FilePath'
-_READONLY = 'READONLY'
-_Readonly = 'Readonly'
-_STATIC = 'STATIC'
-_Static = 'Static'
+_FILENAME = 'FILENAME'
+_READONLY_UPPER = 'READONLY'
+_READONLY = 'Readonly'
+_STATIC_UPPER = 'STATIC'
+_STATIC = 'Static'
 _CONSTS = 'Consts'
 _CONST = 'Const'
 _ATTRIBUTES = 'Attributes'
 _ATTRIBUTE = 'Attribute'
 _OPERATIONS = 'Operations'
 _OPERATION = 'Operation'
-_GETTER = 'GETTER'
-_Getter = '__getter__'
-_SETTER = 'SETTER'
-_Setter = '__setter__'
-_DELETER = 'DELETER'
-_Deleter = '__deleter__'
+_GETTER_UPPER = 'GETTER'
+_GETTER = '__getter__'
+_SETTER_UPPER = 'SETTER'
+_SETTER = '__setter__'
+_DELETER_UPPER = 'DELETER'
+_DELETER = '__deleter__'
 _ARGUMENTS = 'Arguments'
 _ARGUMENT = 'Argument'
 _EXTATTRIBUTES = 'ExtAttributes'
 _EXTATTRIBUTE = 'ExtAttribute'
 _INHERIT = 'Inherit'
 _REFERENCE = 'REFERENCE'
-_PARTIAL_FILEPATH ='Partial_FilePaths' 
+_PARTIAL_FILEPATH = 'Partial_FilePaths'
 _MEMBERS = ['Consts', 'Attributes', 'Operations']
 
 
@@ -71,7 +72,7 @@ def is_implements(definition):
     Returns:
       boolean
     """
-    return definition.GetClass() == _IMPLEMENT_CLASS_NAME
+    return definition.GetClass() == _IMPLEMENT
 
 
 def is_non_partial(definition):
@@ -81,10 +82,7 @@ def is_non_partial(definition):
     Returns:
       boolean
     """
-    if definition.GetClass() == _INTERFACE_CLASS_NAME and not definition.GetProperty(_PARTIAL):
-        return True
-    else:
-        return False
+    return definition.GetClass() == _INTERFACE and not definition.GetProperty(_PARTIAL)
 
 
 def is_partial(definition):
@@ -94,10 +92,7 @@ def is_partial(definition):
     Return:
       boolean
     """
-    if definition.GetClass() == _INTERFACE_CLASS_NAME and definition.GetProperty(_PARTIAL):
-        return True
-    else:
-        return False
+    return definition.GetClass() == _INTERFACE and definition.GetProperty(_PARTIAL)
 
 
 def get_filepath(interface_node):
@@ -107,7 +102,7 @@ def get_filepath(interface_node):
     Returns:
       str which is |interface_node|'s file path
     """
-    filename = interface_node.GetProperty('FILENAME')
+    filename = interface_node.GetProperty(_FILENAME)
     return os.path.relpath(filename)
 
 
@@ -191,8 +186,8 @@ def attribute_node_to_dict(attribute_node):
         _NAME: attribute_node.GetName(),
         _TYPE: get_attribute_type(attribute_node),
         _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(attribute_node)],
-        _Readonly: attribute_node.GetProperty(_READONLY, default=False),
-        _Static: attribute_node.GetProperty(_STATIC, default=False),
+        _READONLY: attribute_node.GetProperty(_READONLY_UPPER, default=False),
+        _STATIC: attribute_node.GetProperty(_STATIC_UPPER, default=False),
     }
 
 
@@ -236,12 +231,12 @@ def get_operation_name(operation_node):
     Returns:
       name of operation
     """
-    if operation_node.GetProperty(_GETTER):
-        return _Getter
-    elif operation_node.GetProperty(_SETTER):
-        return _Setter
-    elif operation_node.GetProperty(_DELETER):
-        return _Deleter
+    if operation_node.GetProperty(_GETTER_UPPER):
+        return _GETTER
+    elif operation_node.GetProperty(_SETTER_UPPER):
+        return _SETTER
+    elif operation_node.GetProperty(_DELETER_UPPER):
+        return _DELETER
     else:
         return operation_node.GetName()
 
@@ -258,7 +253,7 @@ def operation_node_to_dict(operation_node):
         _ARGUMENTS: [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
         _TYPE: get_operation_type(operation_node),
         _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(operation_node)],
-        _Static: operation_node.GetProperty(_STATIC, default=False),
+        _STATIC: operation_node.GetProperty(_STATIC_UPPER, default=False),
     }
 
 
