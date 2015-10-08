@@ -23,13 +23,12 @@ class TestFunctions(unittest.TestCase):
         for actual in collect_idls_into_json.get_definitions(pathfile):
             self.assertEqual(actual.GetName(), self.definition.GetName())
 
-
     '''def test_get_implements(self):
-        implement = self.definition.GetClass()
+        implement = self.definition2.GetClass()
         if implement == 'Implements':
-            self.assertTrue(collect_idls_into_json.is_implements())
+            self.assertTrue(collect_idls_into_json.is_implements(self.definition2))
         else:
-            self.assertFalse(collect_idls_into_json.is_implements(node))'''
+            self.assertFalse(collect_idls_into_json.is_implements(self.definition2))'''
 
 
     def test_is_non_partial(self):
@@ -121,8 +120,7 @@ class TestFunctions(unittest.TestCase):
 
 
     '''def test_merge_partial_dicts(self):
-        #for actual in collect_idls_into_json.get_definitions(utilities.read_file_to_list('sample0.txt')):
-            #self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.merge_partial_dicts(actual)))
+    #self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.merge_partial_dicts(collect_idls_into_json.interface_node_to_dict(self.definition), )))
         pass
 
     def test_merge_implement_node(self):
