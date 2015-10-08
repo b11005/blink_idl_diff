@@ -69,7 +69,7 @@ class TestFunctions(unittest.TestCase):
         for attribute in collect_idls_into_json.get_attribute_node_list(self.definition):
             if attribute:
                 self.assertEqual(attribute.GetClass(), 'Attribute')
-                
+                self.assertEqual(collect_idls_into_json.get_attribute_type(attribute), 'Node')
                 self.assertTrue(attribute_member.issuperset(collect_idls_into_json.attribute_node_to_dict(attribute).keys()))
             else:
                 self.assertEqual(attribute, None)
@@ -81,10 +81,14 @@ class TestFunctions(unittest.TestCase):
         for operation in collect_idls_into_json.get_operation_node_list(self.definition):
             if operation:
                 self.assertEqual(operation.GetClass(), 'Operation')
+                self.assertEqual(operation.GetName(), 'appendChild')
+                self.assertEqual(collect_idls_into_json.get_operation_type(operation), 'Node')
                 self.assertTrue(operate_member.issuperset(collect_idls_into_json.operation_node_to_dict(operation).keys()))
                 for argument in collect_idls_into_json.get_argument_node_list(operation):
                     if argument:
                         self.assertEqual(argument.GetClass(), 'Argument')
+                        self.assertEqual(argument.GetName(), 'newChild')
+                        self.assertEqual(collect_idls_into_json.get_argument_type(argument), 'Node')
                         self.assertTrue(argument_member.issuperset(collect_idls_into_json.argument_node_to_dict(argument).keys()))
                     else:
                         self.assertEqual(argument, None)
@@ -107,6 +111,7 @@ class TestFunctions(unittest.TestCase):
         inherit = collect_idls_into_json.inherit_node_to_dict(self.definition)
         if inherit:
             self.assertEqual(inherit.keys(), ['Parent'])
+            self.assertEqual(inherit.values(), ['EventTarget'])
         else:
             self.assertEqual(inherit, [])
 
