@@ -19,7 +19,6 @@ from blink_idl_parser import parse_file, BlinkIDLParser
 _INTERFACE_CLASS_NAME = 'Interface'
 _IMPLEMENT_CLASS_NAME = 'Implements'
 _PARTIAL = 'Partial'
-_STRIP_FILEPATH = '../chromium/src/third_party/WebKit'
 _NAME = 'Name'
 _TYPE = 'Type'
 _FILEPATH = 'FilePath'
@@ -90,7 +89,7 @@ def get_filepath(interface_node):
       str which is |interface_node|'s file path
     """
     filename = interface_node.GetProperty('FILENAME')
-    return os.path.relpath(filename).strip(_STRIP_FILEPATH)
+    return os.path.relpath(filename)
 
 
 def get_const_node_list(interface_node):
@@ -339,7 +338,6 @@ def merge_implement_node(interfaces_dict, implement_nodes):
     return interfaces_dict
 
 
-# TODO(natsukoa): Remove indent
 def export_to_jsonfile(dictionary, json_file):
     """Returns jsonfile which is dumped each interface information dictionary to json.
     Args:
@@ -349,7 +347,7 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True, indent=4)
+        json.dump(dictionary, f, sort_keys=True)
 
 
 def main(args):
