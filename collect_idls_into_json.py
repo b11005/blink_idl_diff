@@ -21,13 +21,32 @@ _IMPLEMENT_CLASS_NAME = 'Implements'
 _PARTIAL = 'Partial'
 _NAME = 'Name'
 _TYPE = 'Type'
+_VALUE = 'Value'
+_PARENT = 'Parent'
 _FILEPATH = 'FilePath'
+_READONLY = 'READONLY'
+_Readonly = 'Readonly'
+_STATIC = 'STATIC'
+_Static = 'Static'
+_CONSTS = 'Consts'
 _CONST = 'Const'
+_ATTRIBUTES = 'Attributes'
 _ATTRIBUTE = 'Attribute'
+_OPERATIONS = 'Operations'
 _OPERATION = 'Operation'
+_GETTER = 'GETTER'
+_Getter = '__getter__'
+_SETTER = 'SETTER'
+_Setter = '__setter__'
+_DELETER = 'DELETER'
+_Deleter = '__deleter__'
+_ARGUMENTS = 'Arguments'
 _ARGUMENT = 'Argument'
+_EXTATTRIBUTES = 'ExtAttributes'
 _EXTATTRIBUTE = 'ExtAttribute'
 _INHERIT = 'Inherit'
+_REFERENCE = 'REFERENCE'
+_PARTIAL_FILEPATH ='Partial_FilePaths' 
 _MEMBERS = ['Consts', 'Attributes', 'Operations']
 
 
@@ -132,8 +151,8 @@ def const_node_to_dict(const_node):
     return {
         _NAME: const_node.GetName(),
         _TYPE: get_const_type(const_node),
-        'Value': get_const_value(const_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(const_node)],
+        _VALUE: get_const_value(const_node),
+        _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(const_node)],
     }
 
 
@@ -171,9 +190,9 @@ def attribute_node_to_dict(attribute_node):
     return {
         _NAME: attribute_node.GetName(),
         _TYPE: get_attribute_type(attribute_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(attribute_node)],
-        'Readonly': attribute_node.GetProperty('READONLY', default=False),
-        'Static': attribute_node.GetProperty('STATIC', default=False),
+        _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(attribute_node)],
+        _Readonly: attribute_node.GetProperty(_READONLY, default=False),
+        _Static: attribute_node.GetProperty(_STATIC, default=False),
     }
 
 
@@ -194,7 +213,7 @@ def get_argument_node_list(operation_node):
     Returns:
       list of argument node
     """
-    return operation_node.GetOneOf('Arguments').GetListOf(_ARGUMENT)
+    return operation_node.GetOneOf(_ARGUMENTS).GetListOf(_ARGUMENT)
 
 
 def argument_node_to_dict(argument_node):
@@ -217,12 +236,12 @@ def get_operation_name(operation_node):
     Returns:
       name of operation
     """
-    if operation_node.GetProperty('GETTER'):
-        return '__getter__'
-    elif operation_node.GetProperty('SETTER'):
-        return '__setter__'
-    elif operation_node.GetProperty('DELETER'):
-        return '__deleter__'
+    if operation_node.GetProperty(_GETTER):
+        return _Getter
+    elif operation_node.GetProperty(_SETTER):
+        return _Setter
+    elif operation_node.GetProperty(_DELETER):
+        return _Deleter
     else:
         return operation_node.GetName()
 
@@ -236,10 +255,10 @@ def operation_node_to_dict(operation_node):
     """
     return {
         _NAME: get_operation_name(operation_node),
-        'Arguments': [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
+        _ARGUMENTS: [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
         _TYPE: get_operation_type(operation_node),
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(operation_node)],
-        'Static': operation_node.GetProperty('STATIC', default=False),
+        _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(operation_node)],
+        _Static: operation_node.GetProperty(_STATIC, default=False),
     }
 
 
@@ -250,8 +269,8 @@ def get_extattribute_node_list(node):
     Returns:
       list of ExtAttrbute
     """
-    if node.GetOneOf('ExtAttributes'):
-        return node.GetOneOf('ExtAttributes').GetListOf(_EXTATTRIBUTE)
+    if node.GetOneOf(_EXTATTRIBUTES):
+        return node.GetOneOf(_EXTATTRIBUTES).GetListOf(_EXTATTRIBUTE)
     else:
         return []
 
@@ -277,7 +296,7 @@ def inherit_node_to_dict(interface_node):
     """
     inherit = interface_node.GetOneOf(_INHERIT)
     if inherit:
-        return {'Parent': inherit.GetName()}
+        return {_PARENT: inherit.GetName()}
     else:
         return []
 
@@ -292,10 +311,10 @@ def interface_node_to_dict(interface_node):
     return {
         _NAME: interface_node.GetName(),
         _FILEPATH: get_filepath(interface_node),
-        'Consts': [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
-        'Attributes': [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
-        'Operations': [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
-        'ExtAttributes': [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
+        _CONSTS: [const_node_to_dict(const) for const in get_const_node_list(interface_node)],
+        _ATTRIBUTES: [attribute_node_to_dict(attr) for attr in get_attribute_node_list(interface_node) if attr],
+        _OPERATIONS: [operation_node_to_dict(operation) for operation in get_operation_node_list(interface_node) if operation],
+        _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(interface_node)],
         _INHERIT: inherit_node_to_dict(interface_node)
     }
 
@@ -315,7 +334,7 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
         else:
             for member in _MEMBERS:
                 interface[member].extend(partial.get(member))
-            interface.setdefault('Partial_FilePaths', []).append(partial[_FILEPATH])
+            interface.setdefault(_PARTIAL_FILEPATH, []).append(partial[_FILEPATH])
     return interfaces_dict
 
 
@@ -328,7 +347,7 @@ def merge_implement_node(interfaces_dict, implement_nodes):
       interfaces_dict: dict of interface information combine into implements node
     """
     for implement in implement_nodes:
-        reference = implement.GetProperty('REFERENCE')
+        reference = implement.GetProperty(_REFERENCE)
         implement = implement.GetName()
         if not reference:
             continue
