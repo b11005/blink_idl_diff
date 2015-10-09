@@ -6,7 +6,7 @@ import utilities
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
-_FILE = 'Source/bindings/scripts/testdata/test_filepath.txt'
+_FILE = 'testcase.txt'
 _KEY_SET = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
 _PARTIAL = {'Node': {'Operations': [], 'Name': 'Node', 'FilePath': 'Source/core/timing/WorkerGlobalScopePerformance.idl', 'Inherit': [], 'Consts': [], 'ExtAttributes': [], 'Attributes': [{'Static': False, 'Readonly': True, 'Type': 'WorkerPerformance', 'Name': 'performance', 'ExtAttributes': []}]}}
 
@@ -36,7 +36,7 @@ class TestFunctions(unittest.TestCase):
             self.assertFalse(collect_idls_into_json.is_partial(self.definition))
 
     def test_get_filepaths(self):
-        filepath = collect_idls_into_json.get_filepath(self.definition)
+        filepath = collect_idls_into_json.get_filepath(self.definition).strip('../chromium/src/third_party/WebKit/')
         self.assertTrue(filepath.startswith('Source'))
         self.assertTrue(filepath.endswith('.idl'))
 
