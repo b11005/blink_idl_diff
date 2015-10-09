@@ -283,7 +283,7 @@ def extattr_node_to_dict(extattr):
 
 
 def inherit_node_to_dict(interface_node):
-    """Returns dictionary of inherit if |interface_node| has inherit node.
+    """Returns dictionary of inherit if |interface_node| has inherit node, otherwise return empty list.
     Args:
       interface_node: interface node
     Returns:
@@ -324,16 +324,16 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
     """
     for interface_name, partial in partials_dict.iteritems():
         interface = interfaces_dict.get(interface_name)
-        if not interface:
-            continue
-        else:
+        try:
             for member in _MEMBERS:
                 interface[member].extend(partial.get(member))
             interface.setdefault(_PARTIAL_FILEPATH, []).append(partial[_FILEPATH])
+        except:
+            raise
     return interfaces_dict
 
 
-def merge_implement_node(interfaces_dict, implement_nodes):
+def merge_implement_nodes(interfaces_dict, implement_node_list):
     """Returns dict of interface information combined with referenced interface information
     Args:
       interfaces_dict: dict of interface information
@@ -341,14 +341,14 @@ def merge_implement_node(interfaces_dict, implement_nodes):
     Returns:
       interfaces_dict: dict of interface information combine into implements node
     """
-    for implement in implement_nodes:
+    for implement in implement_node_list:
         reference = implement.GetProperty(_REFERENCE)
         implement = implement.GetName()
-        if not reference:
-            continue
-        else:
+        try:
             for member in _MEMBERS:
                 interfaces_dict[implement][member].extend(interfaces_dict[reference].get(member))
+        except:
+            raise
     return interfaces_dict
 
 
@@ -368,9 +368,9 @@ def main(args):
     path_file = args[0]
     json_file = args[1]
     path_list = utilities.read_file_to_list(path_file)
-    implement_nodes = [definition
-                       for definition in get_definitions(path_list)
-                       if is_implements(definition)]
+    implement_node_list = [definition
+                           for definition in get_definitions(path_list)
+                           if is_implements(definition)]
     interfaces_dict = {definition.GetName(): interface_node_to_dict(definition)
                        for definition in get_definitions(path_list)
                        if is_non_partial(definition)}
@@ -378,7 +378,7 @@ def main(args):
                      for definition in get_definitions(path_list)
                      if is_partial(definition)}
     dictionary = merge_partial_dicts(interfaces_dict, partials_dict)
-    interfaces_dict = merge_implement_node(interfaces_dict, implement_nodes)
+    interfaces_dict = merge_implement_nodes(interfaces_dict, implement_node_list)
     export_to_jsonfile(dictionary, json_file)
 
 
