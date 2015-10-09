@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 import unittest
 import collect_idls_into_json
@@ -6,8 +6,9 @@ import utilities
 
 from blink_idl_parser import parse_file, BlinkIDLParser
 
-_FILE = '/usr/local/google/home/natsukoa/chromium/src/third_party/WebKit/Source/bindings/scripts/testdata/test_filepath.txt'
+_FILE = 'Source/bindings/scripts/testdata/test_filepath.txt'
 _KEY_SET = set(['Operations', 'Name', 'FilePath', 'Inherit', 'Consts', 'ExtAttributes', 'Attributes'])
+_PARTIAL = {'Node': {'Operations': [], 'Name': 'Node', 'FilePath': 'Source/core/timing/WorkerGlobalScopePerformance.idl', 'Inherit': [], 'Consts': [], 'ExtAttributes': [], 'Attributes': [{'Static': False, 'Readonly': True, 'Type': 'WorkerPerformance', 'Name': 'performance', 'ExtAttributes': []}]}}
 
 
 class TestFunctions(unittest.TestCase):
@@ -17,39 +18,27 @@ class TestFunctions(unittest.TestCase):
         definitions = parse_file(parser, path)
         self.definition = definitions.GetChildren()[0]
 
-
     def test_get_definitions(self):
         pathfile = utilities.read_file_to_list(_FILE)
         for actual in collect_idls_into_json.get_definitions(pathfile):
             self.assertEqual(actual.GetName(), self.definition.GetName())
-
-    '''def test_get_implements(self):
-        implement = self.definition2.GetClass()
-        if implement == 'Implements':
-            self.assertTrue(collect_idls_into_json.is_implements(self.definition2))
-        else:
-            self.assertFalse(collect_idls_into_json.is_implements(self.definition2))'''
-
 
     def test_is_non_partial(self):
         if self.definition.GetClass() == 'Interface' and not self.definition.GetProperty('Partial'):
             self.assertTrue(collect_idls_into_json.is_non_partial(self.definition))
         else:
             self.assertFalse(collect_idls_into_json.is_non_partial(self.definition))
-                
 
-    '''def test_is_partial(self):
+    def test_is_partial(self):
         if self.definition.GetClass() == 'Interface' and self.definition.GetProperty('Partial'):
             self.assertTrue(collect_idls_into_json.is_partial(self.definition))
         else:
-            self.assertFalse(collect_idls_into_json.is_partial(self.definition))'''
-
+            self.assertFalse(collect_idls_into_json.is_partial(self.definition))
 
     def test_get_filepaths(self):
         filepath = collect_idls_into_json.get_filepath(self.definition)
         self.assertTrue(filepath.startswith('Source'))
         self.assertTrue(filepath.endswith('.idl'))
-
 
     def test_const_node_to_dict(self):
         const_member = set(['Name', 'Type', 'Value', 'ExtAttributes'])
@@ -62,17 +51,16 @@ class TestFunctions(unittest.TestCase):
             else:
                 self.assertEqual(const, None)
 
-
     def test_attribute_node_to_dict(self):
         attribute_member = set(['Name', 'Type', 'ExtAttributes', 'Readonly', 'Static'])
         for attribute in collect_idls_into_json.get_attribute_node_list(self.definition):
             if attribute:
                 self.assertEqual(attribute.GetClass(), 'Attribute')
+                self.assertEqual(attribute.GetName(), 'parentNode')
                 self.assertEqual(collect_idls_into_json.get_attribute_type(attribute), 'Node')
                 self.assertTrue(attribute_member.issuperset(collect_idls_into_json.attribute_node_to_dict(attribute).keys()))
             else:
                 self.assertEqual(attribute, None)
-
 
     def test_operation_node_to_dict(self):
         operate_member = set(['Static', 'ExtAttributes', 'Type', 'Name', 'Arguments'])
@@ -94,7 +82,6 @@ class TestFunctions(unittest.TestCase):
             else:
                 self.assertEqual(operation, None)
 
-
     def test_extattribute_node_to_dict(self):
         for extattr in collect_idls_into_json.get_extattribute_node_list(self.definition):
             if extattr:
@@ -105,7 +92,6 @@ class TestFunctions(unittest.TestCase):
             else:
                 self.assertEqual(extattr, None)
 
-
     def test_inherit_node_to_dict(self):
         inherit = collect_idls_into_json.inherit_node_to_dict(self.definition)
         if inherit:
@@ -114,20 +100,12 @@ class TestFunctions(unittest.TestCase):
         else:
             self.assertEqual(inherit, [])
 
-
     def test_interface_node_to_dict(self):
         self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.interface_node_to_dict(self.definition)))
 
-
-    '''def test_merge_partial_dicts(self):
-    #self.assertTrue(_KEY_SET.issuperset(collect_idls_into_json.merge_partial_dicts(collect_idls_into_json.interface_node_to_dict(self.definition), )))
-        pass
-
-    def test_merge_implement_node(self):
-        pass
-
-    def test_export_to_jsonfile(self):
-        pass'''
+    def test_merge_partial_dicts(self):
+        key_name = self.definition.GetName()
+        self.assertEqual(collect_idls_into_json.merge_partial_dicts({key_name: collect_idls_into_json.interface_node_to_dict(self.definition)}, _PARTIAL)[key_name]['Partial_FilePaths'], ['Source/core/timing/WorkerGlobalScopePerformance.idl'])
 
 
 if __name__ == '__main__':
