@@ -293,7 +293,7 @@ def inherit_node_to_dict(interface_node):
     if inherit:
         return {_PARENT: inherit.GetName()}
     else:
-        return []
+        return None
 
 
 def interface_node_to_dict(interface_node):
