@@ -25,9 +25,9 @@ _VALUE = 'Value'
 _PARENT = 'Parent'
 _FILEPATH = 'FilePath'
 _FILENAME = 'FILENAME'
-_READONLY_UPPER = 'READONLY'
+_PROP_READONLY = 'READONLY'
 _READONLY = 'Readonly'
-_STATIC_UPPER = 'STATIC'
+_PROP_STATIC = 'STATIC'
 _STATIC = 'Static'
 _CONSTS = 'Consts'
 _CONST = 'Const'
@@ -35,12 +35,12 @@ _ATTRIBUTES = 'Attributes'
 _ATTRIBUTE = 'Attribute'
 _OPERATIONS = 'Operations'
 _OPERATION = 'Operation'
-_GETTER_UPPER = 'GETTER'
-_GETTER = '__getter__'
-_SETTER_UPPER = 'SETTER'
-_SETTER = '__setter__'
-_DELETER_UPPER = 'DELETER'
-_DELETER = '__deleter__'
+_PROP_GETTER = 'GETTER'
+_NAMED_GETTER = '__getter__'
+_PROP_SETTER = 'SETTER'
+_NAMED_SETTER = '__setter__'
+_PROP_DELETER = 'DELETER'
+_NAMED_DELETER = '__deleter__'
 _ARGUMENTS = 'Arguments'
 _ARGUMENT = 'Argument'
 _EXTATTRIBUTES = 'ExtAttributes'
@@ -186,8 +186,8 @@ def attribute_node_to_dict(attribute_node):
         _NAME: attribute_node.GetName(),
         _TYPE: get_attribute_type(attribute_node),
         _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(attribute_node)],
-        _READONLY: attribute_node.GetProperty(_READONLY_UPPER, default=False),
-        _STATIC: attribute_node.GetProperty(_STATIC_UPPER, default=False),
+        _READONLY: attribute_node.GetProperty(_PROP_READONLY, default=False),
+        _STATIC: attribute_node.GetProperty(_PROP_STATIC, default=False),
     }
 
 
@@ -231,12 +231,12 @@ def get_operation_name(operation_node):
     Returns:
       name of operation
     """
-    if operation_node.GetProperty(_GETTER_UPPER):
-        return _GETTER
-    elif operation_node.GetProperty(_SETTER_UPPER):
-        return _SETTER
-    elif operation_node.GetProperty(_DELETER_UPPER):
-        return _DELETER
+    if operation_node.GetProperty(_PROP_GETTER):
+        return _NAMED_GETTER
+    elif operation_node.GetProperty(_PROP_SETTER):
+        return _NAMED_SETTER
+    elif operation_node.GetProperty(_PROP_DELETER):
+        return _NAMED_DELETER
     else:
         return operation_node.GetName()
 
@@ -253,7 +253,7 @@ def operation_node_to_dict(operation_node):
         _ARGUMENTS: [argument_node_to_dict(argument) for argument in get_argument_node_list(operation_node) if argument_node_to_dict(argument)],
         _TYPE: get_operation_type(operation_node),
         _EXTATTRIBUTES: [extattr_node_to_dict(extattr) for extattr in get_extattribute_node_list(operation_node)],
-        _STATIC: operation_node.GetProperty(_STATIC_UPPER, default=False),
+        _STATIC: operation_node.GetProperty(_PROP_STATIC, default=False),
     }
 
 
