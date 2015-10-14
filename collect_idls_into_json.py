@@ -324,12 +324,12 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
     """
     for interface_name, partial in partials_dict.iteritems():
         interface = interfaces_dict.get(interface_name)
-        try:
+        if not interface:
+            raise Exception('These is a partial interface, but the corresponding non-partial interface was not found.')
+        else:
             for member in _MEMBERS:
                 interface[member].extend(partial.get(member))
             interface.setdefault(_PARTIAL_FILEPATH, []).append(partial[_FILEPATH])
-        except:
-            raise
     return interfaces_dict
 
 
@@ -344,11 +344,11 @@ def merge_implement_nodes(interfaces_dict, implement_node_list):
     for implement in implement_node_list:
         reference = implement.GetProperty(_REFERENCE)
         implement = implement.GetName()
-        try:
+        if reference not in interfaces_dict.keys() or implement not in interfaces_dict.keys():
+            raise Exception('There is not corresponding implement or reference interface.')
+        else:
             for member in _MEMBERS:
                 interfaces_dict[implement][member].extend(interfaces_dict[reference].get(member))
-        except:
-            raise
     return interfaces_dict
 
 
