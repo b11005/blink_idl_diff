@@ -33,7 +33,7 @@ def print_result(diff):
 def main(argv):
     #hash_value = argv[0]
     #order = argv[1]
-    dir_path1 = '/usr/local/google/home/natsukoa/chromium/src/third_party/WebKit/Source'
+    dir_path1 = '~chromium/src/third_party/WebKit/Source'
     path_file1 = './test1.txt'
     file_path1 = get_filepath(dir_path1, path_file1)
     json_file1 = 'test_sample1.json'
@@ -48,7 +48,7 @@ def main(argv):
 
     diff = make_diff(json1, json2)
     call = print_result(diff)
-
+    
 
 if __name__ == '__main__':
     main(sys.argv[1:])
