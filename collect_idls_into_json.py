@@ -1,10 +1,10 @@
+
 #!/usr/bin/env python
 # Copyright 2015 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Usage: collect_idls_into_json.py path_file.txt json_file.json
-
 This script collects and organizes interface information and that information dumps into json file.
 """
 
@@ -21,6 +21,7 @@ _IMPLEMENT = 'Implements'
 _PARTIAL = 'Partial'
 _NAME = 'Name'
 _TYPE = 'Type'
+_UNIONTYPE = 'UnionType'
 _VALUE = 'Value'
 _PARENT = 'Parent'
 _FILEPATH = 'FilePath'
@@ -168,8 +169,40 @@ def get_attribute_type(attribute_node):
     Returns:
       name of attribute's type
     """
-    return attribute_node.GetOneOf(_TYPE).GetChildren()[0].GetName()
+    types = attribute_node.GetOneOf(_TYPE).GetChildren()[0]
+    type_list = []
+    if types.GetClass() == _UNIONTYPE:
+        union = attribute_node.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE)
+        for a in union:
+            for b in a.GetChildren():
+                if b.GetClass() == 'Array':
+                    type_list[-1] = type_list[-1]+'[]'
+                elif b.GetClass() == 'Sequence':
+                    for c in b.GetOneOf(_TYPE).GetChildren():
+                        type_list.append('<' + c.GetName() + '>')
+                else:
+                    type_list.append(b.GetName())
+        return type_list
 
+             #return [j.GetName() for i in union for j in i.GetChildren()]
+    elif types.GetClass() == 'Sequence':
+        if types.GetOneOf(_TYPE).GetChildren()[0].GetClass() == _UNIONTYPE:
+            for c in types.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
+                for d in c.GetChildren():
+                    type_list.append('<' + d.GetName() + '>')
+            return type_list
+        else:
+            for i in types.GetOneOf(_TYPE).GetChildren():
+                if i.GetClass() == 'Sequence':
+                    for j in i.GetOneOf(_TYPE).GetChildren():
+                        type_list.append('<' + j.GetName() + '>')                    
+                else:
+                    type_list.append('<' + i.GetName() + '>')
+            return type_list
+    elif types.GetClass() == 'Any':
+        return 'Any'
+    else:
+        return types.GetName()
 
 get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
@@ -361,10 +394,17 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True)
+        json.dump(dictionary, f, sort_keys=True, indent=4)
+
+
+def usage():
+    sys.stdout.write('Usage: collect_idls_into_json.py <path_file.txt> <output_file.json>\n')
 
 
 def main(args):
+    if len(args) != 2:
+        usage()
+        exit(1)
     path_file = args[0]
     json_file = args[1]
     path_list = utilities.read_file_to_list(path_file)
