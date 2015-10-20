@@ -22,6 +22,9 @@ _PARTIAL = 'Partial'
 _NAME = 'Name'
 _TYPE = 'Type'
 _UNIONTYPE = 'UnionType'
+_ARRAY = 'Array'
+_ANY = 'Any'
+_SEQUENCE = 'Sequence'
 _VALUE = 'Value'
 _PARENT = 'Parent'
 _FILEPATH = 'FilePath'
@@ -173,34 +176,32 @@ def get_attribute_type(attribute_node):
     type_list = []
     if types.GetClass() == _UNIONTYPE:
         union = attribute_node.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE)
-        for a in union:
-            for b in a.GetChildren():
-                if b.GetClass() == 'Array':
+        for union_types in union:
+            for union_type in union_types.GetChildren():
+                if union_type.GetClass() == _ARRAY:
                     type_list[-1] = type_list[-1]+'[]'
-                elif b.GetClass() == 'Sequence':
-                    for c in b.GetOneOf(_TYPE).GetChildren():
-                        type_list.append('<' + c.GetName() + '>')
+                elif union_type.GetClass() == _SEQUENCE:
+                    for seq_type in union_type.GetOneOf(_TYPE).GetChildren():
+                        type_list.append('<' + seq_type.GetName() + '>')
                 else:
-                    type_list.append(b.GetName())
+                    type_list.append(union_type.GetName())
         return type_list
-
-             #return [j.GetName() for i in union for j in i.GetChildren()]
-    elif types.GetClass() == 'Sequence':
+    elif types.GetClass() == _SEQUENCE:
         if types.GetOneOf(_TYPE).GetChildren()[0].GetClass() == _UNIONTYPE:
-            for c in types.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
-                for d in c.GetChildren():
-                    type_list.append('<' + d.GetName() + '>')
+            for seq_union_types in types.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
+                for seq_union_type in seq_union_types.GetChildren():
+                    type_list.append('<' + seq_union_type.GetName() + '>')
             return type_list
         else:
-            for i in types.GetOneOf(_TYPE).GetChildren():
-                if i.GetClass() == 'Sequence':
-                    for j in i.GetOneOf(_TYPE).GetChildren():
-                        type_list.append('<' + j.GetName() + '>')                    
+            for sequence in types.GetOneOf(_TYPE).GetChildren():
+                if sequence.GetClass() == _SEQUENCE:
+                    for sequence_type in sequence.GetOneOf(_TYPE).GetChildren():
+                        type_list.append('<' + sequence_type.GetName() + '>')                    
                 else:
-                    type_list.append('<' + i.GetName() + '>')
+                    type_list.append('<' + sequence.GetName() + '>')
             return type_list
-    elif types.GetClass() == 'Any':
-        return 'Any'
+    elif types.GetClass() == _ANY:
+        return _ANY
     else:
         return types.GetName()
 
