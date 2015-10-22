@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 # Copyright 2015 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -25,6 +24,7 @@ _UNIONTYPE = 'UnionType'
 _ARRAY = 'Array'
 _ANY = 'Any'
 _SEQUENCE = 'Sequence'
+_PROP_VALUE = 'VALUE'
 _VALUE = 'Value'
 _PARENT = 'Parent'
 _FILEPATH = 'FilePath'
@@ -135,9 +135,14 @@ def get_const_value(const_node):
     Args:
       const_node: const node
     Returns:
-      node.GetChildren()[1].GetName(): name of oparation's value
+      node.GetChildren()[1].GetName(): name of constant's value
     """
-    return const_node.GetChildren()[1].GetName()
+    if const_node.GetChildren()[1].GetName():
+        return const_node.GetChildren()[1].GetName()
+    else:
+        for const_props in const_node.GetChildren():
+            if const_props.GetClass() == _VALUE and not const_props.GetName():
+                return const_props.GetProperty(_PROP_VALUE)
 
 
 def const_node_to_dict(const_node):
@@ -172,38 +177,40 @@ def get_attribute_type(attribute_node):
     Returns:
       name of attribute's type
     """
-    types = attribute_node.GetOneOf(_TYPE).GetChildren()[0]
+    attr_type = attribute_node.GetOneOf(_TYPE).GetChildren()[0]
     type_list = []
-    if types.GetClass() == _UNIONTYPE:
-        union = attribute_node.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE)
-        for union_types in union:
+    if attr_type.GetClass() == _UNIONTYPE:
+        unions = attribute_node.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE)
+        for union_types in unions:
             for union_type in union_types.GetChildren():
                 if union_type.GetClass() == _ARRAY:
-                    type_list[-1] = type_list[-1]+'[]'
+                    type_list[-1] = type_list[-1] + '[]'
                 elif union_type.GetClass() == _SEQUENCE:
                     for seq_type in union_type.GetOneOf(_TYPE).GetChildren():
                         type_list.append('<' + seq_type.GetName() + '>')
                 else:
                     type_list.append(union_type.GetName())
         return type_list
-    elif types.GetClass() == _SEQUENCE:
-        if types.GetOneOf(_TYPE).GetChildren()[0].GetClass() == _UNIONTYPE:
-            for seq_union_types in types.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
+    elif attr_type.GetClass() == _SEQUENCE:
+        union_types = []
+        if attr_type.GetOneOf(_TYPE).GetChildren()[0].GetClass() == _UNIONTYPE:
+            for seq_union_types in attr_type.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
                 for seq_union_type in seq_union_types.GetChildren():
-                    type_list.append('<' + seq_union_type.GetName() + '>')
+                    union_types.append(seq_union_type.GetName())
+                type_list.append('<' + str(union_types) + '>')
             return type_list
         else:
-            for sequence in types.GetOneOf(_TYPE).GetChildren():
+            for sequence in attr_type.GetOneOf(_TYPE).GetChildren():
                 if sequence.GetClass() == _SEQUENCE:
                     for sequence_type in sequence.GetOneOf(_TYPE).GetChildren():
-                        type_list.append('<' + sequence_type.GetName() + '>')                    
+                        type_list.append('<' + sequence_type.GetName() + '>')
                 else:
                     type_list.append('<' + sequence.GetName() + '>')
             return type_list
-    elif types.GetClass() == _ANY:
+    elif attr_type.GetClass() == _ANY:
         return _ANY
     else:
-        return types.GetName()
+        return attr_type.GetName()
 
 get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
