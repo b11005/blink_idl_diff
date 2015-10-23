@@ -52,7 +52,7 @@ _EXTATTRIBUTE = 'ExtAttribute'
 _INHERIT = 'Inherit'
 _PROP_REFERENCE = 'REFERENCE'
 _PARTIAL_FILEPATH = 'Partial_FilePaths'
-_MEMBERS = ['Consts', 'Attributes', 'Operations']
+_MEMBERS = [_CONSTS, _ATTRIBUTES, _OPERATIONS]
 
 
 def get_definitions(paths):
@@ -77,16 +77,6 @@ def is_implements(definition):
       True if class of |definition| is Implements, otherwise False.
     """
     return definition.GetClass() == _IMPLEMENT
-
-
-def is_non_partial(definition):
-    """Returns True if class of |definition| is 'interface' class and not 'partial' interface, otherwise False.
-    Args:
-      definition: IDL node
-    Returns:
-      True if |definition| is 'partial interface' class, otherwise False.
-    """
-    return definition.GetClass() == _INTERFACE and not definition.GetProperty(_PARTIAL)
 
 
 def is_partial(definition):
@@ -132,6 +122,8 @@ def get_const_type(const_node):
 
 def get_const_value(const_node):
     """Returns const's value.
+    This function only supports primitive types.
+
     Args:
       const_node: const node
     Returns:
@@ -338,13 +330,13 @@ def inherit_node_to_dict(interface_node):
     Args:
       interface_node: interface node
     Returns:
-      A dictioanry of inheritance information if |interface_node| has a parent interface, otherwise None.
+      A dictioanry of inheritance information.
     """
     inherit = interface_node.GetOneOf(_INHERIT)
     if inherit:
         return {_PARENT: inherit.GetName()}
     else:
-        return None
+        return {_PARENT: None}
 
 
 def interface_node_to_dict(interface_node):
@@ -377,9 +369,8 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
         interface = interfaces_dict.get(interface_name)
         if not interface:
             raise Exception('There is a partial interface, but the corresponding non-partial interface was not found.')
-        else:
-            for member in _MEMBERS:
-                interface[member].extend(partial.get(member))
+        for member in _MEMBERS:
+            interface[member].extend(partial.get(member))
             interface.setdefault(_PARTIAL_FILEPATH, []).append(partial[_FILEPATH])
     return interfaces_dict
 
@@ -397,9 +388,8 @@ def merge_implement_nodes(interfaces_dict, implement_node_list):
         implement = implement.GetName()
         if reference not in interfaces_dict.keys() or implement not in interfaces_dict.keys():
             raise Exception('There is not corresponding implement or reference interface.')
-        else:
-            for member in _MEMBERS:
-                interfaces_dict[implement][member].extend(interfaces_dict[reference].get(member))
+        for member in _MEMBERS:
+            interfaces_dict[implement][member].extend(interfaces_dict[reference].get(member))
     return interfaces_dict
 
 
@@ -429,7 +419,7 @@ def main(args):
                            if is_implements(definition)]
     interfaces_dict = {definition.GetName(): interface_node_to_dict(definition)
                        for definition in get_definitions(path_list)
-                       if is_non_partial(definition)}
+                       if not is_partial(definition)}
     partials_dict = {definition.GetName(): interface_node_to_dict(definition)
                      for definition in get_definitions(path_list)
                      if is_partial(definition)}
