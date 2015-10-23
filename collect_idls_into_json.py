@@ -56,7 +56,7 @@ _MEMBERS = ['Consts', 'Attributes', 'Operations']
 
 
 def get_definitions(paths):
-    """Returns IDL node.
+    """Returns a generator of IDL node.
     Args:
       paths: list of IDL file path
     Returns:
@@ -70,11 +70,11 @@ def get_definitions(paths):
 
 
 def is_implements(definition):
-    """Returns True if class of |definition| is Implement, otherwise False.
+    """Returns True if class of |definition| is Implements, otherwise False.
     Args:
       definition: IDL node
     Returns:
-      boolean
+      True if class of |definition| is Implements, otherwise False.
     """
     return definition.GetClass() == _IMPLEMENT
 
@@ -84,7 +84,7 @@ def is_non_partial(definition):
     Args:
       definition: IDL node
     Returns:
-      boolean
+      True if |definition| is 'partial interface' class, otherwise False.
     """
     return definition.GetClass() == _INTERFACE and not definition.GetProperty(_PARTIAL)
 
@@ -94,13 +94,13 @@ def is_partial(definition):
     Args:
       definition: IDL node
     Return:
-      boolean
+      True if |definition| is 'partial interface' class, otherwise False.
     """
     return definition.GetClass() == _INTERFACE and definition.GetProperty(_PARTIAL)
 
 
 def get_filepath(interface_node):
-    """Returns relative path to the IDL in which "interface_node| is defined.
+    """Returns relative path to the IDL in which |interface_node| is defined.
     Args:
       interface_node: IDL interface
     Returns:
@@ -111,11 +111,11 @@ def get_filepath(interface_node):
 
 
 def get_const_node_list(interface_node):
-    """Returns Const node.
+    """Returns a list of Const node.
     Args:
       interface_node: interface node
     Returns:
-      list of const node
+      A list of const node
     """
     return interface_node.GetListOf(_CONST)
 
@@ -125,7 +125,7 @@ def get_const_type(const_node):
     Args:
       const_node: const node
     Returns:
-      node.GetChildren()[0].GetName(): str which is constant type
+      str which is constant type.
     """
     return const_node.GetChildren()[0].GetName()
 
@@ -135,7 +135,7 @@ def get_const_value(const_node):
     Args:
       const_node: const node
     Returns:
-      node.GetChildren()[1].GetName(): name of constant's value
+      str which is name of constant's value.
     """
     if const_node.GetChildren()[1].GetName():
         return const_node.GetChildren()[1].GetName()
@@ -143,7 +143,7 @@ def get_const_value(const_node):
         for const_child in const_node.GetChildren():
             if const_child.GetClass() == _VALUE and not const_child.GetName():
                 return const_child.GetProperty(_PROP_VALUE)
-        raise Exception('Constant Value is empty')
+        raise Exception('Constant value is empty')
 
 
 def const_node_to_dict(const_node):
@@ -199,22 +199,26 @@ def get_attribute_type(attribute_node):
                 if len(union_member.GetChildren()) != 1:
                     raise Exception('Complex type in a union in a sequence is not yet supported')
                 type_component = union_member.GetChildren()[0]
-                return '<' + type_component.GetName() + '>'
+                union_member_types.append(type_component.GetName())
+            return '<' + str(union_member_types) + '>'
         else:
             for type_component in attr_type.GetOneOf(_TYPE).GetChildren():
                 if type_component.GetClass() == _SEQUENCE:
                     raise Exception('Sequence in another sequence is not yet supported')
                 else:
-                    type_list.append('<' + type_component.GetName() + '>')
-            return type_list
+                    if type_component.GetClass() == _ARRAY:
+                        type_list[-1] += []
+                    else:
+                        type_list.append(type_component.GetName())
+            return '<' + type_list[0] + '>'
     elif attr_type.GetClass() == _ANY:
         return _ANY
     else:
-        for i in attribute_node.GetOneOf(_TYPE).GetChildren():
-            if i.GetClass() ==_ARRAY:
+        for type_component in attribute_node.GetOneOf(_TYPE).GetChildren():
+            if type_component.GetClass() == _ARRAY:
                 type_list[-1] += '[]'
             else:
-                type_list.append(i.GetName())
+                type_list.append(type_component.GetName())
         return type_list[0]
 
 
@@ -330,11 +334,11 @@ def extattr_node_to_dict(extattr):
 
 
 def inherit_node_to_dict(interface_node):
-    """Returns dictionary of inherit if |interface_node| has inherit node, otherwise return empty list.
+    """Returns a dictionary of inheritance information.
     Args:
       interface_node: interface node
     Returns:
-      dictioanry of inherit's information
+      A dictioanry of inheritance information if |interface_node| has a parent interface, otherwise None.
     """
     inherit = interface_node.GetOneOf(_INHERIT)
     if inherit:
@@ -344,11 +348,11 @@ def inherit_node_to_dict(interface_node):
 
 
 def interface_node_to_dict(interface_node):
-    """Returns dictioary whose key is interface name and value is dictioary of interface's information.
+    """Returns a dictioary of interface information.
     Args:
       interface_node: interface node
     Returns:
-      dictionary, {interface name: interface information dictionary}
+      A dictionary of the interface information.
     """
     return {
         _NAME: interface_node.GetName(),
@@ -362,17 +366,17 @@ def interface_node_to_dict(interface_node):
 
 
 def merge_partial_dicts(interfaces_dict, partials_dict):
-    """Returns interface information dictioary.
+    """Merges partial interface into non-partial interface.
     Args:
-      interfaces_dict: interface node dictionary
-      partial_dict: partial interface node dictionary
+      interfaces_dict: A dict of the non-partial interfaces.
+      partial_dict: A dict of partial interfaces.
     Returns:
-      a dictronary merged with interfaces_dict and partial_dict
+      A merged dictionary of |interface_dict| with |partial_dict|.
     """
     for interface_name, partial in partials_dict.iteritems():
         interface = interfaces_dict.get(interface_name)
         if not interface:
-            raise Exception('These is a partial interface, but the corresponding non-partial interface was not found.')
+            raise Exception('There is a partial interface, but the corresponding non-partial interface was not found.')
         else:
             for member in _MEMBERS:
                 interface[member].extend(partial.get(member))
@@ -381,12 +385,12 @@ def merge_partial_dicts(interfaces_dict, partials_dict):
 
 
 def merge_implement_nodes(interfaces_dict, implement_node_list):
-    """Returns dict of interface information combined with referenced interface information
+    """Combines a dict of interface information with referenced interface information.
     Args:
       interfaces_dict: dict of interface information
       implement_nodes: list of implemented interface node
     Returns:
-      interfaces_dict: dict of interface information combine into implements node
+      A dict of interface information combined with implements nodes.
     """
     for implement in implement_node_list:
         reference = implement.GetProperty(_PROP_REFERENCE)
@@ -400,12 +404,10 @@ def merge_implement_nodes(interfaces_dict, implement_node_list):
 
 
 def export_to_jsonfile(dictionary, json_file):
-    """Returns jsonfile which is dumped each interface information dictionary to json.
+    """Writes a Python dict into a JSON file.
     Args:
       dictioary: interface dictionary
       json_file: json file for output
-    Returns:
-      json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
         json.dump(dictionary, f, sort_keys=True)
