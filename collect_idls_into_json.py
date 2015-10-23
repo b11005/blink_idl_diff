@@ -28,7 +28,7 @@ _PROP_VALUE = 'VALUE'
 _VALUE = 'Value'
 _PARENT = 'Parent'
 _FILEPATH = 'FilePath'
-_FILENAME = 'FILENAME'
+_PROP_FILENAME = 'FILENAME'
 _PROP_READONLY = 'READONLY'
 _READONLY = 'Readonly'
 _PROP_STATIC = 'STATIC'
@@ -50,7 +50,7 @@ _ARGUMENT = 'Argument'
 _EXTATTRIBUTES = 'ExtAttributes'
 _EXTATTRIBUTE = 'ExtAttribute'
 _INHERIT = 'Inherit'
-_REFERENCE = 'REFERENCE'
+_PROP_REFERENCE = 'REFERENCE'
 _PARTIAL_FILEPATH = 'Partial_FilePaths'
 _MEMBERS = ['Consts', 'Attributes', 'Operations']
 
@@ -106,7 +106,7 @@ def get_filepath(interface_node):
     Returns:
       str which is |interface_node|'s file path
     """
-    filename = interface_node.GetProperty(_FILENAME)
+    filename = interface_node.GetProperty(_PROP_FILENAME)
     return os.path.relpath(filename)
 
 
@@ -140,9 +140,10 @@ def get_const_value(const_node):
     if const_node.GetChildren()[1].GetName():
         return const_node.GetChildren()[1].GetName()
     else:
-        for const_props in const_node.GetChildren():
-            if const_props.GetClass() == _VALUE and not const_props.GetName():
-                return const_props.GetProperty(_PROP_VALUE)
+        for const_child in const_node.GetChildren():
+            if const_child.GetClass() == _VALUE and not const_child.GetName():
+                return const_child.GetProperty(_PROP_VALUE)
+        raise Exception('Constant Value is empty')
 
 
 def const_node_to_dict(const_node):
@@ -180,37 +181,42 @@ def get_attribute_type(attribute_node):
     attr_type = attribute_node.GetOneOf(_TYPE).GetChildren()[0]
     type_list = []
     if attr_type.GetClass() == _UNIONTYPE:
-        unions = attribute_node.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE)
-        for union_types in unions:
-            for union_type in union_types.GetChildren():
-                if union_type.GetClass() == _ARRAY:
-                    type_list[-1] = type_list[-1] + '[]'
-                elif union_type.GetClass() == _SEQUENCE:
-                    for seq_type in union_type.GetOneOf(_TYPE).GetChildren():
+        union_member_list = attr_type.GetListOf(_TYPE)
+        for union_member in union_member_list:
+            for type_component in union_member.GetChildren():
+                if type_component.GetClass() == _ARRAY:
+                    type_list[-1] += '[]'
+                elif type_component.GetClass() == _SEQUENCE:
+                    for seq_type in type_component.GetOneOf(_TYPE).GetChildren():
                         type_list.append('<' + seq_type.GetName() + '>')
                 else:
-                    type_list.append(union_type.GetName())
+                    type_list.append(type_component.GetName())
         return type_list
     elif attr_type.GetClass() == _SEQUENCE:
-        union_types = []
+        union_member_types = []
         if attr_type.GetOneOf(_TYPE).GetChildren()[0].GetClass() == _UNIONTYPE:
-            for seq_union_types in attr_type.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
-                for seq_union_type in seq_union_types.GetChildren():
-                    union_types.append(seq_union_type.GetName())
-                type_list.append('<' + str(union_types) + '>')
-            return type_list
+            for union_member in attr_type.GetOneOf(_TYPE).GetOneOf(_UNIONTYPE).GetListOf(_TYPE):
+                if len(union_member.GetChildren()) != 1:
+                    raise Exception('Complex type in a union in a sequence is not yet supported')
+                type_component = union_member.GetChildren()[0]
+                return '<' + type_component.GetName() + '>'
         else:
-            for sequence in attr_type.GetOneOf(_TYPE).GetChildren():
-                if sequence.GetClass() == _SEQUENCE:
-                    for sequence_type in sequence.GetOneOf(_TYPE).GetChildren():
-                        type_list.append('<' + sequence_type.GetName() + '>')
+            for type_component in attr_type.GetOneOf(_TYPE).GetChildren():
+                if type_component.GetClass() == _SEQUENCE:
+                    raise Exception('Sequence in another sequence is not yet supported')
                 else:
-                    type_list.append('<' + sequence.GetName() + '>')
+                    type_list.append('<' + type_component.GetName() + '>')
             return type_list
     elif attr_type.GetClass() == _ANY:
         return _ANY
     else:
-        return attr_type.GetName()
+        for i in attribute_node.GetOneOf(_TYPE).GetChildren():
+            if i.GetClass() ==_ARRAY:
+                type_list[-1] += '[]'
+            else:
+                type_list.append(i.GetName())
+        return type_list[0]
+
 
 get_operation_type = get_attribute_type
 get_argument_type = get_attribute_type
@@ -383,7 +389,7 @@ def merge_implement_nodes(interfaces_dict, implement_node_list):
       interfaces_dict: dict of interface information combine into implements node
     """
     for implement in implement_node_list:
-        reference = implement.GetProperty(_REFERENCE)
+        reference = implement.GetProperty(_PROP_REFERENCE)
         implement = implement.GetName()
         if reference not in interfaces_dict.keys() or implement not in interfaces_dict.keys():
             raise Exception('There is not corresponding implement or reference interface.')
@@ -402,7 +408,7 @@ def export_to_jsonfile(dictionary, json_file):
       json file which is contained each interface node dictionary
     """
     with open(json_file, 'w') as f:
-        json.dump(dictionary, f, sort_keys=True, indent=4)
+        json.dump(dictionary, f, sort_keys=True)
 
 
 def usage():
